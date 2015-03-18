@@ -24,10 +24,13 @@ class PaymentPaypal implements SubscriberInterface
 
     protected $session;
 
-    public function __construct(RestClient $restClient, $session)
+    protected $paypalBootstrap;
+
+    public function __construct(RestClient $restClient, $session, $paypalBootstrap)
     {
         $this->restClient = $restClient;
         $this->session = $session;
+        $this->paypalBootstrap = $paypalBootstrap;
     }
 
     public static function getSubscribedEvents()
@@ -59,6 +62,7 @@ class PaymentPaypal implements SubscriberInterface
         $this->restClient->setAuthToken();
         $uri = 'payments/payment/' . $paymentId;
         $payment = $this->restClient->get($uri, array('payer_id' => $payerId));
+        $statusId = $this->paypalBootstrap->Config()->get('paypalStatusId', 12);
 
         if($payment['state'] == 'created') {
             $uri = "payments/payment/$paymentId/execute";
@@ -72,7 +76,8 @@ class PaymentPaypal implements SubscriberInterface
             } else {
                 $transactionId = $payment['id'];
             }
-            $action->saveOrder($transactionId, sha1($payment['id']));
+            $action->saveOrder($transactionId, sha1($payment['id']), $statusId);
+
             $action->redirect(array(
                 'controller' => 'checkout',
                 'action' => 'finish',
