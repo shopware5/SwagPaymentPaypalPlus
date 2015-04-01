@@ -8,17 +8,15 @@
 
 namespace Shopware\SwagPaymentPaypalPlus\Subscriber;
 
-use Enlight\Event\SubscriberInterface;
 use \Enlight_Controller_Action as ControllerAction;
 use \Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap as Bootstrap;
 use \Shopware_Plugins_Frontend_SwagPaymentPaypal_Bootstrap as PaypalBootstrap;
-use \Shopware;
 
 /**
  * Class Checkout
  * @package Shopware\SwagPaymentPaypal\Subscriber
  */
-class Checkout implements SubscriberInterface
+class Checkout
 {
     /**
      * @var Bootstrap
@@ -210,6 +208,8 @@ class Checkout implements SubscriberInterface
      */
     public function onPostDispatchCheckout(\Enlight_Event_EventArgs $args)
     {
+        unset($this->session->PaypalPlusPayment);
+
         /** @var $action \Enlight_Controller_Action */
         $action = $args->getSubject();
         $request = $action->Request();

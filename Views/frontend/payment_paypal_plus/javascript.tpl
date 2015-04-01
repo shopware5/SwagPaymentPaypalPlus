@@ -34,19 +34,18 @@
                 $.each(config.thirdPartyPaymentMethods, function( index, method ) {
                     if(method.methodName == selectedMethod) {
                         var val = method.redirectUrl.match(/[0-9]+$/);
-                        var val = method.redirectUrl.match(/[0-9]+$/);
                         changeMethodInput.val(val);
                         changeMethodForm.show();
                     }
                 });
                 disable = true;
             },
-            preselection: "{if $sUserData.additional.payment.name == 'paypal'}paypal{else}none{/if}",
+            //preselection: "{if $sUserData.additional.payment.name == 'paypal'}paypal{else}none{/if}",
             thirdPartyPaymentMethods: [{foreach from=$sPayments item=payment key=paymentKey}{if $payment.name != 'paypal' && isset($PaypalPlusThirdPartyPaymentMethods[$payment.id])}{
                 "redirectUrl": "{url controller=account action=savePayment selectPaymentId=$payment.id}",
-                "methodName": "{$payment.description|escape:javascript}",
+                "methodName": "{$payment.description|unescape:entity|escape:javascript}",
                 "imageUrl": "{if !empty($PaypalPlusThirdPartyPaymentMethods[$payment.id]['media'])}{link file={$PaypalPlusThirdPartyPaymentMethods[$payment.id]['media']} fullPath}{/if}",
-                "description": "{$payment.additionaldescription|strip_tags|trim|escape:javascript}"
+                "description": "{$payment.additionaldescription|strip_tags|unescape:entity|trim|escape:javascript}"
             }{if !$payment@last},{/if}{/if}{/foreach}]
         });
     </script>

@@ -8,14 +8,13 @@
 
 namespace Shopware\SwagPaymentPaypalPlus\Subscriber;
 
-use Enlight\Event\SubscriberInterface;
 use \Shopware_Components_Paypal_RestClient as RestClient;
 
 /**
  * Class PaymentPaypal
  * @package Shopware\SwagPaymentPaypal\Subscriber
  */
-class PaymentPaypal implements SubscriberInterface
+class PaymentPaypal
 {
     /**
      * @var RestClient
@@ -63,6 +62,20 @@ class PaymentPaypal implements SubscriberInterface
         $uri = 'payments/payment/' . $paymentId;
         $payment = $this->restClient->get($uri, array('payer_id' => $payerId));
         $statusId = $this->paypalBootstrap->Config()->get('paypalStatusId', 12);
+
+        if(!empty($payment['transactions'][0]['amount']['total'])) {
+            $ppAmount = floatval($payment['transactions'][0]['amount']['total']);
+        } else {
+            $ppAmount = 0;
+        }
+        $swAmount = $action->getAmount();
+        if (abs($swAmount - $ppAmount) >= 0.01) {
+            $action->redirect(array(
+                'controller' => 'checkout',
+                'action' => 'confirm'
+            ));
+            return;
+        }
 
         if($payment['state'] == 'created') {
             $uri = "payments/payment/$paymentId/execute";

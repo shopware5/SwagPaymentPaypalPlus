@@ -8,14 +8,13 @@
 
 namespace Shopware\SwagPaymentPaypalPlus\Subscriber;
 
-use Enlight\Event\SubscriberInterface;
 use Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap as Bootstrap;
 
 /**
  * Class PaymentForm
  * @package Shopware\SwagPaymentPaypal\Subscriber
  */
-class PaymentForm implements SubscriberInterface
+class PaymentForm
 {
     protected $bootstrap;
 
