@@ -177,16 +177,18 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         );
     }
 
+    public function registerMyNamespace()
+    {
+        $this->Application()->Loader()->registerNamespace('Shopware\SwagPaymentPaypalPlus', __DIR__ . DIRECTORY_SEPARATOR);
+    }
+
     /**
      * @param $args
      */
     public function onPostDispatchCheckout($args)
     {
-        static $subscriber;
-        if(!isset($subscriber)) {
-            require_once __DIR__ . '/Subscriber/Checkout.php';
-            $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Checkout($this);
-        }
+        $this->registerMyNamespace();
+        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Checkout($this);
         $subscriber->onPostDispatchCheckout($args);
     }
 
@@ -195,11 +197,8 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      */
     public function onPostDispatchAccount($args)
     {
-        static $subscriber;
-        if(!isset($subscriber)) {
-            require_once __DIR__ . '/Subscriber/Checkout.php';
-            $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Checkout($this);
-        }
+        $this->registerMyNamespace();
+        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Checkout($this);
         $subscriber->onPostDispatchAccount($args);
     }
 
@@ -208,11 +207,8 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      */
     public function onExtendBackendPayment($args)
     {
-        static $subscriber;
-        if(!isset($subscriber)) {
-            require_once __DIR__ . '/Subscriber/PaymentForm.php';
-            $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PaymentForm($this);
-        }
+        $this->registerMyNamespace();
+        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PaymentForm($this);
         $subscriber->onExtendBackendPayment($args);
     }
 
@@ -221,15 +217,12 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      */
     public function onPreDispatchPaymentPaypal($args)
     {
-        static $subscriber;
-        if(!isset($subscriber)) {
-            require_once __DIR__ . '/Subscriber/PaymentPaypal.php';
-            $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PaymentPaypal(
-                $this->get('paypalRestClient'),
-                $this->get('session'),
-                $this->Collection()->get('SwagPaymentPaypal')
-            );
-        }
+        $this->registerMyNamespace();
+        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PaymentPaypal(
+            $this->get('paypalRestClient'),
+            $this->get('session'),
+            $this->Collection()->get('SwagPaymentPaypal')
+        );
         $subscriber->onPreDispatchPaymentPaypal($args);
     }
 
@@ -239,15 +232,12 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      */
     public function onPaymentPaypalWebhook(Enlight_Controller_ActionEventArgs $args)
     {
-        static $subscriber;
-        if(!isset($subscriber)) {
-            require_once __DIR__ . '/Subscriber/PaymentPaypal.php';
-            $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PaymentPaypal(
-                $this->get('paypalRestClient'),
-                $this->get('session'),
-                $this->Collection()->get('SwagPaymentPaypal')
-            );
-        }
+        $this->registerMyNamespace();
+        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PaymentPaypal(
+            $this->get('paypalRestClient'),
+            $this->get('session'),
+            $this->Collection()->get('SwagPaymentPaypal')
+        );
         return $subscriber->onPaymentPaypalWebhook($args);
     }
 
