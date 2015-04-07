@@ -104,7 +104,7 @@ class Checkout
     {
         $address = array(
             'recipient_name' => $user['shippingaddress']['firstname'] . ' ' . $user['shippingaddress']['lastname'],
-            'line1' => $user['shippingaddress']['street'] . ' ' . $user['shippingaddress']['streetnumber'],
+            'line1' => trim($user['shippingaddress']['street'] . ' ' . $user['shippingaddress']['streetnumber']),
             'city' => $user['shippingaddress']['city'],
             'postal_code' => $user['shippingaddress']['zipcode'],
             'country_code' => $user['additional']['countryShipping']['countryiso'],

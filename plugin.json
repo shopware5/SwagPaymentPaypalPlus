@@ -8,10 +8,11 @@
     "link": "http://store.shopware.com",
     "author": "shopware AG",
 
-    "currentVersion": "1.0.0",
+    "currentVersion": "1.0.1",
 
     "changelog": {
         "de": {
+            "1.0.1": "PT-2917 - Fügt Webhook unter /payment_paypal/web hinzu. PAYMENT.SALE.COMPLETED wird nicht unterstützt/benötigt",
             "1.0.0": "PT-2396 - Erstveröffentlichung"
         },
         "en": {

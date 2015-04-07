@@ -36,6 +36,7 @@ class PaymentPaypal
     {
         return array(
             'Enlight_Controller_Action_PreDispatch_Frontend_PaymentPaypal' => 'onPreDispatchPaymentPaypal',
+            'Enlight_Controller_Action_Frontend_PaymentPaypal_Webhook' => 'onPaymentPaypalWebhook',
         );
     }
 
@@ -65,11 +66,14 @@ class PaymentPaypal
 
         if(!empty($payment['transactions'][0]['amount']['total'])) {
             $ppAmount = floatval($payment['transactions'][0]['amount']['total']);
+            $ppCurrency = floatval($payment['transactions'][0]['amount']['currency']);
         } else {
             $ppAmount = 0;
+            $ppCurrency = '';
         }
         $swAmount = $action->getAmount();
-        if (abs($swAmount - $ppAmount) >= 0.01) {
+        $swCurrency = $action->getCurrencyShortName();
+        if (abs($swAmount - $ppAmount) >= 0.01 || $ppCurrency != $swCurrency) {
             $action->redirect(array(
                 'controller' => 'checkout',
                 'action' => 'confirm'
@@ -89,7 +93,19 @@ class PaymentPaypal
             } else {
                 $transactionId = $payment['id'];
             }
-            $action->saveOrder($transactionId, sha1($payment['id']), $statusId);
+            $orderNumber = $action->saveOrder($transactionId, sha1($payment['id']), $statusId);
+
+            try {
+                $sql = '
+                    INSERT INTO s_order_attributes (orderID, swag_payal_express)
+                    SELECT id, 2 FROM s_order WHERE ordernumber = ?
+                    ON DUPLICATE KEY UPDATE swag_payal_express = 2
+                ';
+                $action->get('db')->query($sql, array(
+                    $orderNumber,
+                ));
+            } catch (\Exception $e) {
+            }
 
             $action->redirect(array(
                 'controller' => 'checkout',
@@ -97,5 +113,33 @@ class PaymentPaypal
                 'sUniqueID' => sha1($payment['id'])
             ));
         }
+    }
+
+    /**
+     * @param \Enlight_Controller_ActionEventArgs $args
+     * @return bool
+     */
+    public function onPaymentPaypalWebhook(\Enlight_Controller_ActionEventArgs $args)
+    {
+        $action = $args->getSubject();
+        $payment = $action->Request()->getRawBody();
+        $payment = json_decode($payment, true);
+        $transactionId = null;
+
+        if(empty($payment['resource']['id'])) {
+            $message = sprintf(
+                "PayPal-Webhook"
+            );
+            $context = array('request.body' => $payment);
+            $action->get('pluginlogger')->error($message, $context);
+        } else {
+            $transactionId = $payment['resource']['id'];
+        }
+
+        $action->forward('notify', null, null, array(
+            'txn_id' => $transactionId
+        ));
+
+        return true;
     }
 }

@@ -17,7 +17,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     {
         $this->createMyEvents();
         $this->createMyForm();
-        $this->createMyTranslations();
         $this->createMyAttributes();
 
         return array(
@@ -93,6 +92,10 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             'Enlight_Controller_Action_PreDispatch_Frontend_PaymentPaypal',
             'onPreDispatchPaymentPaypal'
         );
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_Frontend_PaymentPaypal_Webhook',
+            'onPaymentPaypalWebhook'
+        );
     }
 
     /**
@@ -108,36 +111,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             'store' => 'base.Country',
             'multiSelect' => true
         ));
-    }
-
-    private function createMyTranslations()
-    {
-        $form = $this->Form();
-        $translations = array(
-            'en_GB' => array(
-                'paypalUsername' => 'API username',
-                'paypalPassword' => 'API password',
-            )
-        );
-        $shopRepository = Shopware()->Models()->getRepository('\Shopware\Models\Shop\Locale');
-        foreach ($translations as $locale => $snippets) {
-            $localeModel = $shopRepository->findOneBy(array(
-                'locale' => $locale
-            ));
-            foreach ($snippets as $element => $snippet) {
-                if ($localeModel === null) {
-                    continue;
-                }
-                $elementModel = $form->getElement($element);
-                if ($elementModel === null) {
-                    continue;
-                }
-                $translationModel = new \Shopware\Models\Config\ElementTranslation();
-                $translationModel->setLabel($snippet);
-                $translationModel->setLocale($localeModel);
-                $elementModel->addTranslation($translationModel);
-            }
-        }
     }
 
     private function createMyAttributes()
@@ -183,10 +156,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         } catch(Exception $e) { }
     }
 
-    /**
-     * @param bool $next
-     */
-    public function registerMyTemplateDir($next = false)
+    public function registerMyTemplateDir()
     {
         $this->get('template')->addTemplateDir(
             __DIR__ . '/Views/', 'paypal_plus'
@@ -194,9 +164,9 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     }
 
     /**
-     * @param Enlight_Event_EventArgs $args
+     * @param $args
      */
-    public function onPostDispatchCheckout(Enlight_Event_EventArgs $args)
+    public function onPostDispatchCheckout($args)
     {
         static $subscriber;
         if(!isset($subscriber)) {
@@ -207,9 +177,9 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     }
 
     /**
-     * @param Enlight_Controller_ActionEventArgs $args
+     * @param $args
      */
-    public function onExtendBackendPayment(Enlight_Controller_ActionEventArgs $args)
+    public function onExtendBackendPayment($args)
     {
         static $subscriber;
         if(!isset($subscriber)) {
@@ -220,9 +190,9 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     }
 
     /**
-     * @param Enlight_Controller_ActionEventArgs $args
+     * @param $args
      */
-    public function onPreDispatchPaymentPaypal(Enlight_Controller_ActionEventArgs $args)
+    public function onPreDispatchPaymentPaypal($args)
     {
         static $subscriber;
         if(!isset($subscriber)) {
@@ -234,6 +204,24 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             );
         }
         $subscriber->onPreDispatchPaymentPaypal($args);
+    }
+
+    /**
+     * @param Enlight_Controller_ActionEventArgs $args
+     * @return bool
+     */
+    public function onPaymentPaypalWebhook(Enlight_Controller_ActionEventArgs $args)
+    {
+        static $subscriber;
+        if(!isset($subscriber)) {
+            require_once __DIR__ . '/Subscriber/PaymentPaypal.php';
+            $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PaymentPaypal(
+                $this->get('paypalRestClient'),
+                $this->get('session'),
+                $this->Collection()->get('SwagPaymentPaypal')
+            );
+        }
+        return $subscriber->onPaymentPaypalWebhook($args);
     }
 
     /**
