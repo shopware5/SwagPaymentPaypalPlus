@@ -56,6 +56,10 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $this->createMyForm();
         $this->createMyEvents();
 
+        if($version == '1.0.0') {
+            $this->createMyAttributes();
+        }
+
         return array(
             'success' => true,
             'invalidateCache' => array('config', 'backend', 'proxy')
@@ -83,6 +87,10 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $this->subscribeEvent(
             'Enlight_Controller_Action_PostDispatch_Frontend_Checkout',
             'onPostDispatchCheckout'
+        );
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_PostDispatch_Frontend_Account',
+            'onPostDispatchAccount'
         );
         $this->subscribeEvent(
             'Enlight_Controller_Action_PostDispatch_Backend_Payment',
@@ -126,6 +134,12 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             $modelManager->addAttribute(
                 's_core_paymentmeans_attributes', 'paypal',
                 'plus_active', 'tinyint(1)'
+            );
+        } catch(Exception $e) { }
+        try {
+            $modelManager->addAttribute(
+                's_core_paymentmeans_attributes', 'paypal',
+                'plus_redirect', 'tinyint(1)'
             );
         } catch(Exception $e) { }
         try {
@@ -174,6 +188,19 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Checkout($this);
         }
         $subscriber->onPostDispatchCheckout($args);
+    }
+
+    /**
+     * @param $args
+     */
+    public function onPostDispatchAccount($args)
+    {
+        static $subscriber;
+        if(!isset($subscriber)) {
+            require_once __DIR__ . '/Subscriber/Checkout.php';
+            $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Checkout($this);
+        }
+        $subscriber->onPostDispatchAccount($args);
     }
 
     /**

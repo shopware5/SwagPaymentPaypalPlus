@@ -17,6 +17,7 @@
 {block name='frontend_checkout_confirm_error_messages' append}
     {if $PaypalPlusApprovalUrl}
         <form id="ppplusChangeForm" style="display: none" name="" method="POST" action="{url controller=account action=savePayment sTarget=checkout}">
+            <input id="ppplusRedirect" type="hidden" name="ppplusRedirect" value="0" />
             <input type="hidden" name="sourceCheckoutConfirm" value="1" />
             <input id="ppplusChangeInput" type="hidden" name="register[payment]" class="radio" value="" />
             <input type="submit" value="{s name='PaypalPlusLinkChangePayment'}Weiter{/s}" class="button-right large" />

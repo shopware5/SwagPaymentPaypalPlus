@@ -23,9 +23,11 @@
                 var selectedMethod = ppp.getPaymentMethod(),
                         changeMethodForm = $('#ppplusChangeForm'),
                         changeMethodInput = $('#ppplusChangeInput'),
+                        changeRedirect = $('#ppplusRedirect'),
                         basketButton = $('#basketButton'),
                         config = this;
                 changeMethodForm.hide();
+                changeRedirect.val(0);
                 if(selectedMethod.indexOf('pp-') === 0) {
                     basketButton.removeAttr('disabled').removeClass('paypal_plus_disable_button');
                 } else {
@@ -33,8 +35,10 @@
                 }
                 $.each(config.thirdPartyPaymentMethods, function( index, method ) {
                     if(method.methodName == selectedMethod) {
-                        var val = method.redirectUrl.match(/[0-9]+$/);
-                        changeMethodInput.val(val);
+                        var redirect = method.redirectUrl.match(/\?redirect=1/),
+                            paymentId = parseInt(method.redirectUrl.match(/[0-9]+($|\?)/), 10);
+                        changeMethodInput.val(paymentId);
+                        changeRedirect.val(redirect ? 1 : 0);
                         changeMethodForm.show();
                     }
                 });
@@ -42,7 +46,7 @@
             },
             //preselection: "{if $sUserData.additional.payment.name == 'paypal'}paypal{else}none{/if}",
             thirdPartyPaymentMethods: [{foreach from=$sPayments item=payment key=paymentKey}{if $payment.name != 'paypal' && isset($PaypalPlusThirdPartyPaymentMethods[$payment.id])}{
-                "redirectUrl": "{url controller=account action=savePayment selectPaymentId=$payment.id}",
+                "redirectUrl": "{url controller=account action=savePayment selectPaymentId=$payment.id}{if !empty($PaypalPlusThirdPartyPaymentMethods[$payment.id]['redirect'])}?redirect=1{/if}",
                 "methodName": "{$payment.description|unescape:entity|escape:javascript}",
                 "imageUrl": "{if !empty($PaypalPlusThirdPartyPaymentMethods[$payment.id]['media'])}{link file={$PaypalPlusThirdPartyPaymentMethods[$payment.id]['media']} fullPath}{/if}",
                 "description": "{$payment.additionaldescription|strip_tags|unescape:entity|trim|escape:javascript}"
