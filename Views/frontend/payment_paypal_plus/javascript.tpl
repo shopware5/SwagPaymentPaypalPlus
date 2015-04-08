@@ -10,7 +10,7 @@
             mode: "{if $PaypalPlusModeSandbox}sandbox{else}live{/if}",
             buttonLocation: "outside",
             useraction: "commit",
-            country: '{$PaypalLocale|substr:3}',
+            country: '{$sUserData.additional.country.countryiso}',
             {$PaypalReverse = '_'|explode:$PaypalLocale|array_reverse}
             {$PaypalReverse = '_'|implode:$PaypalReverse}
             language: '{$PaypalReverse}',
