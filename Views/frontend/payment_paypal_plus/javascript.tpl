@@ -10,6 +10,10 @@
             mode: "{if $PaypalPlusModeSandbox}sandbox{else}live{/if}",
             buttonLocation: "outside",
             useraction: "commit",
+            country: '{$PaypalLocale|substr:3}',
+            {$PaypalReverse = '_'|explode:$PaypalLocale|array_reverse}
+            {$PaypalReverse = '_'|implode:$PaypalReverse}
+            language: '{$PaypalReverse}',
             disableContinue: function() {
                 if(disable) { // Fix preselection issue
                     var changeMethodForm = $('#ppplusChangeForm'),

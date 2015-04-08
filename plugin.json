@@ -12,7 +12,7 @@
 
     "changelog": {
         "de": {
-            "1.0.1": "PT-2917 - Fügt Webhook unter „/payment_paypal/webhook“ hinzu. PAYMENT.SALE.COMPLETED wird nicht unterstützt/benötigt; PT-2917 - Fügt die Option „Direkt auf externe Zahlungsart umleiten“ hinzu",
+            "1.0.1": "PT-2917 - Feature: Fügt Webhook unter „/payment_paypal/webhook“ hinzu. PAYMENT.SALE.COMPLETED wird nicht unterstützt/benötigt; PT-2917 - Feature: Fügt die Option „Direkt auf externe Zahlungsart umleiten“ hinzu; PT-2917 - Bugfix: Übergabe von country / language an PayPal",
             "1.0.0": "PT-2396 - Erstveröffentlichung"
         },
         "en": {

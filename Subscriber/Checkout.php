@@ -341,6 +341,7 @@ class Checkout
         if(!empty($payment['links'][1]['href'])) {
             $view->PaypalPlusApprovalUrl = $payment['links'][1]['href'];
             $view->PaypalPlusModeSandbox = $config->get('paypalSandbox');
+            $view->PaypalLocale = $this->paypalBootstrap->getLocaleCode();
 
             $db = $this->bootstrap->get('db');
             $sql = '
