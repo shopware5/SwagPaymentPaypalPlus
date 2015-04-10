@@ -336,6 +336,7 @@ class Checkout
             ),
         );
         $restClient->setAuthToken();
+        $restClient->setHeaders('PayPal-Partner-Attribution-Id', 'ShopwareAG_Cart_PayPalPlus_1017');
         $payment = $restClient->create($uri, $params);
 
         if(!empty($payment['links'][1]['href'])) {

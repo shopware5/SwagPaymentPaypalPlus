@@ -230,14 +230,10 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      * @param Enlight_Controller_ActionEventArgs $args
      * @return bool
      */
-    public function onPaymentPaypalWebhook(Enlight_Controller_ActionEventArgs $args)
+    public function onPaymentPaypalWebhook($args)
     {
         $this->registerMyNamespace();
-        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PaymentPaypal(
-            $this->get('paypalRestClient'),
-            $this->get('session'),
-            $this->Collection()->get('SwagPaymentPaypal')
-        );
+        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Webhook();
         return $subscriber->onPaymentPaypalWebhook($args);
     }
 
@@ -246,7 +242,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      */
     public function getLabel()
     {
-        return 'PayPal Plus';
+        return 'PayPal PLUS';
     }
 
     /**

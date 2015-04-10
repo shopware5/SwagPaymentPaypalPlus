@@ -33,7 +33,7 @@ class PaymentForm
     /**
      * @param \Enlight_Controller_ActionEventArgs $args
      */
-    public function onExtendBackendPayment(\Enlight_Controller_ActionEventArgs $args)
+    public function onExtendBackendPayment($args)
     {
         $request = $args->getRequest();
         $view = $args->getSubject()->View();

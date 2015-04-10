@@ -28,6 +28,7 @@ class PaymentPaypal
     public function __construct(RestClient $restClient, $session, $paypalBootstrap)
     {
         $this->restClient = $restClient;
+        $this->restClient->setHeaders('PayPal-Partner-Attribution-Id', 'ShopwareAG_Cart_PayPalPlus_1017');
         $this->session = $session;
         $this->paypalBootstrap = $paypalBootstrap;
     }
@@ -35,15 +36,14 @@ class PaymentPaypal
     public static function getSubscribedEvents()
     {
         return array(
-            'Enlight_Controller_Action_PreDispatch_Frontend_PaymentPaypal' => 'onPreDispatchPaymentPaypal',
-            'Enlight_Controller_Action_Frontend_PaymentPaypal_Webhook' => 'onPaymentPaypalWebhook',
+            'Enlight_Controller_Action_PreDispatch_Frontend_PaymentPaypal' => 'onPreDispatchPaymentPaypal'
         );
     }
 
     /**
      * @param \Enlight_Controller_ActionEventArgs $args
      */
-    public function onPreDispatchPaymentPaypal(\Enlight_Controller_ActionEventArgs $args)
+    public function onPreDispatchPaymentPaypal($args)
     {
         $request = $args->getRequest();
         /** @var \Shopware_Controllers_Frontend_PaymentPaypal $action */
@@ -83,7 +83,6 @@ class PaymentPaypal
 
         if($payment['state'] == 'created') {
             $uri = "payments/payment/$paymentId/execute";
-            $this->restClient->setAuthToken();
             $payment = $this->restClient->create($uri, array('payer_id' => $payerId));
         }
 
@@ -113,33 +112,5 @@ class PaymentPaypal
                 'sUniqueID' => sha1($payment['id'])
             ));
         }
-    }
-
-    /**
-     * @param \Enlight_Controller_ActionEventArgs $args
-     * @return bool
-     */
-    public function onPaymentPaypalWebhook(\Enlight_Controller_ActionEventArgs $args)
-    {
-        $action = $args->getSubject();
-        $payment = $action->Request()->getRawBody();
-        $payment = json_decode($payment, true);
-        $transactionId = null;
-
-        if(empty($payment['resource']['id'])) {
-            $message = sprintf(
-                "PayPal-Webhook"
-            );
-            $context = array('request.body' => $payment);
-            $action->get('pluginlogger')->error($message, $context);
-        } else {
-            $transactionId = $payment['resource']['id'];
-        }
-
-        $action->forward('notify', null, null, array(
-            'txn_id' => $transactionId
-        ));
-
-        return true;
     }
 }
