@@ -339,6 +339,8 @@ class Checkout
         $restClient->setHeaders('PayPal-Partner-Attribution-Id', 'ShopwareAG_Cart_PayPalPlus_1017');
         $payment = $restClient->create($uri, $params);
 
+        $view->PaypalPlusResponse = $payment;
+
         if(!empty($payment['links'][1]['href'])) {
             $view->PaypalPlusApprovalUrl = $payment['links'][1]['href'];
             $view->PaypalPlusModeSandbox = $config->get('paypalSandbox');
