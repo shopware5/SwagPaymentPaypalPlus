@@ -17,7 +17,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     {
         $this->createMyEvents();
         $this->createMyForm();
-        $this->createMyTranslations();
         $this->createMyAttributes();
 
         return array(
@@ -57,6 +56,10 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $this->createMyForm();
         $this->createMyEvents();
 
+        if($version == '1.0.0') {
+            $this->createMyAttributes();
+        }
+
         return array(
             'success' => true,
             'invalidateCache' => array('config', 'backend', 'proxy')
@@ -86,12 +89,20 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             'onPostDispatchCheckout'
         );
         $this->subscribeEvent(
+            'Enlight_Controller_Action_PostDispatch_Frontend_Account',
+            'onPostDispatchAccount'
+        );
+        $this->subscribeEvent(
             'Enlight_Controller_Action_PostDispatch_Backend_Payment',
             'onExtendBackendPayment'
         );
         $this->subscribeEvent(
             'Enlight_Controller_Action_PreDispatch_Frontend_PaymentPaypal',
             'onPreDispatchPaymentPaypal'
+        );
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_Frontend_PaymentPaypal_Webhook',
+            'onPaymentPaypalWebhook'
         );
     }
 
@@ -110,36 +121,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         ));
     }
 
-    private function createMyTranslations()
-    {
-        $form = $this->Form();
-        $translations = array(
-            'en_GB' => array(
-                'paypalUsername' => 'API username',
-                'paypalPassword' => 'API password',
-            )
-        );
-        $shopRepository = Shopware()->Models()->getRepository('\Shopware\Models\Shop\Locale');
-        foreach ($translations as $locale => $snippets) {
-            $localeModel = $shopRepository->findOneBy(array(
-                'locale' => $locale
-            ));
-            foreach ($snippets as $element => $snippet) {
-                if ($localeModel === null) {
-                    continue;
-                }
-                $elementModel = $form->getElement($element);
-                if ($elementModel === null) {
-                    continue;
-                }
-                $translationModel = new \Shopware\Models\Config\ElementTranslation();
-                $translationModel->setLabel($snippet);
-                $translationModel->setLocale($localeModel);
-                $elementModel->addTranslation($translationModel);
-            }
-        }
-    }
-
     private function createMyAttributes()
     {
         /** @var $modelManager \Shopware\Components\Model\ModelManager */
@@ -153,6 +134,12 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             $modelManager->addAttribute(
                 's_core_paymentmeans_attributes', 'paypal',
                 'plus_active', 'tinyint(1)'
+            );
+        } catch(Exception $e) { }
+        try {
+            $modelManager->addAttribute(
+                's_core_paymentmeans_attributes', 'paypal',
+                'plus_redirect', 'tinyint(1)'
             );
         } catch(Exception $e) { }
         try {
@@ -183,57 +170,71 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         } catch(Exception $e) { }
     }
 
-    /**
-     * @param bool $next
-     */
-    public function registerMyTemplateDir($next = false)
+    public function registerMyTemplateDir()
     {
         $this->get('template')->addTemplateDir(
             __DIR__ . '/Views/', 'paypal_plus'
         );
     }
 
-    /**
-     * @param Enlight_Event_EventArgs $args
-     */
-    public function onPostDispatchCheckout(Enlight_Event_EventArgs $args)
+    public function registerMyNamespace()
     {
-        static $subscriber;
-        if(!isset($subscriber)) {
-            require_once __DIR__ . '/Subscriber/Checkout.php';
-            $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Checkout($this);
-        }
+        $this->Application()->Loader()->registerNamespace('Shopware\SwagPaymentPaypalPlus', __DIR__ . DIRECTORY_SEPARATOR);
+    }
+
+    /**
+     * @param $args
+     */
+    public function onPostDispatchCheckout($args)
+    {
+        $this->registerMyNamespace();
+        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Checkout($this);
         $subscriber->onPostDispatchCheckout($args);
     }
 
     /**
-     * @param Enlight_Controller_ActionEventArgs $args
+     * @param $args
      */
-    public function onExtendBackendPayment(Enlight_Controller_ActionEventArgs $args)
+    public function onPostDispatchAccount($args)
     {
-        static $subscriber;
-        if(!isset($subscriber)) {
-            require_once __DIR__ . '/Subscriber/PaymentForm.php';
-            $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PaymentForm($this);
-        }
+        $this->registerMyNamespace();
+        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Checkout($this);
+        $subscriber->onPostDispatchAccount($args);
+    }
+
+    /**
+     * @param $args
+     */
+    public function onExtendBackendPayment($args)
+    {
+        $this->registerMyNamespace();
+        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PaymentForm($this);
         $subscriber->onExtendBackendPayment($args);
     }
 
     /**
-     * @param Enlight_Controller_ActionEventArgs $args
+     * @param $args
      */
-    public function onPreDispatchPaymentPaypal(Enlight_Controller_ActionEventArgs $args)
+    public function onPreDispatchPaymentPaypal($args)
     {
-        static $subscriber;
-        if(!isset($subscriber)) {
-            require_once __DIR__ . '/Subscriber/PaymentPaypal.php';
-            $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PaymentPaypal(
-                $this->get('paypalRestClient'),
-                $this->get('session'),
-                $this->Collection()->get('SwagPaymentPaypal')
-            );
-        }
+        $this->registerMyNamespace();
+        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PaymentPaypal(
+            $this->get('paypalRestClient'),
+            $this->get('session'),
+            $this->Collection()->get('SwagPaymentPaypal')
+        );
         $subscriber->onPreDispatchPaymentPaypal($args);
+    }
+
+    /**
+     * @param Enlight_Controller_ActionEventArgs $args
+     * @return bool
+     */
+    public function onPaymentPaypalWebhook($args)
+    {
+        $this->registerMyNamespace();
+        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Webhook();
+        return $subscriber->onPaymentPaypalWebhook($args);
     }
 
     /**
@@ -241,7 +242,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      */
     public function getLabel()
     {
-        return 'PayPal Plus';
+        return 'PayPal PLUS';
     }
 
     /**

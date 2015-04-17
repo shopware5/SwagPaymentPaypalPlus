@@ -8,17 +8,15 @@
 
 namespace Shopware\SwagPaymentPaypalPlus\Subscriber;
 
-use Enlight\Event\SubscriberInterface;
 use \Enlight_Controller_Action as ControllerAction;
 use \Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap as Bootstrap;
 use \Shopware_Plugins_Frontend_SwagPaymentPaypal_Bootstrap as PaypalBootstrap;
-use \Shopware;
 
 /**
  * Class Checkout
  * @package Shopware\SwagPaymentPaypal\Subscriber
  */
-class Checkout implements SubscriberInterface
+class Checkout
 {
     /**
      * @var Bootstrap
@@ -106,7 +104,7 @@ class Checkout implements SubscriberInterface
     {
         $address = array(
             'recipient_name' => $user['shippingaddress']['firstname'] . ' ' . $user['shippingaddress']['lastname'],
-            'line1' => $user['shippingaddress']['street'] . ' ' . $user['shippingaddress']['streetnumber'],
+            'line1' => trim($user['shippingaddress']['street'] . ' ' . $user['shippingaddress']['streetnumber']),
             'city' => $user['shippingaddress']['city'],
             'postal_code' => $user['shippingaddress']['zipcode'],
             'country_code' => $user['additional']['countryShipping']['countryiso'],
@@ -210,10 +208,31 @@ class Checkout implements SubscriberInterface
      */
     public function onPostDispatchCheckout(\Enlight_Event_EventArgs $args)
     {
+        unset($this->session->PaypalPlusPayment);
+
         /** @var $action \Enlight_Controller_Action */
         $action = $args->getSubject();
         $request = $action->Request();
         $response = $action->Response();
+
+        // Secure dispatch
+        if (!$request->isDispatched()
+            || $response->isException()
+            || $response->isRedirect()
+        ) {
+            return;
+        }
+
+        if($request->getActionName() == 'confirm' && $request->get('ppplusRedirect')) {
+            $action->redirect(array(
+                'controller' => 'checkout',
+                'action' => 'payment',
+                'sAGB' => 1
+            ));
+            return;
+        }
+
+        // Paypal plus conditions
         $view = $action->View();
         $user = $view->sUserData;
         $countries = $this->bootstrap->Config()->get('paypalPlusCountries');
@@ -223,10 +242,7 @@ class Checkout implements SubscriberInterface
             $countries = (array)$countries;
         }
 
-        if (!$request->isDispatched()
-            || $response->isException()
-            || $response->isRedirect()
-            || !empty($this->session->PaypalResponse['TOKEN']) // PP-Express
+        if (!empty($this->session->PaypalResponse['TOKEN']) // PP-Express
             || empty($user['additional']['payment']['name'])
             || $user['additional']['payment']['name'] != 'paypal'
             || !in_array($user['additional']['country']['id'], $countries)
@@ -245,6 +261,24 @@ class Checkout implements SubscriberInterface
             $view->extendsTemplate('frontend/payment_paypal_plus/checkout.tpl');
         } elseif($request->getActionName() == 'shippingPayment' && $templateVersion >= 3) { // responsive template
             $this->onPaypalPlus($action);
+        }
+    }
+
+    public function onPostDispatchAccount(\Enlight_Event_EventArgs $args)
+    {
+        /** @var $action \Enlight_Controller_Action */
+        $action = $args->getSubject();
+        $request = $action->Request();
+        $response = $action->Response();
+
+        if($response->isRedirect()
+            && $request->getActionName() == 'savePayment'
+            && $request->get('ppplusRedirect')) {
+            $action->redirect(array(
+                'controller' => 'checkout',
+                'action' => 'confirm',
+                'ppplusRedirect' => 1
+            ));
         }
     }
 
@@ -302,15 +336,19 @@ class Checkout implements SubscriberInterface
             ),
         );
         $restClient->setAuthToken();
+        $restClient->setHeaders('PayPal-Partner-Attribution-Id', 'ShopwareAG_Cart_PayPalPlus_1017');
         $payment = $restClient->create($uri, $params);
+
+        $view->PaypalPlusResponse = $payment;
 
         if(!empty($payment['links'][1]['href'])) {
             $view->PaypalPlusApprovalUrl = $payment['links'][1]['href'];
             $view->PaypalPlusModeSandbox = $config->get('paypalSandbox');
+            $view->PaypalLocale = $this->paypalBootstrap->getLocaleCode();
 
             $db = $this->bootstrap->get('db');
             $sql = '
-              SELECT paymentmeanID as id, paypal_plus_media as media
+              SELECT paymentmeanID as id, paypal_plus_media as media, paypal_plus_redirect as redirect
               FROM s_core_paymentmeans_attributes WHERE paypal_plus_active=1
             ';
             $paymentMethods = $db->fetchAssoc($sql);

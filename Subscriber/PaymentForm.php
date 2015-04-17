@@ -8,14 +8,13 @@
 
 namespace Shopware\SwagPaymentPaypalPlus\Subscriber;
 
-use Enlight\Event\SubscriberInterface;
 use Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap as Bootstrap;
 
 /**
  * Class PaymentForm
  * @package Shopware\SwagPaymentPaypal\Subscriber
  */
-class PaymentForm implements SubscriberInterface
+class PaymentForm
 {
     protected $bootstrap;
 
@@ -34,7 +33,7 @@ class PaymentForm implements SubscriberInterface
     /**
      * @param \Enlight_Controller_ActionEventArgs $args
      */
-    public function onExtendBackendPayment(\Enlight_Controller_ActionEventArgs $args)
+    public function onExtendBackendPayment($args)
     {
         $request = $args->getRequest();
         $view = $args->getSubject()->View();

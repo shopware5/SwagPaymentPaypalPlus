@@ -10,6 +10,10 @@
             mode: "{if $PaypalPlusModeSandbox}sandbox{else}live{/if}",
             buttonLocation: "outside",
             useraction: "commit",
+            country: '{$sUserData.additional.country.countryiso}',
+            {$PaypalReverse = '_'|explode:$PaypalLocale|array_reverse}
+            {$PaypalReverse = '_'|implode:$PaypalReverse}
+            language: '{$PaypalReverse}',
             disableContinue: function() {
                 if(disable) { // Fix preselection issue
                     var changeMethodForm = $('#ppplusChangeForm'),
@@ -23,9 +27,11 @@
                 var selectedMethod = ppp.getPaymentMethod(),
                         changeMethodForm = $('#ppplusChangeForm'),
                         changeMethodInput = $('#ppplusChangeInput'),
+                        changeRedirect = $('#ppplusRedirect'),
                         basketButton = $('#basketButton'),
                         config = this;
                 changeMethodForm.hide();
+                changeRedirect.val(0);
                 if(selectedMethod.indexOf('pp-') === 0) {
                     basketButton.removeAttr('disabled').removeClass('paypal_plus_disable_button');
                 } else {
@@ -33,20 +39,21 @@
                 }
                 $.each(config.thirdPartyPaymentMethods, function( index, method ) {
                     if(method.methodName == selectedMethod) {
-                        var val = method.redirectUrl.match(/[0-9]+$/);
-                        var val = method.redirectUrl.match(/[0-9]+$/);
-                        changeMethodInput.val(val);
+                        var redirect = method.redirectUrl.match(/\?redirect=1/),
+                            paymentId = parseInt(method.redirectUrl.match(/[0-9]+($|\?)/), 10);
+                        changeMethodInput.val(paymentId);
+                        changeRedirect.val(redirect ? 1 : 0);
                         changeMethodForm.show();
                     }
                 });
                 disable = true;
             },
-            preselection: "{if $sUserData.additional.payment.name == 'paypal'}paypal{else}none{/if}",
+            //preselection: "{if $sUserData.additional.payment.name == 'paypal'}paypal{else}none{/if}",
             thirdPartyPaymentMethods: [{foreach from=$sPayments item=payment key=paymentKey}{if $payment.name != 'paypal' && isset($PaypalPlusThirdPartyPaymentMethods[$payment.id])}{
-                "redirectUrl": "{url controller=account action=savePayment selectPaymentId=$payment.id}",
-                "methodName": "{$payment.description|escape:javascript}",
+                "redirectUrl": "{url controller=account action=savePayment selectPaymentId=$payment.id}{if !empty($PaypalPlusThirdPartyPaymentMethods[$payment.id]['redirect'])}?redirect=1{/if}",
+                "methodName": "{$payment.description|unescape:entity|escape:javascript}",
                 "imageUrl": "{if !empty($PaypalPlusThirdPartyPaymentMethods[$payment.id]['media'])}{link file={$PaypalPlusThirdPartyPaymentMethods[$payment.id]['media']} fullPath}{/if}",
-                "description": "{$payment.additionaldescription|strip_tags|trim|escape:javascript}"
+                "description": "{$payment.additionaldescription|strip_tags|unescape:entity|trim|escape:javascript}"
             }{if !$payment@last},{/if}{/if}{/foreach}]
         });
     </script>

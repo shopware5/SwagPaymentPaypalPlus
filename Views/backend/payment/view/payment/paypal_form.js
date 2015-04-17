@@ -26,6 +26,14 @@ Ext.define('Shopware.apps.payment.view.payment.PaypalForm', {
             fieldLabel: 'Bild welches bei „PayPal PLUS“ angezeigt wird',
             name: 'attribute[paypalPlusMedia]'
         });
+        result.push({
+            xtype: 'checkbox',
+            fieldLabel: 'Direkt auf externe Zahlungsart umleiten',
+            boxLabel: 'Aufschläge müssen ggf. auf der externen Seite ausgewiesen werden!',
+            inputValue: 1,
+            uncheckedValue: 0,
+            name: 'attribute[paypalPlusRedirect]'
+        });
         return result;
     }
 });
