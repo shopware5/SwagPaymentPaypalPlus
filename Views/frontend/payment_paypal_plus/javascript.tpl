@@ -51,9 +51,9 @@
             //preselection: "{if $sUserData.additional.payment.name == 'paypal'}paypal{else}none{/if}",
             thirdPartyPaymentMethods: [{foreach from=$sPayments item=payment key=paymentKey}{if $payment.name != 'paypal' && isset($PaypalPlusThirdPartyPaymentMethods[$payment.id])}{
                 "redirectUrl": "{url controller=account action=savePayment selectPaymentId=$payment.id}{if !empty($PaypalPlusThirdPartyPaymentMethods[$payment.id]['redirect'])}?redirect=1{/if}",
-                "methodName": "{$payment.description|unescape:entity|escape:javascript}",
+                "methodName": {$payment.description|unescape:entity|json_encode},
                 "imageUrl": "{if !empty($PaypalPlusThirdPartyPaymentMethods[$payment.id]['media'])}{link file={$PaypalPlusThirdPartyPaymentMethods[$payment.id]['media']} fullPath}{/if}",
-                "description": "{$payment.additionaldescription|strip_tags|unescape:entity|trim|escape:javascript}"
+                "description": {$payment.additionaldescription|strip_tags|unescape:entity|trim|json_encode}
             }{if !$payment@last},{/if}{/if}{/foreach}]
         });
     </script>
