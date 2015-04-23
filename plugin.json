@@ -23,7 +23,7 @@
 
     "compatibility": {
         "minimumVersion": "4.1.0",
-        "maximumVersion": "4.3.6",
+        "maximumVersion": null,
         "blacklist": [
         ]
     }
