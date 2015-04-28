@@ -8,10 +8,11 @@
     "link": "http://store.shopware.com",
     "author": "shopware AG",
 
-    "currentVersion": "1.0.2",
+    "currentVersion": "1.0.3",
 
     "changelog": {
         "de": {
+            "1.0.3": "PT-3016 - Bugfix: Sonderzeichen in älteren PHP-Versionen, Update bei der Übergabe von country / language an PayPal ",
             "1.0.2": "PT-2917 - Bugfix: Sonderzeichen in der Zahlungsart-Beschreibung werden nun richtig an PayPal übergeben",
             "1.0.1": "PT-2917 - Feature: Fügt Webhook unter „/payment_paypal/webhook“ hinzu. PAYMENT.SALE.COMPLETED wird nicht unterstützt/benötigt; PT-2917 - Feature: Fügt die Option „Direkt auf externe Zahlungsart umleiten“ hinzu; PT-2917 - Bugfix: Übergabe von country / language an PayPal",
             "1.0.0": "PT-2396 - Erstveröffentlichung"
