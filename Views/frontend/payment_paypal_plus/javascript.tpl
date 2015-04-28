@@ -51,7 +51,7 @@
                 "redirectUrl": "{url controller=account action=savePayment selectPaymentId=$payment.id}{if !empty($PaypalPlusThirdPartyPaymentMethods[$payment.id]['redirect'])}?redirect=1{/if}",
                 "methodName": {$payment.description|unescape:entity|json_encode},
                 "imageUrl": "{if !empty($PaypalPlusThirdPartyPaymentMethods[$payment.id]['media'])}{link file={$PaypalPlusThirdPartyPaymentMethods[$payment.id]['media']} fullPath}{/if}",
-                "description": {$payment.additionaldescription|strip_tags|unescape:entity|trim|json_encode}
+                "description": {$payment.additionaldescription|strip_tags|html_entity_decode:null:utf8|trim|json_encode}
             }{if !$payment@last},{/if}{/if}{/foreach}]
         });
     </script>
