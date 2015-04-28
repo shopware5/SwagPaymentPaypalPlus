@@ -9,6 +9,14 @@
 class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
     /**
+     * Register the autoloader
+     */
+    public function afterInit()
+    {
+        $this->get('loader')->registerNamespace('Shopware\SwagPaymentPaypalPlus', __DIR__ . DIRECTORY_SEPARATOR);
+    }
+
+    /**
      * Installs the plugin
      *
      * @return bool
@@ -177,17 +185,11 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         );
     }
 
-    public function registerMyNamespace()
-    {
-        $this->Application()->Loader()->registerNamespace('Shopware\SwagPaymentPaypalPlus', __DIR__ . DIRECTORY_SEPARATOR);
-    }
-
     /**
      * @param $args
      */
     public function onPostDispatchCheckout($args)
     {
-        $this->registerMyNamespace();
         $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Checkout($this);
         $subscriber->onPostDispatchCheckout($args);
     }
@@ -197,7 +199,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      */
     public function onPostDispatchAccount($args)
     {
-        $this->registerMyNamespace();
         $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Checkout($this);
         $subscriber->onPostDispatchAccount($args);
     }
@@ -207,7 +208,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      */
     public function onExtendBackendPayment($args)
     {
-        $this->registerMyNamespace();
         $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PaymentForm($this);
         $subscriber->onExtendBackendPayment($args);
     }
@@ -217,7 +217,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      */
     public function onPreDispatchPaymentPaypal($args)
     {
-        $this->registerMyNamespace();
         $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PaymentPaypal(
             $this->get('paypalRestClient'),
             $this->get('session'),
@@ -232,7 +231,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      */
     public function onPaymentPaypalWebhook($args)
     {
-        $this->registerMyNamespace();
         $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Webhook();
         return $subscriber->onPaymentPaypalWebhook($args);
     }
