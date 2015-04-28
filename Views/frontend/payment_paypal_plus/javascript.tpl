@@ -11,13 +11,7 @@
             buttonLocation: "outside",
             useraction: "commit",
             country: '{$sUserData.additional.country.countryiso}',
-<<<<<<< Updated upstream
-            {$PaypalReverse = '_'|explode:$PaypalLocale|array_reverse}
-            {$PaypalReverse = '_'|implode:$PaypalReverse}
-            language: '{$PaypalReverse}',
-=======
             language: '{$PaypalLocale}',
->>>>>>> Stashed changes
             disableContinue: function() {
                 if(disable) { // Fix preselection issue
                     var changeMethodForm = $('#ppplusChangeForm'),
