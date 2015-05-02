@@ -97,10 +97,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             'onPostDispatchCheckout'
         );
         $this->subscribeEvent(
-            'Enlight_Controller_Action_PostDispatch_Frontend_Account',
-            'onPostDispatchAccount'
-        );
-        $this->subscribeEvent(
             'Enlight_Controller_Action_PostDispatch_Backend_Payment',
             'onExtendBackendPayment'
         );
@@ -111,6 +107,14 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $this->subscribeEvent(
             'Enlight_Controller_Action_Frontend_PaymentPaypal_Webhook',
             'onPaymentPaypalWebhook'
+        );
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_Frontend_PaymentPaypal_PlusRedirect',
+            'onPaymentPaypalPlusRedirect'
+        );
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_PostDispatch_Frontend_Account',
+            'onPostDispatchAccount'
         );
     }
 
@@ -126,6 +130,10 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             'value' => array(2),
             'store' => 'base.Country',
             'multiSelect' => true
+        ));
+        $form->setElement('boolean', 'paypalHidePaymentSelection', array(
+            'label' => 'Zahlungsart-Auswahl im Bestellabschluss ausblenden',
+            'value' => true
         ));
     }
 
@@ -197,15 +205,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     /**
      * @param $args
      */
-    public function onPostDispatchAccount($args)
-    {
-        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Checkout($this);
-        $subscriber->onPostDispatchAccount($args);
-    }
-
-    /**
-     * @param $args
-     */
     public function onExtendBackendPayment($args)
     {
         $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PaymentForm($this);
@@ -233,6 +232,25 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     {
         $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Webhook();
         return $subscriber->onPaymentPaypalWebhook($args);
+    }
+
+    /**
+     * @param Enlight_Controller_ActionEventArgs $args
+     * @return bool
+     */
+    public function onPaymentPaypalPlusRedirect($args)
+    {
+        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PlusRedirect($this);
+        return $subscriber->onPaypalPlusRedirect($args);
+    }
+
+    /**
+     * @param $args
+     */
+    public function onPostDispatchAccount($args)
+    {
+        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PlusRedirect($this);
+        $subscriber->onPostDispatchAccount($args);
     }
 
     /**

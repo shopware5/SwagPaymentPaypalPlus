@@ -219,11 +219,12 @@ class Checkout
         if (!$request->isDispatched()
             || $response->isException()
             || $response->isRedirect()
+            || $request->getActionName() != 'confirm'
         ) {
             return;
         }
 
-        if($request->getActionName() == 'confirm' && $request->get('ppplusRedirect')) {
+        if($request->get('ppplusRedirect')) {
             $action->redirect(array(
                 'controller' => 'checkout',
                 'action' => 'payment',
@@ -236,7 +237,7 @@ class Checkout
         $view = $action->View();
         $user = $view->sUserData;
         $countries = $this->bootstrap->Config()->get('paypalPlusCountries');
-        if($countries instanceof \Enlight_Config) {
+        if ($countries instanceof \Enlight_Config) {
             $countries = $countries->toArray();
         } else {
             $countries = (array)$countries;
@@ -255,30 +256,10 @@ class Checkout
         $templateVersion = $shopContext->getTemplate()->getVersion();
 
         $this->bootstrap->registerMyTemplateDir($templateVersion >= 3);
+        $this->onPaypalPlus($action);
 
-        if($request->getActionName() == 'confirm' && $templateVersion < 3) { // emotion template
-            $this->onPaypalPlus($action);
+        if ($templateVersion < 3) { // emotion template
             $view->extendsTemplate('frontend/payment_paypal_plus/checkout.tpl');
-        } elseif($request->getActionName() == 'shippingPayment' && $templateVersion >= 3) { // responsive template
-            $this->onPaypalPlus($action);
-        }
-    }
-
-    public function onPostDispatchAccount(\Enlight_Event_EventArgs $args)
-    {
-        /** @var $action \Enlight_Controller_Action */
-        $action = $args->getSubject();
-        $request = $action->Request();
-        $response = $action->Response();
-
-        if($response->isRedirect()
-            && $request->getActionName() == 'savePayment'
-            && $request->get('ppplusRedirect')) {
-            $action->redirect(array(
-                'controller' => 'checkout',
-                'action' => 'confirm',
-                'ppplusRedirect' => 1
-            ));
         }
     }
 
@@ -348,7 +329,7 @@ class Checkout
 
             $db = $this->bootstrap->get('db');
             $sql = '
-              SELECT paymentmeanID as id, paypal_plus_media as media, paypal_plus_redirect as redirect
+              SELECT paymentmeanID as id, paypal_plus_media as media
               FROM s_core_paymentmeans_attributes WHERE paypal_plus_active=1
             ';
             $paymentMethods = $db->fetchAssoc($sql);
