@@ -1,4 +1,5 @@
 {if $PaypalPlusApprovalUrl}
+    {$PayPalPlusContinue = "{s name='PaypalPlusLinkChangePayment'}Weiter{/s}"}
     <script type="text/javascript">
         var jQuery_SW = $.noConflict(true);
     </script>
@@ -19,6 +20,26 @@
                 {$PaypalPlusLang = $PaypalLocale}
             {/if}
             language: '{$PaypalPlusLang}',
+            disableContinue: function() {
+                var basketButton = $('#basketButton');
+                if(disable) { // Fix preselection issue
+                    basketButton.val({$PayPalPlusContinue|json_encode})
+                }
+                disable = true;
+            },
+            enableContinue: function() {
+                var selectedMethod = ppp.getPaymentMethod(),
+                    basketButton = $('#basketButton');
+                if(!basketButton.data('orgValue')) {
+                    basketButton.data('orgValue', basketButton.val());
+                }
+                if(selectedMethod.indexOf('pp-') === 0) {
+                    basketButton.val(basketButton.data('orgValue'));
+                } else {
+                    basketButton.val({$PayPalPlusContinue|json_encode});
+                }
+                disable = true;
+            },
             //preselection: "{if $sUserData.additional.payment.name == 'paypal'}paypal{else}none{/if}",
             thirdPartyPaymentMethods: [{foreach from=$sPayments item=payment key=paymentKey}{if $payment.name != 'paypal' && isset($PaypalPlusThirdPartyPaymentMethods[$payment.id])}{
                 "redirectUrl": "{url controller=payment_paypal action=plusRedirect selectPaymentId=$payment.id}",
