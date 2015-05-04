@@ -33,9 +33,7 @@ class Webhook
         $transactionId = null;
 
         if(empty($payment['resource']['id'])) {
-            $message = sprintf(
-                "PayPal-Webhook"
-            );
+            $message = "PayPal-Webhook";
             $context = array('request.body' => $payment);
             $action->get('pluginlogger')->error($message, $context);
         } else {

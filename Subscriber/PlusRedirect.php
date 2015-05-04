@@ -74,7 +74,7 @@ class PlusRedirect
         $request = $action->Request();
         if($request->getParam('ppplusRedirect')) {
             $values = $request->getPost();
-            $values['payment'] = $values['register'];
+            $values['payment'] = $values['sPayment'];
             $values['isPost'] = true;
             $action->View()->sFormData = $values;
         }

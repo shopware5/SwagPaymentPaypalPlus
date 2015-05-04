@@ -31,12 +31,19 @@ class Checkout
     protected $config;
     protected $session;
 
+    /**
+     * @var \Shopware_Components_Paypal_RestClient
+     */
+    protected $restClient;
+
     public function __construct(Bootstrap $bootstrap)
     {
         $this->bootstrap = $bootstrap;
         $this->paypalBootstrap = $bootstrap->Collection()->get('SwagPaymentPaypal');
         $this->config = $this->paypalBootstrap->Config();
         $this->session = $bootstrap->get('session');
+        $this->restClient = $bootstrap->get('paypalRestClient');
+        $this->restClient->setHeaders('PayPal-Partner-Attribution-Id', 'ShopwareAG_Cart_PayPalPlus_1017');
     }
 
     public static function getSubscribedEvents()
@@ -140,20 +147,20 @@ class Checkout
     {
         if (!isset($this->session['PaypalProfile'])) {
             $profile = $this->getProfileData();
-            $restClient = $this->bootstrap->get('paypalRestClient');
             $uri = 'payment-experience/web-profiles';
-            $restClient->setAuthToken();
-            $profileList = $restClient->get($uri);
+            $this->restClient->setAuthToken();
+            $profileList = $this->restClient->get($uri);
             foreach($profileList as $entry) {
                 if($entry['name'] == $profile['name']) {
-                    $restClient->update("$uri/{$entry['id']}", $profile);
+                    $this->restClient->update("$uri/{$entry['id']}", $profile);
                     $this->session['PaypalProfile'] = array(
                         'id' => $entry['id']
                     );
+                    break;
                 }
             }
             if(!isset($this->session['PaypalProfile'])) {
-                $this->session['PaypalProfile'] = $restClient->create($uri, $profile);
+                $this->session['PaypalProfile'] = $this->restClient->create($uri, $profile);
             }
         }
         return $this->session['PaypalProfile'];
@@ -204,13 +211,12 @@ class Checkout
     }
 
     /**
-     * @param \Enlight_Event_EventArgs $args
+     * @param \Enlight_Controller_ActionEventArgs $args
      */
-    public function onPostDispatchCheckout(\Enlight_Event_EventArgs $args)
+    public function onPostDispatchCheckout($args)
     {
         unset($this->session->PaypalPlusPayment);
 
-        /** @var $action \Enlight_Controller_Action */
         $action = $args->getSubject();
         $request = $action->Request();
         $response = $action->Response();
@@ -283,9 +289,6 @@ class Checkout
             'forceSecure' => true,
         ));
 
-        /** @var \Shopware_Components_Paypal_RestClient $restClient */
-        $restClient = $this->bootstrap->get('paypalRestClient');
-
         $profile = $this->getProfile();
 
         //Payment
@@ -316,9 +319,8 @@ class Checkout
                 'cancel_url' => $cancelUrl
             ),
         );
-        $restClient->setAuthToken();
-        $restClient->setHeaders('PayPal-Partner-Attribution-Id', 'ShopwareAG_Cart_PayPalPlus_1017');
-        $payment = $restClient->create($uri, $params);
+        $this->restClient->setAuthToken();
+        $payment = $this->restClient->create($uri, $params);
 
         $view->PaypalPlusResponse = $payment;
 
