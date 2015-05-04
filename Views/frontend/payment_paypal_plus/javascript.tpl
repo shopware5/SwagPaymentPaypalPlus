@@ -5,8 +5,7 @@
     </script>
     <script src="https://www.paypalobjects.com/webstatic/ppplus/ppplus.min.js" type="text/javascript"></script>
     <script type="text/javascript">
-        // $('button[form="confirm--form"]')
-        var ppp; disable = false; ppp = PAYPAL.apps.PPP({
+        var ppp, disable = false, basketButton, bbFunction = 'val'; ppp = PAYPAL.apps.PPP({
             approvalUrl: "{$PaypalPlusApprovalUrl|escape:javascript}",
             placeholder: "ppplus",
             mode: "{if $PaypalPlusModeSandbox}sandbox{else}live{/if}",
@@ -21,22 +20,21 @@
             {/if}
             language: '{$PaypalPlusLang}',
             disableContinue: function() {
-                var basketButton = $('#basketButton');
                 if(disable) { // Fix preselection issue
-                    basketButton.val({$PayPalPlusContinue|json_encode})
+                    if(basketButton) {
+                        basketButton.val({$PayPalPlusContinue|json_encode})
+                    }
                 }
                 disable = true;
             },
             enableContinue: function() {
-                var selectedMethod = ppp.getPaymentMethod(),
-                    basketButton = $('#basketButton');
-                if(!basketButton.data('orgValue')) {
-                    basketButton.data('orgValue', basketButton.val());
-                }
-                if(selectedMethod.indexOf('pp-') === 0) {
-                    basketButton.val(basketButton.data('orgValue'));
-                } else {
-                    basketButton.val({$PayPalPlusContinue|json_encode});
+                var selectedMethod = ppp.getPaymentMethod();
+                if(basketButton) {
+                    if(selectedMethod.indexOf('pp-') === 0) {
+                        basketButton[bbFunction](basketButton.data('orgValue'));
+                    } else {
+                        basketButton[bbFunction]({$PayPalPlusContinue|json_encode});
+                    }
                 }
                 disable = true;
             },
@@ -52,6 +50,12 @@
     <script type="text/javascript">
         var jQuery = $ = jQuery_SW;
         $(document).ready(function($) {
+            basketButton = $('#basketButton');
+            if (!basketButton[0]) {
+                basketButton = $('.main--actions button[type=submit]');
+                bbFunction = 'html';
+            }
+            basketButton.data('orgValue', basketButton[bbFunction]());
             var onConfirm = function () {
                 var $agb = $('#sAGB');
                 if (!$agb.length || $agb.attr('checked') || $agb[0].checked) {
@@ -61,7 +65,7 @@
                 return true;
             };
             $('#confirm--form').on('submit', onConfirm);
-            $('#basketButton').on('click', onConfirm);
+            basketButton.on('click', onConfirm);
         });
     </script>
 {/if}
