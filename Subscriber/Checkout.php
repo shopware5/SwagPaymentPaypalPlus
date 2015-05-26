@@ -123,18 +123,26 @@ class Checkout
      * @param $basket
      * @return array
      */
-    protected function getItemList($basket)
+    protected function getItemList($basket, $user)
     {
         $list = array();
         $currency = $this->getCurrency();
         foreach ($basket['content'] as $basketItem) {
-            $unitPrice = round(str_replace(',', '.', $basketItem['price']), 2);
+            if (!empty($user['additional']['charge_vat']) && !empty($basketItem['amountWithTax'])) {
+                $amount = round($basketItem['amountWithTax'], 2);
+                $quantity = 1;
+            } else {
+                $amount = str_replace(',', '.', $basketItem['amount']);
+                $quantity = (int)$basketItem['quantity'];
+                $amount = $amount / $basketItem['quantity'];
+            }
+            $amount = round($amount, 2);
             $list[] = array(
                 'name' => $basketItem['articlename'],
                 'sku' => $basketItem['ordernumber'],
-                'price' => number_format($unitPrice, 2, '.', ','),
+                'price' => number_format($amount, 2, '.', ','),
                 'currency' => $currency,
-                'quantity' => (int)$basketItem['quantity'],
+                'quantity' => $quantity,
             );
         }
         return $list;
@@ -208,6 +216,28 @@ class Checkout
                 'bank_txn_pending_url' => $notifyUrl
             ),
         );
+    }
+
+    private function getTransactionData($basket, $user)
+    {
+        $total = $this->getTotalAmount($basket, $user);
+        $shipping = $this->getTotalShipment($basket, $user);
+
+        return array(array(
+            'amount' => array(
+                'currency' => $this->getCurrency(),
+                'total' => number_format($total, 2, '.', ','),
+                'details' => array(
+                    'shipping' => number_format($shipping, 2, '.', ','),
+                    'subtotal' => number_format($total - $shipping, 2, '.', ','),
+                    'tax' => number_format(0, 2, '.', ','),
+                )
+            ),
+            'item_list' => array(
+                'items' => $this->getItemList($basket, $user),
+                'shipping_address' => $this->getShippingAddress($user)
+            ),
+        ));
     }
 
     /**
@@ -291,7 +321,8 @@ class Checkout
 
         $profile = $this->getProfile();
 
-        //Payment
+        $this->restClient->setAuthToken();
+
         $uri = 'payments/payment';
         $params = array(
             'intent' => 'sale',
@@ -299,29 +330,15 @@ class Checkout
             'payer' => array(
                 'payment_method' => 'paypal'
             ),
-            'transactions' => array(array(
-                'amount' => array(
-                    'currency' => $this->getCurrency(),
-                    'total' => number_format($this->getTotalAmount($basket, $user), 2, '.', ','),
-                    'details' => array(
-                        "shipping" => number_format($this->getTotalShipment($basket, $user), 2, '.', ','),
-                        "subtotal" => number_format($this->getTotalSub($basket, $user), 2, '.', ','),
-                        "tax" => number_format(0, 2, '.', ','),
-                    )
-                ),
-                'item_list' => array(
-                    'items' => $this->getItemList($basket),
-                    'shipping_address' => $this->getShippingAddress($user)
-                ),
-            )),
+            'transactions' => $this->getTransactionData($basket, $user),
             'redirect_urls' => array(
                 'return_url' => $returnUrl,
                 'cancel_url' => $cancelUrl
             ),
         );
-        $this->restClient->setAuthToken();
         $payment = $this->restClient->create($uri, $params);
 
+        $view->PaypalPlusRequest = $params;
         $view->PaypalPlusResponse = $payment;
 
         if(!empty($payment['links'][1]['href'])) {

@@ -17,11 +17,6 @@ use \Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap as Bootstrap;
 class PlusRedirect
 {
     /**
-     * @var Bootstrap
-     */
-    protected $bootstrap;
-
-    /**
      * @var \sAdmin
      */
     protected $admin;
