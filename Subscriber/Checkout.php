@@ -250,13 +250,39 @@ class Checkout
         $action = $args->getSubject();
         $request = $action->Request();
         $response = $action->Response();
+        $view = $action->View();
 
         // Secure dispatch
         if (!$request->isDispatched()
             || $response->isException()
             || $response->isRedirect()
-            || $request->getActionName() != 'confirm'
         ) {
+            return;
+        }
+
+        //Fix payment description
+        $newDescription = $this->bootstrap->Config()->get('paypalPlusDescription');
+        if (!empty($newDescription)) {
+            $payments = $view->sPayments;
+            if (!empty($payments)) {
+                foreach($payments as $key => $payment) {
+                    if($payment['name'] == 'paypal') {
+                        $payments[$key]['description'] = $newDescription;
+                        break;
+                    }
+                }
+                $view->sPayments = $payments;
+            }
+            $user = $view->sUserData;
+            if (!empty($user['additional']['payment']['name'])
+              && $user['additional']['payment']['name'] == 'paypal') {
+                $user['additional']['payment']['description'] = $newDescription;
+                $view->sUserData = $user;
+            }
+        }
+
+        // Check action
+        if ($request->getActionName() != 'confirm') {
             return;
         }
 
@@ -270,7 +296,6 @@ class Checkout
         }
 
         // Paypal plus conditions
-        $view = $action->View();
         $user = $view->sUserData;
         $countries = $this->bootstrap->Config()->get('paypalPlusCountries');
         if ($countries instanceof \Enlight_Config) {

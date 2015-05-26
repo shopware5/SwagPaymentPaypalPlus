@@ -135,6 +135,10 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             'label' => 'Zahlungsart-Auswahl im Bestellabschluss ausblenden',
             'value' => true
         ));
+        $form->setElement('text', 'paypalPlusDescription', array(
+            'label' => 'Zahlungsart-Bezeichnung überschreiben',
+            'value' => 'PayPal, Lastschrift oder Kreditkarte'
+        ));
     }
 
     private function createMyAttributes()
