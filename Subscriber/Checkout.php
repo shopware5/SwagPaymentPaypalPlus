@@ -123,18 +123,26 @@ class Checkout
      * @param $basket
      * @return array
      */
-    protected function getItemList($basket)
+    protected function getItemList($basket, $user)
     {
         $list = array();
         $currency = $this->getCurrency();
         foreach ($basket['content'] as $basketItem) {
-            $unitPrice = round(str_replace(',', '.', $basketItem['price']), 2);
+            if (!empty($user['additional']['charge_vat']) && !empty($basketItem['amountWithTax'])) {
+                $amount = round($basketItem['amountWithTax'], 2);
+                $quantity = 1;
+            } else {
+                $amount = str_replace(',', '.', $basketItem['amount']);
+                $quantity = (int)$basketItem['quantity'];
+                $amount = $amount / $basketItem['quantity'];
+            }
+            $amount = round($amount, 2);
             $list[] = array(
                 'name' => $basketItem['articlename'],
                 'sku' => $basketItem['ordernumber'],
-                'price' => number_format($unitPrice, 2, '.', ','),
+                'price' => number_format($amount, 2, '.', ','),
                 'currency' => $currency,
-                'quantity' => (int)$basketItem['quantity'],
+                'quantity' => $quantity,
             );
         }
         return $list;
@@ -210,6 +218,28 @@ class Checkout
         );
     }
 
+    private function getTransactionData($basket, $user)
+    {
+        $total = $this->getTotalAmount($basket, $user);
+        $shipping = $this->getTotalShipment($basket, $user);
+
+        return array(array(
+            'amount' => array(
+                'currency' => $this->getCurrency(),
+                'total' => number_format($total, 2, '.', ','),
+                'details' => array(
+                    'shipping' => number_format($shipping, 2, '.', ','),
+                    'subtotal' => number_format($total - $shipping, 2, '.', ','),
+                    'tax' => number_format(0, 2, '.', ','),
+                )
+            ),
+            'item_list' => array(
+                'items' => $this->getItemList($basket, $user),
+                'shipping_address' => $this->getShippingAddress($user)
+            ),
+        ));
+    }
+
     /**
      * @param \Enlight_Controller_ActionEventArgs $args
      */
@@ -220,13 +250,39 @@ class Checkout
         $action = $args->getSubject();
         $request = $action->Request();
         $response = $action->Response();
+        $view = $action->View();
 
         // Secure dispatch
         if (!$request->isDispatched()
             || $response->isException()
             || $response->isRedirect()
-            || $request->getActionName() != 'confirm'
         ) {
+            return;
+        }
+
+        //Fix payment description
+        $newDescription = $this->bootstrap->Config()->get('paypalPlusDescription');
+        if (!empty($newDescription)) {
+            $payments = $view->sPayments;
+            if (!empty($payments)) {
+                foreach($payments as $key => $payment) {
+                    if($payment['name'] == 'paypal') {
+                        $payments[$key]['description'] = $newDescription;
+                        break;
+                    }
+                }
+                $view->sPayments = $payments;
+            }
+            $user = $view->sUserData;
+            if (!empty($user['additional']['payment']['name'])
+              && $user['additional']['payment']['name'] == 'paypal') {
+                $user['additional']['payment']['description'] = $newDescription;
+                $view->sUserData = $user;
+            }
+        }
+
+        // Check action
+        if ($request->getActionName() != 'confirm') {
             return;
         }
 
@@ -240,7 +296,6 @@ class Checkout
         }
 
         // Paypal plus conditions
-        $view = $action->View();
         $user = $view->sUserData;
         $countries = $this->bootstrap->Config()->get('paypalPlusCountries');
         if ($countries instanceof \Enlight_Config) {
@@ -291,7 +346,8 @@ class Checkout
 
         $profile = $this->getProfile();
 
-        //Payment
+        $this->restClient->setAuthToken();
+
         $uri = 'payments/payment';
         $params = array(
             'intent' => 'sale',
@@ -299,29 +355,15 @@ class Checkout
             'payer' => array(
                 'payment_method' => 'paypal'
             ),
-            'transactions' => array(array(
-                'amount' => array(
-                    'currency' => $this->getCurrency(),
-                    'total' => number_format($this->getTotalAmount($basket, $user), 2, '.', ','),
-                    'details' => array(
-                        "shipping" => number_format($this->getTotalShipment($basket, $user), 2, '.', ','),
-                        "subtotal" => number_format($this->getTotalSub($basket, $user), 2, '.', ','),
-                        "tax" => number_format(0, 2, '.', ','),
-                    )
-                ),
-                'item_list' => array(
-                    'items' => $this->getItemList($basket),
-                    'shipping_address' => $this->getShippingAddress($user)
-                ),
-            )),
+            'transactions' => $this->getTransactionData($basket, $user),
             'redirect_urls' => array(
                 'return_url' => $returnUrl,
                 'cancel_url' => $cancelUrl
             ),
         );
-        $this->restClient->setAuthToken();
         $payment = $this->restClient->create($uri, $params);
 
+        $view->PaypalPlusRequest = $params;
         $view->PaypalPlusResponse = $payment;
 
         if(!empty($payment['links'][1]['href'])) {
