@@ -75,12 +75,17 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     }
 
     /**
+     * Legacy wrapper for di container
+     *
      * @param string $name
      * @return mixed
      */
     public function get($name)
     {
         if(version_compare(Shopware::VERSION, '4.2.0', '<') && Shopware::VERSION != '___VERSION___') {
+            if($name == 'loader') {
+                return $this->Application()->Loader();
+            }
             $name = ucfirst($name);
             return $this->Application()->Bootstrap()->getResource($name);
         }
