@@ -1,0 +1,53 @@
+.payment_method .grid_15.method {
+    padding: 0 !important;
+}
+
+.payment_method .payment_radio {
+    display: none;
+}
+
+.payment_method .payment_row {
+    background: #FFFFFF;
+    width: 100%;
+    display: inline-block;
+    cursor: pointer;
+    padding: 21px 0;
+}
+
+.payment_method .payment_row.active,
+.payment_method .payment_row:hover {
+    background: #f9f9f9;
+}
+
+.payment_method .payment_row.active:after,
+.payment_method .payment_row.active::after {
+    content: '';
+    background-image: url("../images/checkmark.png");
+    background-repeat: no-repeat;
+    background-position: right;
+    position: absolute;
+    top: 0;
+    right: 8px;
+    height: 50px;
+    width: 50px;
+}
+
+.payment_method .payment_row.has_border {
+    border-bottom: 1px solid #dfdfdf;
+}
+
+.payment_method .payment_description {
+    display: inline-block;
+    font-weight: normal;
+    padding-right: 20px;
+    box-sizing: border-box;
+    line-height: 22px;
+}
+
+.payment_method .grid_15.method.no_border {
+    border: 0 none !important;
+}
+
+#ppplus {
+    margin-left: 40px;
+}
