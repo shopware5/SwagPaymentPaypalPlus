@@ -14,6 +14,7 @@ use \Shopware_Plugins_Frontend_SwagPaymentPaypal_Bootstrap as PaypalBootstrap;
 
 /**
  * Class Checkout
+ *
  * @package Shopware\SwagPaymentPaypal\Subscriber
  */
 class Checkout
@@ -100,6 +101,7 @@ class Checkout
             $unitPrice = round(str_replace(',', '.', $basketItem['price']), 2);
             $total += $unitPrice * $basketItem['quantity'];
         }
+
         return $total;
     }
 
@@ -116,11 +118,13 @@ class Checkout
             'postal_code' => $user['shippingaddress']['zipcode'],
             'country_code' => $user['additional']['countryShipping']['countryiso'],
         );
+
         return $address;
     }
 
     /**
      * @param $basket
+     * @param $user
      * @return array
      */
     protected function getItemList($basket, $user)
@@ -133,7 +137,7 @@ class Checkout
                 $quantity = 1;
             } else {
                 $amount = str_replace(',', '.', $basketItem['amount']);
-                $quantity = (int)$basketItem['quantity'];
+                $quantity = (int) $basketItem['quantity'];
                 $amount = $amount / $basketItem['quantity'];
             }
             $amount = round($amount, 2);
@@ -145,6 +149,7 @@ class Checkout
                 'quantity' => $quantity,
             );
         }
+
         return $list;
     }
 
@@ -158,8 +163,8 @@ class Checkout
             $uri = 'payment-experience/web-profiles';
             $this->restClient->setAuthToken();
             $profileList = $this->restClient->get($uri);
-            foreach($profileList as $entry) {
-                if($entry['name'] == $profile['name']) {
+            foreach ($profileList as $entry) {
+                if ($entry['name'] == $profile['name']) {
                     $this->restClient->update("$uri/{$entry['id']}", $profile);
                     $this->session['PaypalProfile'] = array(
                         'id' => $entry['id']
@@ -167,10 +172,11 @@ class Checkout
                     break;
                 }
             }
-            if(!isset($this->session['PaypalProfile'])) {
+            if (!isset($this->session['PaypalProfile'])) {
                 $this->session['PaypalProfile'] = $this->restClient->create($uri, $profile);
             }
         }
+
         return $this->session['PaypalProfile'];
     }
 
@@ -194,10 +200,13 @@ class Checkout
         $logoImage = 'string:{link file=' . var_export($logoImage, true) . ' fullPath}';
         $logoImage = $template->fetch($logoImage);
 
-        $notifyUrl = $router->assemble(array(
-            'controller' => 'payment_paypal', 'action' => 'notify',
-            'forceSecure' => true
-        ));
+        $notifyUrl = $router->assemble(
+            array(
+                'controller' => 'payment_paypal',
+                'action' => 'notify',
+                'forceSecure' => true
+            )
+        );
 
         return array(
             'name' => $profileName,
@@ -223,21 +232,23 @@ class Checkout
         $total = $this->getTotalAmount($basket, $user);
         $shipping = $this->getTotalShipment($basket, $user);
 
-        return array(array(
-            'amount' => array(
-                'currency' => $this->getCurrency(),
-                'total' => number_format($total, 2, '.', ','),
-                'details' => array(
-                    'shipping' => number_format($shipping, 2, '.', ','),
-                    'subtotal' => number_format($total - $shipping, 2, '.', ','),
-                    'tax' => number_format(0, 2, '.', ','),
-                )
-            ),
-            'item_list' => array(
-                'items' => $this->getItemList($basket, $user),
-                'shipping_address' => $this->getShippingAddress($user)
-            ),
-        ));
+        return array(
+            array(
+                'amount' => array(
+                    'currency' => $this->getCurrency(),
+                    'total' => number_format($total, 2, '.', ','),
+                    'details' => array(
+                        'shipping' => number_format($shipping, 2, '.', ','),
+                        'subtotal' => number_format($total - $shipping, 2, '.', ','),
+                        'tax' => number_format(0, 2, '.', ','),
+                    )
+                ),
+                'item_list' => array(
+                    'items' => $this->getItemList($basket, $user),
+                    'shipping_address' => $this->getShippingAddress($user)
+                ),
+            )
+        );
     }
 
     /**
@@ -253,10 +264,7 @@ class Checkout
         $view = $action->View();
 
         // Secure dispatch
-        if (!$request->isDispatched()
-            || $response->isException()
-            || $response->isRedirect()
-        ) {
+        if (!$request->isDispatched() || $response->isException() || $response->isRedirect()) {
             return;
         }
 
@@ -265,8 +273,8 @@ class Checkout
         if (!empty($newDescription)) {
             $payments = $view->sPayments;
             if (!empty($payments)) {
-                foreach($payments as $key => $payment) {
-                    if($payment['name'] == 'paypal') {
+                foreach ($payments as $key => $payment) {
+                    if ($payment['name'] == 'paypal') {
                         $payments[$key]['description'] = $newDescription;
                         break;
                     }
@@ -274,8 +282,7 @@ class Checkout
                 $view->sPayments = $payments;
             }
             $user = $view->sUserData;
-            if (!empty($user['additional']['payment']['name'])
-              && $user['additional']['payment']['name'] == 'paypal') {
+            if (!empty($user['additional']['payment']['name']) && $user['additional']['payment']['name'] == 'paypal') {
                 $user['additional']['payment']['description'] = $newDescription;
                 $view->sUserData = $user;
             }
@@ -286,12 +293,15 @@ class Checkout
             return;
         }
 
-        if($request->get('ppplusRedirect')) {
-            $action->redirect(array(
-                'controller' => 'checkout',
-                'action' => 'payment',
-                'sAGB' => 1
-            ));
+        if ($request->get('ppplusRedirect')) {
+            $action->redirect(
+                array(
+                    'controller' => 'checkout',
+                    'action' => 'payment',
+                    'sAGB' => 1
+                )
+            );
+
             return;
         }
 
@@ -301,12 +311,11 @@ class Checkout
         if ($countries instanceof \Enlight_Config) {
             $countries = $countries->toArray();
         } else {
-            $countries = (array)$countries;
+            $countries = (array) $countries;
         }
 
         if (!empty($this->session->PaypalResponse['TOKEN']) // PP-Express
             || empty($user['additional']['payment']['name'])
-            || $user['additional']['payment']['name'] != 'paypal'
             || !in_array($user['additional']['country']['id'], $countries)
         ) {
             return;
@@ -335,14 +344,21 @@ class Checkout
         $user = $view->sUserData;
         $basket = $view->sBasket;
 
-        $cancelUrl = $router->assemble(array(
-            'controller' => 'payment_paypal', 'action' => 'cancel',
-            'forceSecure' => true,
-        ));
-        $returnUrl = $router->assemble(array(
-            'controller' => 'payment_paypal', 'action' => 'return',
-            'forceSecure' => true,
-        ));
+        $cancelUrl = $router->assemble(
+            array(
+                'controller' => 'payment_paypal',
+                'action' => 'cancel',
+                'forceSecure' => true,
+            )
+        );
+
+        $returnUrl = $router->assemble(
+            array(
+                'controller' => 'payment_paypal',
+                'action' => 'return',
+                'forceSecure' => true,
+            )
+        );
 
         $profile = $this->getProfile();
 
@@ -366,7 +382,7 @@ class Checkout
         $view->PaypalPlusRequest = $params;
         $view->PaypalPlusResponse = $payment;
 
-        if(!empty($payment['links'][1]['href'])) {
+        if (!empty($payment['links'][1]['href'])) {
             $view->PaypalPlusApprovalUrl = $payment['links'][1]['href'];
             $view->PaypalPlusModeSandbox = $config->get('paypalSandbox');
             $view->PaypalLocale = $this->paypalBootstrap->getLocaleCode();
