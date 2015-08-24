@@ -137,7 +137,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             'multiSelect' => true
         ));
         $form->setElement('boolean', 'paypalHidePaymentSelection', array(
-            'label' => 'Zahlungsart-Auswahl im Bestellabschluss ausblenden',
+            'label' => 'Zahlungsart-Auswahl im Bestellabschluss ausblenden (Shopware 4)',
             'value' => true
         ));
         $form->setElement('text', 'paypalPlusDescription', array(
