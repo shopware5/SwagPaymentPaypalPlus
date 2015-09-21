@@ -1,4 +1,5 @@
 <?php
+
 /*
  * (c) shopware AG <info@shopware.com>
  *
@@ -64,7 +65,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $this->createMyForm();
         $this->createMyEvents();
 
-        if($version == '1.0.0') {
+        if ($version == '1.0.0') {
             $this->createMyAttributes();
         }
 
@@ -82,13 +83,15 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      */
     public function get($name)
     {
-        if(version_compare(Shopware::VERSION, '4.2.0', '<') && Shopware::VERSION != '___VERSION___') {
-            if($name == 'loader') {
+        if (version_compare(Shopware::VERSION, '4.2.0', '<') && Shopware::VERSION != '___VERSION___') {
+            if ($name == 'loader') {
                 return $this->Application()->Loader();
             }
             $name = ucfirst($name);
+
             return $this->Application()->Bootstrap()->getResource($name);
         }
+
         return parent::get($name);
     }
 
@@ -130,20 +133,40 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     {
         $form = $this->Form();
 
-        $form->setElement('select', 'paypalPlusCountries', array(
-            'label' => 'Länder bei denen „PayPal PLUS“ angezeigt wird',
-            'value' => array(2),
-            'store' => 'base.Country',
-            'multiSelect' => true
-        ));
-        $form->setElement('boolean', 'paypalHidePaymentSelection', array(
-            'label' => 'Zahlungsart-Auswahl im Bestellabschluss ausblenden (Shopware 4)',
-            'value' => true
-        ));
-        $form->setElement('text', 'paypalPlusDescription', array(
-            'label' => 'Zahlungsart-Bezeichnung überschreiben',
-            'value' => 'PayPal, Lastschrift oder Kreditkarte'
-        ));
+        $form->setElement(
+            'select',
+            'paypalPlusCountries',
+            array(
+                'label' => 'Länder bei denen „PayPal PLUS“ angezeigt wird',
+                'value' => array(2),
+                'store' => 'base.Country',
+                'multiSelect' => true
+            )
+        );
+        $form->setElement(
+            'boolean',
+            'paypalHidePaymentSelection',
+            array(
+                'label' => 'Zahlungsart-Auswahl im Bestellabschluss ausblenden (Shopware 4)',
+                'value' => true
+            )
+        );
+        $form->setElement(
+            'text',
+            'paypalPlusDescription',
+            array(
+                'label' => 'Zahlungsart-Bezeichnung überschreiben',
+                'value' => 'PayPal, Lastschrift oder Kreditkarte'
+            )
+        );
+        $form->setElement(
+            'text',
+            'paypalPlusAdditionalDescription',
+            array(
+                'label' => 'Zahlungsart-Beschreibung überschreiben',
+                'value' => ' Zahlung per Lastschrift oder Kreditkarte ist auch ohne PayPal-Konto möglich.'
+            )
+        );
     }
 
     private function createMyAttributes()
@@ -153,25 +176,32 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
 
         try {
             $modelManager->addAttribute(
-                's_core_paymentmeans_attributes', 'paypal',
-                'plus_media', 'VARCHAR(255)'
+                's_core_paymentmeans_attributes',
+                'paypal',
+                'plus_media',
+                'VARCHAR(255)'
             );
             $modelManager->addAttribute(
-                's_core_paymentmeans_attributes', 'paypal',
-                'plus_active', 'tinyint(1)'
+                's_core_paymentmeans_attributes',
+                'paypal',
+                'plus_active',
+                'tinyint(1)'
             );
-        } catch(Exception $e) { }
+        } catch (Exception $e) {
+        }
         try {
             $modelManager->addAttribute(
-                's_core_paymentmeans_attributes', 'paypal',
-                'plus_redirect', 'tinyint(1)'
+                's_core_paymentmeans_attributes',
+                'paypal',
+                'plus_redirect',
+                'tinyint(1)'
             );
-        } catch(Exception $e) { }
+        } catch (Exception $e) {
+        }
         try {
-            $modelManager->generateAttributeModels(array(
-                's_core_paymentmeans_attributes'
-            ));
-        } catch(Exception $e) { }
+            $modelManager->generateAttributeModels(array('s_core_paymentmeans_attributes'));
+        } catch (Exception $e) {
+        }
     }
 
     private function removeMyAttributes()
@@ -189,17 +219,14 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
                 'paypal',
                 'plus_active'
             );
-            $modelManager->generateAttributeModels(array(
-                's_core_paymentmeans_attributes'
-            ));
-        } catch(Exception $e) { }
+            $modelManager->generateAttributeModels(array('s_core_paymentmeans_attributes'));
+        } catch (Exception $e) {
+        }
     }
 
     public function registerMyTemplateDir()
     {
-        $this->get('template')->addTemplateDir(
-            __DIR__ . '/Views/', 'paypal_plus'
-        );
+        $this->get('template')->addTemplateDir(__DIR__ . '/Views/', 'paypal_plus');
     }
 
     /**
@@ -240,6 +267,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     public function onPaymentPaypalWebhook($args)
     {
         $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Webhook();
+
         return $subscriber->onPaymentPaypalWebhook($args);
     }
 
@@ -250,6 +278,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     public function onPaymentPaypalPlusRedirect($args)
     {
         $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PlusRedirect($this);
+
         return $subscriber->onPaypalPlusRedirect($args);
     }
 
