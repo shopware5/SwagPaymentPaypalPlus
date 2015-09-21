@@ -270,21 +270,24 @@ class Checkout
 
         //Fix payment description
         $newDescription = $this->bootstrap->Config()->get('paypalPlusDescription');
+        $newAdditionalDescription = $this->bootstrap->Config()->get('paypalPlusAdditionalDescription');
         if (!empty($newDescription)) {
-            $payments = $view->sPayments;
+            $payments = $view->getAssign('sPayments');
             if (!empty($payments)) {
                 foreach ($payments as $key => $payment) {
                     if ($payment['name'] == 'paypal') {
                         $payments[$key]['description'] = $newDescription;
+                        $payments[$key]['additionaldescription'] = $payment['additionaldescription'] . $newAdditionalDescription;
                         break;
                     }
                 }
-                $view->sPayments = $payments;
+                $view->assign('sPayments', $payments);
             }
-            $user = $view->sUserData;
+            $user = $view->getAssign('sUserData');
             if (!empty($user['additional']['payment']['name']) && $user['additional']['payment']['name'] == 'paypal') {
                 $user['additional']['payment']['description'] = $newDescription;
-                $view->sUserData = $user;
+                $user['additional']['payment']['additionaldescription'] = $newAdditionalDescription;
+                $view->assign('sUserData', $user);
             }
         }
 
@@ -306,7 +309,7 @@ class Checkout
         }
 
         // Paypal plus conditions
-        $user = $view->sUserData;
+        $user = $view->getAssign('sUserData');
         $countries = $this->bootstrap->Config()->get('paypalPlusCountries');
         if ($countries instanceof \Enlight_Config) {
             $countries = $countries->toArray();
@@ -325,7 +328,7 @@ class Checkout
         $shopContext = $this->bootstrap->get('shop');
         $templateVersion = $shopContext->getTemplate()->getVersion();
 
-        $this->bootstrap->registerMyTemplateDir($templateVersion >= 3);
+        $this->bootstrap->registerMyTemplateDir();
         $this->onPaypalPlus($action);
 
         if ($templateVersion < 3) { // emotion template
@@ -341,8 +344,8 @@ class Checkout
         $config = $this->config;
         $router = $action->Front()->Router();
         $view = $action->View();
-        $user = $view->sUserData;
-        $basket = $view->sBasket;
+        $user = $view->getAssign('sUserData');
+        $basket = $view->getAssign('sBasket');
 
         $cancelUrl = $router->assemble(
             array(
@@ -379,21 +382,19 @@ class Checkout
         );
         $payment = $this->restClient->create($uri, $params);
 
-        $view->PaypalPlusRequest = $params;
-        $view->PaypalPlusResponse = $payment;
+        $view->assign('PaypalPlusRequest', $params);
+        $view->assign('PaypalPlusResponse', $payment);
 
         if (!empty($payment['links'][1]['href'])) {
-            $view->PaypalPlusApprovalUrl = $payment['links'][1]['href'];
-            $view->PaypalPlusModeSandbox = $config->get('paypalSandbox');
-            $view->PaypalLocale = $this->paypalBootstrap->getLocaleCode();
+            $view->assign('PaypalPlusApprovalUrl', $payment['links'][1]['href']);
+            $view->assign('PaypalPlusModeSandbox', $config->get('paypalSandbox'));
+            $view->assign('PaypalLocale', $this->paypalBootstrap->getLocaleCode());
 
             $db = $this->bootstrap->get('db');
-            $sql = '
-              SELECT paymentmeanID as id, paypal_plus_media as media
-              FROM s_core_paymentmeans_attributes WHERE paypal_plus_active=1
-            ';
+            $sql = 'SELECT paymentmeanID AS id, paypal_plus_media AS media
+                    FROM s_core_paymentmeans_attributes WHERE paypal_plus_active = 1';
             $paymentMethods = $db->fetchAssoc($sql);
-            $view->PaypalPlusThirdPartyPaymentMethods = $paymentMethods;
+            $view->assign('PaypalPlusThirdPartyPaymentMethods', $paymentMethods);
             $this->session->PaypalPlusPayment = $payment['id'];
         }
     }
