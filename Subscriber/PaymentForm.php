@@ -12,17 +12,24 @@ use Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap as Bootstrap;
 
 /**
  * Class PaymentForm
+ *
  * @package Shopware\SwagPaymentPaypal\Subscriber
  */
 class PaymentForm
 {
     protected $bootstrap;
 
+    /**
+     * @param Bootstrap $bootstrap
+     */
     public function __construct(Bootstrap $bootstrap)
     {
         $this->bootstrap = $bootstrap;
     }
 
+    /**
+     * @return array
+     */
     public static function getSubscribedEvents()
     {
         return array(

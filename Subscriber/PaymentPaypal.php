@@ -8,10 +8,13 @@
 
 namespace Shopware\SwagPaymentPaypalPlus\Subscriber;
 
-use \Shopware_Components_Paypal_RestClient as RestClient;
+use Enlight_Components_Session_Namespace as Session;
+use Shopware_Components_Paypal_RestClient as RestClient;
+use Shopware_Plugins_Frontend_SwagPaymentPaypal_Bootstrap as PaypalBootstrap;
 
 /**
  * Class PaymentPaypal
+ *
  * @package Shopware\SwagPaymentPaypal\Subscriber
  */
 class PaymentPaypal
@@ -21,10 +24,21 @@ class PaymentPaypal
      */
     protected $restClient;
 
+    /**
+     * @var Session
+     */
     protected $session;
 
+    /**
+     * @var PaypalBootstrap
+     */
     protected $paypalBootstrap;
 
+    /**
+     * @param RestClient $restClient
+     * @param Session $session
+     * @param PaypalBootstrap $paypalBootstrap
+     */
     public function __construct(RestClient $restClient, $session, $paypalBootstrap)
     {
         $this->restClient = $restClient;
@@ -33,6 +47,9 @@ class PaymentPaypal
         $this->paypalBootstrap = $paypalBootstrap;
     }
 
+    /**
+     * @return array
+     */
     public static function getSubscribedEvents()
     {
         return array(
@@ -54,7 +71,7 @@ class PaymentPaypal
         }
 
         $paymentId = $this->session->PaypalPlusPayment;
-        if(empty($paymentId)) {
+        if (empty($paymentId)) {
             return;
         }
 
@@ -64,7 +81,7 @@ class PaymentPaypal
         $payment = $this->restClient->get($uri, array('payer_id' => $payerId));
         $statusId = $this->paypalBootstrap->Config()->get('paypalStatusId', 12);
 
-        if(!empty($payment['transactions'][0]['amount']['total'])) {
+        if (!empty($payment['transactions'][0]['amount']['total'])) {
             $ppAmount = floatval($payment['transactions'][0]['amount']['total']);
             $ppCurrency = floatval($payment['transactions'][0]['amount']['currency']);
         } else {
@@ -74,20 +91,23 @@ class PaymentPaypal
         $swAmount = $action->getAmount();
         $swCurrency = $action->getCurrencyShortName();
         if (abs($swAmount - $ppAmount) >= 0.01 || $ppCurrency != $swCurrency) {
-            $action->redirect(array(
-                'controller' => 'checkout',
-                'action' => 'confirm'
-            ));
+            $action->redirect(
+                array(
+                    'controller' => 'checkout',
+                    'action' => 'confirm'
+                )
+            );
+
             return;
         }
 
-        if($payment['state'] == 'created') {
+        if ($payment['state'] == 'created') {
             $uri = "payments/payment/$paymentId/execute";
             $payment = $this->restClient->create($uri, array('payer_id' => $payerId));
         }
 
-        if($payment['state'] == 'approved') {
-            if(!empty($payment['transactions'][0]['related_resources'][0]['sale']['id'])) {
+        if ($payment['state'] == 'approved') {
+            if (!empty($payment['transactions'][0]['related_resources'][0]['sale']['id'])) {
                 $transactionId = $payment['transactions'][0]['related_resources'][0]['sale']['id'];
             } else {
                 $transactionId = $payment['id'];
@@ -100,17 +120,17 @@ class PaymentPaypal
                     SELECT id, 2 FROM s_order WHERE ordernumber = ?
                     ON DUPLICATE KEY UPDATE swag_payal_express = 2
                 ';
-                $action->get('db')->query($sql, array(
-                    $orderNumber,
-                ));
+                $action->get('db')->query($sql, array($orderNumber,));
             } catch (\Exception $e) {
             }
 
-            $action->redirect(array(
-                'controller' => 'checkout',
-                'action' => 'finish',
-                'sUniqueID' => sha1($payment['id'])
-            ));
+            $action->redirect(
+                array(
+                    'controller' => 'checkout',
+                    'action' => 'finish',
+                    'sUniqueID' => sha1($payment['id'])
+                )
+            );
         }
     }
 }

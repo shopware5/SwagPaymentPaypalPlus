@@ -8,9 +8,10 @@
 
 namespace Shopware\SwagPaymentPaypalPlus\Subscriber;
 
-use \Enlight_Controller_Action as ControllerAction;
-use \Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap as Bootstrap;
-use \Shopware_Plugins_Frontend_SwagPaymentPaypal_Bootstrap as PaypalBootstrap;
+use Enlight_Components_Session_Namespace as Session;
+use Enlight_Controller_Action as ControllerAction;
+use Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap as Bootstrap;
+use Shopware_Plugins_Frontend_SwagPaymentPaypal_Bootstrap as PaypalBootstrap;
 
 /**
  * Class Checkout
@@ -29,7 +30,14 @@ class Checkout
      */
     protected $paypalBootstrap;
 
+    /**
+     * @var \Enlight_Config
+     */
     protected $config;
+
+    /**
+     * @var Session
+     */
     protected $session;
 
     /**
@@ -37,6 +45,9 @@ class Checkout
      */
     protected $restClient;
 
+    /**
+     * @param Bootstrap $bootstrap
+     */
     public function __construct(Bootstrap $bootstrap)
     {
         $this->bootstrap = $bootstrap;
@@ -47,6 +58,9 @@ class Checkout
         $this->restClient->setHeaders('PayPal-Partner-Attribution-Id', 'ShopwareAG_Cart_PayPalPlus_1017');
     }
 
+    /**
+     * @return array
+     */
     public static function getSubscribedEvents()
     {
         return array(
@@ -227,6 +241,11 @@ class Checkout
         );
     }
 
+    /**
+     * @param $basket
+     * @param $user
+     * @return array
+     */
     private function getTransactionData($basket, $user)
     {
         $total = $this->getTotalAmount($basket, $user);
@@ -269,30 +288,38 @@ class Checkout
         }
 
         //Fix payment description
-        $newDescription = $this->bootstrap->Config()->get('paypalPlusDescription');
-        $newAdditionalDescription = $this->bootstrap->Config()->get('paypalPlusAdditionalDescription');
-        if (!empty($newDescription)) {
-            $payments = $view->getAssign('sPayments');
-            if (!empty($payments)) {
-                foreach ($payments as $key => $payment) {
-                    if ($payment['name'] == 'paypal') {
-                        $payments[$key]['description'] = $newDescription;
-                        $payments[$key]['additionaldescription'] = $payment['additionaldescription'] . $newAdditionalDescription;
-                        break;
-                    }
+        $newDescription = $this->bootstrap->Config()->get('paypalPlusDescription', '');
+        $newAdditionalDescription = $this->bootstrap->Config()->get('paypalPlusAdditionalDescription', '');
+        $payments = $view->getAssign('sPayments');
+        if (!empty($payments)) {
+            foreach ($payments as $key => $payment) {
+                if ($payment['name'] == 'paypal') {
+                    $payments[$key]['description'] = $newDescription;
+                    $payments[$key]['additionaldescription'] = $payment['additionaldescription'] . $newAdditionalDescription;
+                    break;
                 }
-                $view->assign('sPayments', $payments);
             }
-            $user = $view->getAssign('sUserData');
-            if (!empty($user['additional']['payment']['name']) && $user['additional']['payment']['name'] == 'paypal') {
-                $user['additional']['payment']['description'] = $newDescription;
-                $user['additional']['payment']['additionaldescription'] = $newAdditionalDescription;
-                $view->assign('sUserData', $user);
-            }
+            $view->assign('sPayments', $payments);
+        }
+        $user = $view->getAssign('sUserData');
+
+        if (!empty($user['additional']['payment']['name']) && $user['additional']['payment']['name'] == 'paypal') {
+            $user['additional']['payment']['description'] = $newDescription;
+            $user['additional']['payment']['additionaldescription'] = $newAdditionalDescription;
+            $view->assign('sUserData', $user);
         }
 
+        $payPalPaymentId = $this->paypalBootstrap->getPayment()->getId();
+        $view->assign('PayPalPaymentId', $payPalPaymentId);
+
+        $allowedActions = array(
+            'confirm',
+            'shippingPayment',
+            'saveShippingPayment',
+        );
+
         // Check action
-        if ($request->getActionName() != 'confirm') {
+        if (!in_array($request->getActionName(), $allowedActions, true)) {
             return;
         }
 
@@ -327,6 +354,13 @@ class Checkout
         /** @var $shopContext \Shopware\Models\Shop\Shop */
         $shopContext = $this->bootstrap->get('shop');
         $templateVersion = $shopContext->getTemplate()->getVersion();
+
+        if ($this->session->offsetExists('PaypalCookieValue') && $request->getActionName() != 'shippingPayment') {
+            setcookie('paypalplus_session', $this->session->offsetGet('PaypalCookieValue'));
+            $view->assign('cameFromStep2', $this->session->offsetGet('PayPalPlusCameFromStep2'));
+            $this->session->offsetUnset('PaypalCookieValue');
+            $this->session->offsetUnset('PayPalPlusCameFromStep2');
+        }
 
         $this->bootstrap->registerMyTemplateDir();
         $this->onPaypalPlus($action);
@@ -381,9 +415,6 @@ class Checkout
             ),
         );
         $payment = $this->restClient->create($uri, $params);
-
-        $view->assign('PaypalPlusRequest', $params);
-        $view->assign('PaypalPlusResponse', $payment);
 
         if (!empty($payment['links'][1]['href'])) {
             $view->assign('PaypalPlusApprovalUrl', $payment['links'][1]['href']);

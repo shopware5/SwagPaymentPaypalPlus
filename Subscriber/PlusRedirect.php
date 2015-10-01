@@ -8,10 +8,11 @@
 
 namespace Shopware\SwagPaymentPaypalPlus\Subscriber;
 
-use \Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap as Bootstrap;
+use Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap as Bootstrap;
 
 /**
  * Class PlusRedirect
+ *
  * @package Shopware\SwagPaymentPaypal\Subscriber
  */
 class PlusRedirect
@@ -21,16 +22,21 @@ class PlusRedirect
      */
     protected $admin;
 
+    /**
+     * @param Bootstrap $bootstrap
+     */
     public function __construct(Bootstrap $bootstrap)
     {
         $this->admin = $bootstrap->get('modules')->getModule('Admin');
     }
 
+    /**
+     * @return array
+     */
     public static function getSubscribedEvents()
     {
         return array(
-            'Enlight_Controller_Action_Frontend_PaymentPaypal_PlusRedirect' => 'onPaypalPlusRedirect',
-            'Enlight_Controller_Action_PostDispatch_Frontend_Account' => 'onPostDispatchAccount'
+            'Enlight_Controller_Action_Frontend_PaymentPaypal_PlusRedirect' => 'onPaypalPlusRedirect'
         );
     }
 
@@ -42,36 +48,32 @@ class PlusRedirect
     {
         $action = $args->getSubject();
         $request = $action->Request();
-        $selectPaymentId = (int)$request->get('selectPaymentId');
+        $selectPaymentId = (int) $request->get('selectPaymentId');
         $request->setPost('sPayment', $selectPaymentId);
         $checkData = $this->admin->sValidateStep3();
         if (!empty($checkData['checkPayment']['sErrorMessages']) || empty($checkData['sProcessed'])) {
-            $action->forward('payment', 'account', 'frontend', array(
-                'ppplusRedirect' => 1
-            ));
+            $action->forward(
+                'payment',
+                'account',
+                'frontend',
+                array(
+                    'ppplusRedirect' => 1
+                )
+            );
+
             return true;
         } else {
             $this->admin->sUpdatePayment();
         }
-        $action->forward('confirm', 'checkout', 'frontend', array(
-            'ppplusRedirect' => 1
-        ));
-        return true;
-    }
+        $action->forward(
+            'confirm',
+            'checkout',
+            'frontend',
+            array(
+                'ppplusRedirect' => 1
+            )
+        );
 
-    /**
-     * @param \Enlight_Controller_ActionEventArgs $args
-     * @return bool
-     */
-    public function onPostDispatchAccount($args)
-    {
-        $action = $args->getSubject();
-        $request = $action->Request();
-        if($request->getParam('ppplusRedirect')) {
-            $values = $request->getPost();
-            $values['payment'] = $values['sPayment'];
-            $values['isPost'] = true;
-            $action->View()->sFormData = $values;
-        }
+        return true;
     }
 }

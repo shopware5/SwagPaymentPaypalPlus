@@ -10,10 +10,14 @@ namespace Shopware\SwagPaymentPaypalPlus\Subscriber;
 
 /**
  * Class PaymentPaypal
+ *
  * @package Shopware\SwagPaymentPaypal\Subscriber
  */
 class Webhook
 {
+    /**
+     * @return array
+     */
     public static function getSubscribedEvents()
     {
         return array(
@@ -32,7 +36,7 @@ class Webhook
         $payment = json_decode($payment, true);
         $transactionId = null;
 
-        if(empty($payment['resource']['id'])) {
+        if (empty($payment['resource']['id'])) {
             $message = "PayPal-Webhook";
             $context = array('request.body' => $payment);
             $action->get('pluginlogger')->error($message, $context);
@@ -40,9 +44,7 @@ class Webhook
             $transactionId = $payment['resource']['id'];
         }
 
-        $action->forward('notify', null, null, array(
-            'txn_id' => $transactionId
-        ));
+        $action->forward('notify', null, null, array('txn_id' => $transactionId));
 
         return true;
     }
