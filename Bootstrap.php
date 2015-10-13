@@ -30,10 +30,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $this->createMyForm();
         $this->createMyAttributes();
 
-        return array(
-            'success' => true,
-            'invalidateCache' => array('config', 'backend', 'proxy', 'template', 'theme')
-        );
+        return true;
     }
 
     /**
@@ -44,10 +41,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $this->secureUninstall();
         $this->removeMyAttributes();
 
-        return array(
-            'success' => true,
-            'invalidateCache' => array('config', 'backend', 'proxy', 'template', 'theme')
-        );
+        return true;
     }
 
     /**
@@ -73,7 +67,29 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
 
         return array(
             'success' => true,
-            'invalidateCache' => array('config', 'backend', 'proxy')
+            'invalidateCache' => $this->getInvalidateCacheArray()
+        );
+    }
+
+    /**
+     * @return array
+     */
+    public function enable()
+    {
+        return array(
+            'success' => true,
+            'invalidateCache' => $this->getInvalidateCacheArray()
+        );
+    }
+
+    /**
+     * @return array
+     */
+    public function disable()
+    {
+        return array(
+            'success' => true,
+            'invalidateCache' => $this->getInvalidateCacheArray()
         );
     }
 
@@ -354,5 +370,13 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             'version' => $this->getVersion(),
             'label' => $this->getLabel()
         );
+    }
+
+    /**
+     * @return array
+     */
+    private function getInvalidateCacheArray()
+    {
+        return array('config', 'backend', 'proxy', 'template', 'theme');
     }
 }
