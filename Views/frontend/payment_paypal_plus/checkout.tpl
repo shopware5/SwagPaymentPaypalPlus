@@ -1,5 +1,6 @@
+{* only loaded in Shopware 4 *}
 {block name="frontend_index_header_javascript" append}
-    {include file="frontend/payment_paypal_plus/javascript.tpl"}
+    {include file="frontend/payment_paypal_plus/js-payment_wall.tpl"}
 {/block}
 
 {block name="frontend_index_header_css_screen" append}

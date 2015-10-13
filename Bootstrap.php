@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 
+use Doctrine\Common\Collections\ArrayCollection;
+
 class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
     /**
@@ -124,6 +126,14 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             'Enlight_Controller_Action_PostDispatch_Frontend_Account',
             'onPostDispatchAccount'
         );
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_Frontend_PaymentPaypal_SaveCookieInSession',
+            'onSaveCookieInSession'
+        );
+        $this->subscribeEvent(
+            'Theme_Compiler_Collect_Plugin_Javascript',
+            'onCollectJavascript'
+        );
     }
 
     /**
@@ -163,7 +173,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             'text',
             'paypalPlusAdditionalDescription',
             array(
-                'label' => 'Zahlungsart-Beschreibung überschreiben',
+                'label' => 'Zahlungsart-Beschreibung ergänzen',
                 'value' => ' Zahlung per Lastschrift oder Kreditkarte ist auch ohne PayPal-Konto möglich.'
             )
         );
@@ -287,8 +297,28 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      */
     public function onPostDispatchAccount($args)
     {
-        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PlusRedirect($this);
+        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Account($this);
         $subscriber->onPostDispatchAccount($args);
+    }
+
+    /**
+     * @param Enlight_Controller_ActionEventArgs $args
+     * @return bool
+     */
+    public function onSaveCookieInSession(Enlight_Controller_ActionEventArgs $args)
+    {
+        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PaypalCookie($this);
+        return $subscriber->onSaveCookieInSession($args);
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function onCollectJavascript()
+    {
+        $jsPath = array(__DIR__ . '/Views/frontend/_public/src/js/paypal-hacks.js');
+
+        return new ArrayCollection($jsPath);
     }
 
     /**
