@@ -235,7 +235,6 @@ class Checkout
                 'address_override' => 1
             ),
             'flow_config' => array(
-                'landing_page_type' => 'billing',
                 'bank_txn_pending_url' => $notifyUrl
             ),
         );
@@ -275,7 +274,11 @@ class Checkout
      */
     public function onPostDispatchCheckout($args)
     {
-        unset($this->session->PaypalPlusPayment);
+        $cameFromStep2 = $this->session->offsetGet('PayPalPlusCameFromStep2');
+
+        if (!$cameFromStep2) {
+            unset($this->session->PaypalPlusPayment);
+        }
 
         $action = $args->getSubject();
         $request = $action->Request();
@@ -357,13 +360,15 @@ class Checkout
 
         if ($this->session->offsetExists('PaypalCookieValue') && $request->getActionName() != 'shippingPayment') {
             setcookie('paypalplus_session', $this->session->offsetGet('PaypalCookieValue'));
-            $view->assign('cameFromStep2', $this->session->offsetGet('PayPalPlusCameFromStep2'));
+            $view->assign('cameFromStep2', $cameFromStep2);
             $this->session->offsetUnset('PaypalCookieValue');
             $this->session->offsetUnset('PayPalPlusCameFromStep2');
         }
 
         $this->bootstrap->registerMyTemplateDir();
-        $this->onPaypalPlus($action);
+        if (!$cameFromStep2) {
+            $this->onPaypalPlus($action);
+        }
 
         if ($templateVersion < 3) { // emotion template
             $view->extendsTemplate('frontend/payment_paypal_plus/checkout.tpl');
