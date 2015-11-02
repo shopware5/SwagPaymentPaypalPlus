@@ -1,4 +1,4 @@
-(function ($) {
+(function ($, undefined) {
     /**
      * this override is necessary to pass an empty function to
      * $.loadingIndicator.close() to prevent a JS error in SW 5.0.x
@@ -41,29 +41,15 @@
      * sets the current payment method to paypal if clicked in the iframe
      */
     $(function () {
-        window.addEventListener('message', function (event) {
-            var data = JSON.parse(event.data),
-                $paypalPlusContainer = $('#ppplus'),
-                paypalPaymentId = $paypalPlusContainer.attr('data-paypal-payment-id'),
-                paypalSandbox = $paypalPlusContainer.attr('data-paypal-sandbox'),
-                payPalCheckBox = $("#payment_mean" + paypalPaymentId),
-                originUrl = 'https://www.paypal.com',
-                isConfirmAction = $('.is--act-confirm').length > 0;
+        var isClick = function () {
+                return events.indexOf('loaded') == -1;
+            },
+            handleEvents = function () {
+                var $paypalPlusContainer = $('#ppplus'),
+                    paypalPaymentId = $paypalPlusContainer.attr('data-paypal-payment-id'),
+                    payPalCheckBox = $("#payment_mean" + paypalPaymentId);
 
-            if (isConfirmAction) {
-                return false;
-            }
-
-            if (paypalSandbox == 'true') {
-                originUrl = 'https://www.sandbox.paypal.com';
-            }
-
-            if (event.origin !== originUrl) {
-                return false;
-            }
-
-            if (payPalCheckBox.prop('checked')) {
-                if (data.action == 'resizeHeightOfTheIframe') {
+                if (payPalCheckBox.prop('checked')) {
                     $.ajax({
                         type: 'POST',
                         url: $paypalPlusContainer.attr('data-paypal-cookie-url'),
@@ -72,15 +58,39 @@
                             cameFromStep2: true
                         }
                     });
-                    return false;
+                } else if (isClick()) {
+                    payPalCheckBox.prop('checked', true);
+                    $('*[data-ajax-shipping-payment="true"]').data('plugin_swShippingPayment').onInputChanged();
                 }
-                return false;
-            } else if (data.action == 'enableContinueButton') {
-                payPalCheckBox.prop('checked', true);
-                $('*[data-ajax-shipping-payment="true"]').data('plugin_swShippingPayment').onInputChanged();
-            } else {
+                events = [];
+            },
+            events = [],
+            timeOut;
+
+        window.addEventListener('message', function (event) {
+            var data = JSON.parse(event.data),
+                $paypalPlusContainer = $('#ppplus'),
+                paypalSandbox = $paypalPlusContainer.attr('data-paypal-sandbox'),
+                originUrl = paypalSandbox == 'true' ? "https://www.sandbox.paypal.com" : 'https://www.paypal.com',
+                isConfirmAction = $('.is--act-confirm').length > 0;
+
+            if (isConfirmAction) {
                 return false;
             }
+
+            if (event.origin !== originUrl) {
+                return false;
+            }
+
+            if (timeOut !== undefined) {
+                clearTimeout(timeOut);
+            }
+
+            events.push(data.action);
+            //wait until all events are fired
+            timeOut = setTimeout(function () {
+                handleEvents();
+            }, 500);
         }, false);
     });
 })(jQuery);
