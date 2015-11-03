@@ -366,7 +366,7 @@ class Checkout
         }
 
         $this->bootstrap->registerMyTemplateDir();
-        if (!$cameFromStep2) {
+        if ($request->getActionName() == 'shippingPayment' || !$cameFromStep2) {
             $this->onPaypalPlus($action);
         }
 
