@@ -207,6 +207,9 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
                 'plus_media',
                 'VARCHAR(255)'
             );
+        } catch (Exception $e) {
+        }
+        try {
             $modelManager->addAttribute(
                 's_core_paymentmeans_attributes',
                 'paypal',
@@ -240,11 +243,25 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
                 'paypal',
                 'plus_media'
             );
+        } catch (Exception $e) {
+        }
+        try {
             $modelManager->removeAttribute(
                 's_core_paymentmeans_attributes',
                 'paypal',
                 'plus_active'
             );
+        } catch (Exception $e) {
+        }
+        try {
+            $modelManager->removeAttribute(
+                's_core_paymentmeans_attributes',
+                'paypal',
+                'plus_redirect'
+            );
+        } catch (Exception $e) {
+        }
+        try {
             $modelManager->generateAttributeModels(array('s_core_paymentmeans_attributes'));
         } catch (Exception $e) {
         }
