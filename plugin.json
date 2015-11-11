@@ -12,7 +12,7 @@
 
     "changelog": {
         "de": {
-            "1.0.7": "PT-3886 - Bugfix: Beschreibung der Zahlart; PT-3887 - Bugfix: Verbesserung der Usability in Shopware 5;",
+            "1.0.7": "PT-3886 - Bugfix: Beschreibung der Zahlart; PT-3887, PT-4184 - Bugfix: Verbesserung der Usability in Shopware 5;",
             "1.0.6": "PT-3638, PT-3639, PT-3640 - Bugfix: Anpassungen Shopware 5 Responsive Theme;",
             "1.0.5": "PT-3216 - Bugfix: Unterstützung für Shopware 4.1.x; PT-3277 - Bugfix: Verbesserung der Bedienbarkeit mit Shopware 4; PT-3435 - Bugfix: Weiterleitung zu PayPal unter Shopware 5.0.2 korrigiert;",
             "1.0.4": "PT-3077 - Bugfix: Bestellungen im Netto-Modus; PT-3077 - Feature: Zahlungsart-Bezeichnung überschreiben",
@@ -22,7 +22,7 @@
             "1.0.0": "PT-2396 - Erstveröffentlichung"
         },
         "en": {
-            "1.0.7": "PT-3886 - Bugfix: Description of payment method; PT-3887 - Bugfix: Usability improvement in Shopware 5;",
+            "1.0.7": "PT-3886 - Bugfix: Description of payment method; PT-3887, PT-4184 - Bugfix: Usability improvement in Shopware 5;",
             "1.0.0": "PT-2396 - First release"
         }
     },
