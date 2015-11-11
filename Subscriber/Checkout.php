@@ -312,7 +312,7 @@ class Checkout
             $view->assign('sUserData', $user);
         }
 
-        if (function_exists($this->paypalBootstrap->getPayment())) {
+        if (method_exists($this->paypalBootstrap, 'getPayment')) {
             $payPalPaymentId = $this->paypalBootstrap->getPayment()->getId();
         } else {
             //fallback for SwagPaymentPaypal verion < 3.3.4
