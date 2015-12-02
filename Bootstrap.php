@@ -71,6 +71,12 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $this->createMyForm();
         $this->createMyEvents();
 
+        $documentInstaller = new DocumentInstaller($this);
+        $documentInstaller->installDocuments();
+
+        $tableInstaller = new AdditionalTableInstaller($this);
+        $tableInstaller->installAdditionalDatabaseTable();
+
         if ($version == '1.0.0') {
             $this->createMyAttributes();
         }
