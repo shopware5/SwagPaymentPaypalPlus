@@ -8,6 +8,10 @@
  */
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Shopware\SwagPaymentPaypalPlus\Components\AdditionalTableInstaller;
+use Shopware\SwagPaymentPaypalPlus\Components\DocumentInstaller;
+use Shopware\SwagPaymentPaypalPlus\Components\InvoiceContentProvider;
+use Shopware\SwagPaymentPaypalPlus\Components\PaymentInstructionProvider;
 
 class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
@@ -30,6 +34,12 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $this->createMyForm();
         $this->createMyAttributes();
 
+        $documentInstaller = new DocumentInstaller($this);
+        $documentInstaller->installDocuments();
+
+        $tableInstaller = new AdditionalTableInstaller($this);
+        $tableInstaller->installAdditionalDatabaseTable();
+        
         return true;
     }
 
@@ -149,6 +159,27 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $this->subscribeEvent(
             'Theme_Compiler_Collect_Plugin_Javascript',
             'onCollectJavascript'
+        );
+        $this->subscribeEvent(
+            'Shopware_Components_Document::assignValues::after',
+            'onBeforeRenderDocument'
+        );
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_PostDispatchSecure_Backend_Config',
+            'onPostDispatchConfig'
+        );
+        $this->subscribeEvent(
+            'Enlight_Bootstrap_InitResource_payment_instruction_provider',
+            'intiPaymentInstructionProvider'
+        );
+
+        $this->subscribeEvent(
+            'Enlight_Bootstrap_InitResource_invoice_content_provider',
+            'intiInvoiceContentProvider'
+        );
+        $this->subscribeEvent(
+            'Theme_Compiler_Collect_Plugin_Less',
+            'addLessFiles'
         );
     }
 
@@ -273,6 +304,23 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     }
 
     /**
+     * Provide the file collection for less
+     *
+     * @param Enlight_Event_EventArgs $args
+     * @return \Doctrine\Common\Collections\ArrayCollection
+     */
+    public function addLessFiles(Enlight_Event_EventArgs $args)
+    {
+        $less = new \Shopware\Components\Theme\LessDefinition(
+            array(),
+            array(__DIR__ . '/Views/frontend/_public/src/less/all.less'),
+            __DIR__
+        );
+
+        return new Doctrine\Common\Collections\ArrayCollection(array($less));
+    }
+
+    /**
      * @param $args
      */
     public function onPostDispatchCheckout($args)
@@ -342,6 +390,75 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     {
         $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PaypalCookie($this);
         return $subscriber->onSaveCookieInSession($args);
+    }
+
+    /**
+     * @param Enlight_Event_EventArgs $arguments
+     */
+    public function onPostDispatchConfig(Enlight_Event_EventArgs $arguments)
+    {
+        /* @var Enlight_View_Default $view */
+        $view = $arguments->getSubject()->View();
+
+        //if the controller action name equals "load" we have to load all application components.
+        if ($arguments->getRequest()->getActionName() === 'load') {
+            $view->addTemplateDir($this->Path() . 'Views/');
+            $view->extendsTemplate('backend/config/view/form/document_paypal_plus.js');
+        }
+    }
+    
+    public function onBeforeRenderDocument(Enlight_Hook_HookArgs $args)
+    {
+        /* @var Shopware_Components_Document $document */
+        $document = $args->getSubject();
+
+        if($document->_order->payment['name'] != 'paypal') {
+            return;
+        }
+
+        /* @var Smarty_Data $view */
+        $view = $document->_view;
+
+        $documentData = $view->getTemplateVars('Document');
+        $orderData = $view->getTemplateVars('Order');
+        $containers = $view->getTemplateVars('Containers');
+
+        if (!isset($containers['Paypal_Content_Info'])) {
+            return;
+        }
+
+        /** @var InvoiceContentProvider $invoiceContentProvider */
+        $invoiceContentProvider = $this->get('invoice_content_provider');
+        $rawFooter = $invoiceContentProvider->getBillsafeInvoiceContentInfo($containers, $orderData);
+
+        $containers['Paypal_Content_Info']['value'] = $rawFooter['value'];
+
+        $transactionId = $orderData['_order']['transactionID'];
+        $orderNumber = $orderData['_order']['ordernumber'];
+
+        /** @var PaymentInstructionProvider $paymentInstructionProvider */
+        $paymentInstructionProvider = $this->get('payment_instruction_provider');
+        $paymentInstruction = $paymentInstructionProvider->getInstructionsByOrdernumberAndTransactionId($orderNumber, $transactionId);
+
+        $document->_template->addTemplateDir(dirname(__FILE__) . '/Views/');
+        $document->_template->assign('instruction', (array)$paymentInstruction);
+
+        $containerData = $view->getTemplateVars('Containers');
+        $containerData['Footer'] = $containerData['Paypal_Footer'];
+        $containerData['Content_Info'] = $containerData['Paypal_Content_Info'];
+        $containerData['Content_Info']['value'] = $document->_template->fetch('string:' . $containerData['Content_Info']['value']);
+        $containerData['Content_Info']['style'] = '}' . $containerData['Content_Info']['style'] . ' #info {';
+        $view->assign('Containers', $containerData);
+    }
+
+    public function intiPaymentInstructionProvider()
+    {
+        return new PaymentInstructionProvider(Shopware()->Container());
+    }
+
+    public function intiInvoiceContentProvider()
+    {
+        return new InvoiceContentProvider(Shopware()->Container());
     }
 
     /**

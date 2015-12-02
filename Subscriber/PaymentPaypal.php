@@ -9,6 +9,7 @@
 namespace Shopware\SwagPaymentPaypalPlus\Subscriber;
 
 use Enlight_Components_Session_Namespace as Session;
+use Shopware\SwagPaymentPaypalPlus\Components\PaymentInstructionProvider;
 use Shopware_Components_Paypal_RestClient as RestClient;
 use Shopware_Plugins_Frontend_SwagPaymentPaypal_Bootstrap as PaypalBootstrap;
 
@@ -63,6 +64,7 @@ class PaymentPaypal
     public function onPreDispatchPaymentPaypal($args)
     {
         $request = $args->getRequest();
+        
         /** @var \Shopware_Controllers_Frontend_PaymentPaypal $action */
         $action = $args->getSubject();
 
@@ -79,6 +81,7 @@ class PaymentPaypal
         $this->restClient->setAuthToken();
         $uri = 'payments/payment/' . $paymentId;
         $payment = $this->restClient->get($uri, array('payer_id' => $payerId));
+
         $statusId = $this->paypalBootstrap->Config()->get('paypalStatusId', 12);
 
         if (!empty($payment['transactions'][0]['amount']['total'])) {
@@ -88,6 +91,7 @@ class PaymentPaypal
             $ppAmount = 0;
             $ppCurrency = '';
         }
+
         $swAmount = $action->getAmount();
         $swCurrency = $action->getCurrencyShortName();
         if (abs($swAmount - $ppAmount) >= 0.01 || $ppCurrency != $swCurrency) {
@@ -107,12 +111,18 @@ class PaymentPaypal
         }
 
         if ($payment['state'] == 'approved') {
+
             if (!empty($payment['transactions'][0]['related_resources'][0]['sale']['id'])) {
                 $transactionId = $payment['transactions'][0]['related_resources'][0]['sale']['id'];
             } else {
                 $transactionId = $payment['id'];
             }
+
             $orderNumber = $action->saveOrder($transactionId, sha1($payment['id']), $statusId);
+
+            if($payment['payment_instruction']){
+                $this->saveInvoiceInstructions($orderNumber, $payment);
+            }
 
             try {
                 $sql = '
@@ -132,5 +142,15 @@ class PaymentPaypal
                 )
             );
         }
+    }
+
+    private function saveInvoiceInstructions($orderNumber, $payment)
+    {
+        /**
+         * SAVE THE INVOICE-INSTRUCTIONS FROM PAYPAL
+         */
+        /** @var PaymentInstructionProvider $paymentInstructionProvider */
+        $paymentInstructionProvider = $this->paypalBootstrap->get('payment_instruction_provider');
+        $paymentInstructionProvider->saveInstructionByOrdernumber($orderNumber, $payment['payment_instruction']);
     }
 }
