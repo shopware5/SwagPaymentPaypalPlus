@@ -435,7 +435,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
 
         /** @var InvoiceContentProvider $invoiceContentProvider */
         $invoiceContentProvider = $this->get('invoice_content_provider');
-        $rawFooter = $invoiceContentProvider->getBillsafeInvoiceContentInfo($containers, $orderData);
+        $rawFooter = $invoiceContentProvider->getPayPalInvoiceContentInfo($containers, $orderData);
 
         $containers['Paypal_Content_Info']['value'] = $rawFooter['value'];
 

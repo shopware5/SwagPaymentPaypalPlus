@@ -45,9 +45,9 @@ class InvoiceContentProvider
      * @return mixed
      * @throws Exception
      */
-    public function getBillsafeInvoiceContentInfo($containers, $orderData)
+    public function getPayPalInvoiceContentInfo($containers, $orderData)
     {
-        $footer = $containers['Billsafe_Content_Info'];
+        $footer = $containers['Paypal_Content_Info'];
 
         $translationComp = new Shopware_Components_Translation();
         $translation = $translationComp->read($orderData['_order']['language'], 'documents', 1);
