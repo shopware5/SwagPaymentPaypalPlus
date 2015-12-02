@@ -2,9 +2,9 @@
     clear: both;
 }
 
-.ppp-instruction-detail-container {
+.content--instruction-details {
 
-    table {
+    .instruction-details--table {
 
         tr {
 
@@ -19,14 +19,14 @@
     }
 }
 
-.finish-ppp {
+.paypal-plus--finish-main {
     .unitize(padding-top, 30);
     .unitize-margin(0, 0, 20, 0);
     clear: both;
 
-    .ppp-header {
+    .finish-main--ppp-header {
 
-        .ppp-left-td {
+        .ppp-header--left-td {
             width:45%;
             text-align: right;
 
@@ -35,33 +35,33 @@
             }
         }
 
-        .ppp-center-td {
+        .ppp-header--center-td {
             width: auto;
-            min-width: 100px;
+            .unitize(min-width, 100);
         }
 
-        .ppp-right-td {
+        .ppp-header--right-td {
             width: 45%;
         }
     }
 
-    .ppp-content {
-        padding-bottom: 10px;
+    .finish-main--content {
+        .unitize(padding-bottom, 10);
 
-        .ppp-instruction {
+        .content--instruction {
             text-align: center;
 
-            p {
+            .instruction--paragraph {
                 font-weight: bolder;
             }
         }
 
-        .ppp-instruction-detail-container {
+        .content--instruction-details {
             .unitize(padding-bottom, 20);
 
-            table {
+            .instruction-details--table {
                 margin: 0 auto;
-                width: 50%;
+                width: 100%;
 
                 tr {
                     display: flex;
@@ -80,17 +80,17 @@
         }
     }
 
-    .ppp-footer {
+    .finish-main--ppp-footer {
         .unitize-padding(0, 30, 0,30);
         text-align: center;
     }
 }
 
 @media screen and (min-width: @phoneLandscapeViewportWidth) {
+    .paypal-plus--finish-main .finish-main--content .content--instruction-details {
 
-    .ppp-instruction-detail-container {
-
-        table {
+        .instruction-details--table {
+            width: 80%;
 
             tr {
 
@@ -103,5 +103,11 @@
                 }
             }
         }
+    }
+}
+
+@media screen and (min-width: @tabletLandscapeViewportWidth) {
+    .paypal-plus--finish-main .finish-main--content .content--instruction-details .instruction-details--table {
+            width: 50%;
     }
 }
