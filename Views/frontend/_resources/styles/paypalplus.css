@@ -51,3 +51,90 @@
 #ppplus {
     margin-left: 40px;
 }
+
+.finish-ppp {
+    border: 1px solid #DEDFE1;
+    margin-bottom: 10px;
+}
+
+.finish-ppp table {
+    border: none;
+}
+
+#center > div.finish-ppp.block.panel.has--border.is--rounded > div.ppp-header > table#veryImportante {
+    margin: 20px auto;
+    width:350px !important;
+}
+
+#center > div.finish-ppp.block.panel.has--border.is--rounded > div.ppp-header > table#veryImportante tr {
+    border: none !important;
+}
+
+#center > div.finish-ppp.block.panel.has--border.is--rounded > div.ppp-header > table#veryImportante .ppp-left-td h3 {
+    margin: 0;
+    padding: 0;
+    font-weight: bolder;
+    font-size: 20px;
+}
+
+#center > div.finish-ppp.block.panel.has--border.is--rounded > div.ppp-header > table#veryImportante .ppp-left-td {
+    width: 33.333%;
+    margin: 0;
+    padding: 0 10px 0 0;
+    text-align: right;
+    vertical-align: middle;
+    border: none !important;
+}
+
+#center > div.finish-ppp.block.panel.has--border.is--rounded > div.ppp-header > table#veryImportante .ppp-center-td{
+    width: 33.333%;
+    border: none !important;
+}
+
+#center > div.finish-ppp.block.panel.has--border.is--rounded > div.ppp-header > table#veryImportante .ppp-right-td {
+    margin: 0;
+    padding: 0 0 0 10px;
+    width: 33.333%;
+    vertical-align: middle;
+    border: none !important;
+}
+
+.finish-ppp .ppp-header table tr,
+.finish-ppp .ppp-header table tr td {
+    padding: 0px;
+    margin: 0px;
+}
+
+.finish-ppp .ppp-header table tr td h3 {
+    margin-top: 10px;
+}
+
+.finish-ppp .ppp-content .ppp-instruction {
+    text-align: center;
+    font-weight: bolder;
+}
+
+.finish-ppp .ppp-content .ppp-instruction-detail-container {
+    width:350px;
+    margin: 0 auto;
+}
+
+.finish-ppp .ppp-content .ppp-instruction-detail-container table,
+.finish-ppp .ppp-content .ppp-instruction-detail-container table tr {
+    width: 100%;
+}
+
+.finish-ppp .ppp-content .ppp-instruction-detail-container table tr .bolder {
+    font-weight: bolder;
+}
+
+.finish-ppp .ppp-content .ppp-instruction-detail-container table tr td {
+    width: 50%;
+    border-top: 1px solid;
+}
+
+.finish-ppp .ppp-footer {
+    margin: 0px 20px 0px 20px;
+    text-align: center;
+
+}

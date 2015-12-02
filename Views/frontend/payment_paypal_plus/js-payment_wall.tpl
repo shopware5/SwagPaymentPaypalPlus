@@ -99,7 +99,8 @@
                 {if !$payment@last}, {/if}
                 {/if}
                 {/foreach}
-                ]
+                ],
+                showPuiOnSandbox: true
             });
         }
 

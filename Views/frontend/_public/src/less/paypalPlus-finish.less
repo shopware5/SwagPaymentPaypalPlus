@@ -1,0 +1,113 @@
+.finish--info {
+    clear: both;
+}
+
+.content--instruction-details {
+
+    .instruction-details--table {
+
+        tr {
+
+            td {
+                font-size: x-small;
+            }
+
+            td.bolder {
+                font-size: x-small;
+            }
+        }
+    }
+}
+
+.paypal-plus--finish-main {
+    .unitize(padding-top, 30);
+    .unitize-margin(0, 0, 20, 0);
+    clear: both;
+
+    .finish-main--ppp-header {
+
+        .ppp-header--left-td {
+            width:45%;
+            text-align: right;
+
+            h3 {
+                .unitize(margin-top, 10);
+            }
+        }
+
+        .ppp-header--center-td {
+            width: auto;
+            .unitize(min-width, 100);
+        }
+
+        .ppp-header--right-td {
+            width: 45%;
+        }
+    }
+
+    .finish-main--content {
+        .unitize(padding-bottom, 10);
+
+        .content--instruction {
+            text-align: center;
+
+            .instruction--paragraph {
+                font-weight: bolder;
+            }
+        }
+
+        .content--instruction-details {
+            .unitize(padding-bottom, 20);
+
+            .instruction-details--table {
+                margin: 0 auto;
+                width: 100%;
+
+                tr {
+                    display: flex;
+                    border-top: 1px solid @border-color;
+
+                    td {
+                        background: none;
+                        width: 50%;
+                    }
+
+                    td.bolder {
+                        font-weight: bolder;
+                    }
+                }
+            }
+        }
+    }
+
+    .finish-main--ppp-footer {
+        .unitize-padding(0, 30, 0,30);
+        text-align: center;
+    }
+}
+
+@media screen and (min-width: @phoneLandscapeViewportWidth) {
+    .paypal-plus--finish-main .finish-main--content .content--instruction-details {
+
+        .instruction-details--table {
+            width: 80%;
+
+            tr {
+
+                td {
+                    font-size: inherit;
+                }
+
+                td.bolder {
+                    font-size: inherit;
+                }
+            }
+        }
+    }
+}
+
+@media screen and (min-width: @tabletLandscapeViewportWidth) {
+    .paypal-plus--finish-main .finish-main--content .content--instruction-details .instruction-details--table {
+            width: 50%;
+    }
+}

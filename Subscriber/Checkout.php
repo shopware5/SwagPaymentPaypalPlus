@@ -10,6 +10,7 @@ namespace Shopware\SwagPaymentPaypalPlus\Subscriber;
 
 use Enlight_Components_Session_Namespace as Session;
 use Enlight_Controller_Action as ControllerAction;
+use Shopware\SwagPaymentPaypalPlus\Components\PaymentInstructionProvider;
 use Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap as Bootstrap;
 use Shopware_Plugins_Frontend_SwagPaymentPaypal_Bootstrap as PaypalBootstrap;
 
@@ -290,6 +291,14 @@ class Checkout
             return;
         }
 
+        /** @var $shopContext \Shopware\Models\Shop\Shop */
+        $shopContext = $this->bootstrap->get('shop');
+        $templateVersion = $shopContext->getTemplate()->getVersion();
+
+        if($request->getActionName() == 'finish') {
+            $this->addInvoiceInstructionsToView($view, $templateVersion);
+        }
+
         //Fix payment description
         $newDescription = $this->bootstrap->Config()->get('paypalPlusDescription', '');
         $newAdditionalDescription = $this->bootstrap->Config()->get('paypalPlusAdditionalDescription', '');
@@ -358,10 +367,6 @@ class Checkout
         ) {
             return;
         }
-
-        /** @var $shopContext \Shopware\Models\Shop\Shop */
-        $shopContext = $this->bootstrap->get('shop');
-        $templateVersion = $shopContext->getTemplate()->getVersion();
 
         if ($this->session->offsetExists('PaypalCookieValue') && $request->getActionName() != 'shippingPayment') {
             setcookie('paypalplus_session', $this->session->offsetGet('PaypalCookieValue'));
@@ -437,6 +442,26 @@ class Checkout
             $paymentMethods = $db->fetchAssoc($sql);
             $view->assign('PaypalPlusThirdPartyPaymentMethods', $paymentMethods);
             $this->session->PaypalPlusPayment = $payment['id'];
+        }
+    }
+
+    /**
+     * @param $view
+     * @param $templateVersion
+     */
+    private function addInvoiceInstructionsToView($view, $templateVersion)
+    {
+        /** @var PaymentInstructionProvider $paymentInstructioProvider */
+        $paymentInstructionProvider = $this->bootstrap->get('payment_instruction_provider');
+        $orderData = $view->getAssign();
+
+        $instruction = $paymentInstructionProvider->getInstructionsByOrdernumberAndTransactionId($orderData['sOrderNumber'], $orderData['sTransactionumber']);
+        $view->assign('instruction', $instruction);
+
+        $this->bootstrap->registerMyTemplateDir();
+
+        if ($templateVersion < 3) {
+            $view->extendsTemplate('frontend/checkout/emotion/finish.tpl');
         }
     }
 }
