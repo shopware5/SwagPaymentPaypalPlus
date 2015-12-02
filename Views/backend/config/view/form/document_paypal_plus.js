@@ -26,9 +26,6 @@ Ext.define('Shopware.apps.Config.view.form.DocumentPaypalPlus', {
     initComponent: function() {
         var me = this;
         me.callOverridden(arguments);
-        // TODO: Remove after Debug
-        console.info('initComp');
-        // TODO: END
     },
 
     /**
