@@ -29,27 +29,37 @@ use Shopware\Components\DependencyInjection\Container;
 
 class PaymentInstructionProvider
 {
-    /** @var Container  */
+    /** @var Container */
     private $container;
 
+    /**
+     * PaymentInstructionProvider constructor.
+     *
+     * @param Container $container
+     */
     public function __construct(Container $container)
     {
         $this->container = $container;
     }
 
-    public function getInstructionsByOrdernumberAndTransactionId($ordernumber, $transactionId)
+    /**
+     * @param string $orderNumber
+     * @param string $transactionId
+     * @return array
+     */
+    public function getInstructionsByOrderNumberAndTransactionId($orderNumber, $transactionId)
     {
-        $result = $this->container->get('dbal_connection')->createQueryBuilder()
-            ->select('*')
-            ->from('s_payment_paypal_plus_payment_instruction', 'instuctions')
-            ->where('ordernumber = :ordernumber')
-            ->andWhere('reference_number = :referenceNumber')
-            ->setParameter(':ordernumber', $ordernumber)
-            ->setParameter(':referenceNumber', $transactionId)
-            ->execute()
-            ->fetch(\PDO::FETCH_ASSOC);
+        $sql = "SELECT *
+                FROM s_payment_paypal_plus_payment_instruction
+                WHERE ordernumber = :orderNumber
+                  AND reference_number = :referenceNumber;";
 
-        if($result) {
+        $result = $this->container->get('db')->fetchRow(
+            $sql,
+            array('orderNumber' => $orderNumber, 'referenceNumber' => $transactionId)
+        );
+
+        if ($result) {
             $links = json_decode($result['links'], true);
             $result['links'] = $links;
         }
@@ -57,25 +67,32 @@ class PaymentInstructionProvider
         return $result;
     }
 
-    public function saveInstructionByOrdernumber($ordernumber, array $instructions)
+    /**
+     * @param string $orderNumber
+     * @param array $instructions
+     */
+    public function saveInstructionByOrderNumber($orderNumber, array $instructions)
     {
         $parameter = array(
-            'ordernumber'                           => $ordernumber,
-            'reference_number'                      => $instructions['reference_number'],
-            'instruction_type'                      => $instructions['instruction_type'],
-            'bank_name'                             => $instructions['recipient_banking_instruction']['bank_name'],
-            'account_holder_name'                   => $instructions['recipient_banking_instruction']['account_holder_name'],
-            'international_bank_account_number'     => $instructions['recipient_banking_instruction']['international_bank_account_number'],
-            'bank_identifier_code'                  => $instructions['recipient_banking_instruction']['bank_identifier_code'],
-            'amount_value'                          => $instructions['amount']['value'],
-            'amount_currency'                       => $instructions['amount']['currency'],
-            'payment_due_date'                      => $instructions['payment_due_date'],
-            'links'                                 => json_encode($instructions['links'])
+            'ordernumber' => $orderNumber,
+            'reference_number' => $instructions['reference_number'],
+            'instruction_type' => $instructions['instruction_type'],
+            'bank_name' => $instructions['recipient_banking_instruction']['bank_name'],
+            'account_holder_name' => $instructions['recipient_banking_instruction']['account_holder_name'],
+            'international_bank_account_number' => $instructions['recipient_banking_instruction']['international_bank_account_number'],
+            'bank_identifier_code' => $instructions['recipient_banking_instruction']['bank_identifier_code'],
+            'amount_value' => $instructions['amount']['value'],
+            'amount_currency' => $instructions['amount']['currency'],
+            'payment_due_date' => $instructions['payment_due_date'],
+            'links' => json_encode($instructions['links'])
         );
 
         $this->container->get('db')->query($this->getInsertSql(), $parameter);
     }
 
+    /**
+     * @return string
+     */
     private function getInsertSql()
     {
         return "INSERT INTO s_payment_paypal_plus_payment_instruction (

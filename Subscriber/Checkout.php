@@ -295,7 +295,7 @@ class Checkout
         $shopContext = $this->bootstrap->get('shop');
         $templateVersion = $shopContext->getTemplate()->getVersion();
 
-        if($request->getActionName() == 'finish') {
+        if ($request->getActionName() == 'finish') {
             $this->addInvoiceInstructionsToView($view, $templateVersion);
         }
 

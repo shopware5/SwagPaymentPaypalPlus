@@ -36,18 +36,29 @@ class AdditionalTableInstaller
     /** @var DatabaseConnection */
     private $databaseConnection;
 
+    /**
+     * AdditionalTableInstaller constructor.
+     *
+     * @param Bootstrap $pluginBootstrap
+     */
     public function __construct(Bootstrap $pluginBootstrap)
     {
         $this->pluginBootstrap = $pluginBootstrap;
         $this->databaseConnection = $this->pluginBootstrap->get('db');
     }
 
+    /**
+     * @return \Zend_Db_Statement_Pdo
+     */
     public function installAdditionalDatabaseTable()
     {
         $sql = $this->getSql();
         return $this->databaseConnection->query($sql);
     }
 
+    /**
+     * @return string
+     */
     private function getSql()
     {
         return "CREATE TABLE IF NOT EXISTS s_payment_paypal_plus_payment_instruction (
