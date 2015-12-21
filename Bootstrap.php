@@ -39,7 +39,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
 
         $tableInstaller = new AdditionalTableInstaller($this);
         $tableInstaller->installAdditionalDatabaseTable();
-        
+
         return true;
     }
 
@@ -173,6 +173,14 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $this->subscribeEvent(
             'Enlight_Controller_Action_PostDispatchSecure_Backend_Config',
             'onPostDispatchConfig'
+        );
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_PostDispatch_Backend_Order',
+            'onPostDispatchOrder'
+        );
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_PostDispatch_Backend_PaymentPaypal',
+            'onPostDispatchPaymentPaypal'
         );
         $this->subscribeEvent(
             'Enlight_Bootstrap_InitResource_payment_instruction_provider',
@@ -395,6 +403,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     public function onSaveCookieInSession(Enlight_Controller_ActionEventArgs $args)
     {
         $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PaypalCookie($this);
+
         return $subscriber->onSaveCookieInSession($args);
     }
 
@@ -412,7 +421,54 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             $view->extendsTemplate('backend/config/view/form/document_paypal_plus.js');
         }
     }
-    
+
+    /**
+     * @param Enlight_Event_EventArgs $args
+     */
+    public function onPostDispatchOrder(Enlight_Event_EventArgs $args)
+    {
+        /* @var Enlight_View_Default $view */
+        $view = $args->getSubject()->View();
+
+        if ($args->getRequest()->getActionName() === 'getList') {
+            $payPalPlusPuiOrderNumbers = $this->getPuiOrderNumbers();
+            $orders = $view->getAssign('data');
+
+            foreach ($orders as &$order) {
+                if (in_array($order['number'], $payPalPlusPuiOrderNumbers)) {
+                    $order['payment']['description'] = $order['payment']['description'] . ' Plus (R)';
+                }
+            }
+
+            $view->assign('data', $orders);
+        }
+    }
+
+    /**
+     * @param Enlight_Event_EventArgs $args
+     */
+    public function onPostDispatchPaymentPaypal(Enlight_Event_EventArgs $args)
+    {
+        /* @var Enlight_View_Default $view */
+        $view = $args->getSubject()->View();
+
+        if ($args->getRequest()->getActionName() === 'getList') {
+            $payPalPlusPuiOrderNumbers = $this->getPuiOrderNumbers();
+            $orders = $view->getAssign('data');
+
+            foreach ($orders as &$order) {
+                if (in_array($order['orderNumber'], $payPalPlusPuiOrderNumbers)) {
+                    $order['paymentDescription'] = $order['paymentDescription'] . ' Plus (R)';
+                }
+            }
+
+            $view->assign('data', $orders);
+        }
+    }
+
+    /**
+     * @param Enlight_Hook_HookArgs $args
+     */
     public function onBeforeRenderDocument(Enlight_Hook_HookArgs $args)
     {
         /* @var Shopware_Components_Document $document */
@@ -444,24 +500,32 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
 
         /** @var PaymentInstructionProvider $paymentInstructionProvider */
         $paymentInstructionProvider = $this->get('payment_instruction_provider');
-        $paymentInstruction = $paymentInstructionProvider->getInstructionsByOrderNumberAndTransactionId($orderNumber, $transactionId);
+        $paymentInstruction = $paymentInstructionProvider
+            ->getInstructionsByOrderNumberAndTransactionId($orderNumber, $transactionId);
 
         $document->_template->addTemplateDir(dirname(__FILE__) . '/Views/');
-        $document->_template->assign('instruction', (array)$paymentInstruction);
+        $document->_template->assign('instruction', (array) $paymentInstruction);
 
         $containerData = $view->getTemplateVars('Containers');
         $containerData['Footer'] = $containerData['Paypal_Footer'];
         $containerData['Content_Info'] = $containerData['Paypal_Content_Info'];
-        $containerData['Content_Info']['value'] = $document->_template->fetch('string:' . $containerData['Content_Info']['value']);
+        $containerData['Content_Info']['value'] = $document->_template
+            ->fetch('string:' . $containerData['Content_Info']['value']);
         $containerData['Content_Info']['style'] = '}' . $containerData['Content_Info']['style'] . ' #info {';
         $view->assign('Containers', $containerData);
     }
 
+    /**
+     * @return PaymentInstructionProvider
+     */
     public function intiPaymentInstructionProvider()
     {
         return new PaymentInstructionProvider(Shopware()->Container());
     }
 
+    /**
+     * @return InvoiceContentProvider
+     */
     public function intiInvoiceContentProvider()
     {
         return new InvoiceContentProvider(Shopware()->Container());
@@ -518,5 +582,15 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     private function getInvalidateCacheArray()
     {
         return array('config', 'backend', 'proxy', 'template', 'theme');
+    }
+
+    /**
+     * @return array
+     */
+    private function getPuiOrderNumbers()
+    {
+        $sql = "SELECT ordernumber FROM s_payment_paypal_plus_payment_instruction;";
+
+        return $this->get('db')->fetchCol($sql);
     }
 }
