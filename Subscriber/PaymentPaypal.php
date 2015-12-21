@@ -61,10 +61,10 @@ class PaymentPaypal
     /**
      * @param \Enlight_Controller_ActionEventArgs $args
      */
-    public function onPreDispatchPaymentPaypal($args)
+    public function onPreDispatchPaymentPaypal(\Enlight_Controller_ActionEventArgs $args)
     {
         $request = $args->getRequest();
-        
+
         /** @var \Shopware_Controllers_Frontend_PaymentPaypal $action */
         $action = $args->getSubject();
 
@@ -111,7 +111,6 @@ class PaymentPaypal
         }
 
         if ($payment['state'] == 'approved') {
-
             if (!empty($payment['transactions'][0]['related_resources'][0]['sale']['id'])) {
                 $transactionId = $payment['transactions'][0]['related_resources'][0]['sale']['id'];
             } else {
@@ -120,7 +119,7 @@ class PaymentPaypal
 
             $orderNumber = $action->saveOrder($transactionId, sha1($payment['id']), $statusId);
 
-            if($payment['payment_instruction']){
+            if ($payment['payment_instruction']) {
                 $this->saveInvoiceInstructions($orderNumber, $payment);
             }
 
@@ -130,7 +129,7 @@ class PaymentPaypal
                     SELECT id, 2 FROM s_order WHERE ordernumber = ?
                     ON DUPLICATE KEY UPDATE swag_payal_express = 2
                 ';
-                $action->get('db')->query($sql, array($orderNumber,));
+                $action->get('db')->query($sql, array($orderNumber));
             } catch (\Exception $e) {
             }
 
@@ -144,13 +143,17 @@ class PaymentPaypal
         }
     }
 
-    private function saveInvoiceInstructions($orderNumber, $payment)
+    /**
+     * @param string $orderNumber
+     * @param array $payment
+     */
+    private function saveInvoiceInstructions($orderNumber, array $payment)
     {
         /**
          * SAVE THE INVOICE-INSTRUCTIONS FROM PAYPAL
          */
         /** @var PaymentInstructionProvider $paymentInstructionProvider */
         $paymentInstructionProvider = $this->paypalBootstrap->get('payment_instruction_provider');
-        $paymentInstructionProvider->saveInstructionByOrdernumber($orderNumber, $payment['payment_instruction']);
+        $paymentInstructionProvider->saveInstructionByOrderNumber($orderNumber, $payment['payment_instruction']);
     }
 }

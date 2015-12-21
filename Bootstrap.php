@@ -418,7 +418,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         /* @var Shopware_Components_Document $document */
         $document = $args->getSubject();
 
-        if($document->_order->payment['name'] != 'paypal') {
+        if ($document->_order->payment['name'] != 'paypal') {
             return;
         }
 
@@ -444,7 +444,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
 
         /** @var PaymentInstructionProvider $paymentInstructionProvider */
         $paymentInstructionProvider = $this->get('payment_instruction_provider');
-        $paymentInstruction = $paymentInstructionProvider->getInstructionsByOrdernumberAndTransactionId($orderNumber, $transactionId);
+        $paymentInstruction = $paymentInstructionProvider->getInstructionsByOrderNumberAndTransactionId($orderNumber, $transactionId);
 
         $document->_template->addTemplateDir(dirname(__FILE__) . '/Views/');
         $document->_template->assign('instruction', (array)$paymentInstruction);

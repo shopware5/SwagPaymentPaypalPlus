@@ -34,18 +34,22 @@ class InvoiceContentProvider
     /** @var Container */
     private $container;
 
+    /**
+     * InvoiceContentProvider constructor.
+     *
+     * @param Container $container
+     */
     public function __construct(Container $container)
     {
         $this->container = $container;
     }
     
     /**
-     * @param $containers
-     * @param $orderData
-     * @return mixed
-     * @throws Exception
+     * @param array $containers
+     * @param array $orderData
+     * @return array
      */
-    public function getPayPalInvoiceContentInfo($containers, $orderData)
+    public function getPayPalInvoiceContentInfo(array $containers, array $orderData)
     {
         $footer = $containers['Paypal_Content_Info'];
 
@@ -53,8 +57,8 @@ class InvoiceContentProvider
         $translation = $translationComp->read($orderData['_order']['language'], 'documents', 1);
 
         $query = "SELECT * FROM s_core_documents_box WHERE id = ?";
-        /** @var Enlight_Components_Db_Adapter_Pdo_Mysql $databaseConnection */
 
+        /** @var \Enlight_Components_Db_Adapter_Pdo_Mysql $databaseConnection */
         $databaseConnection = $this->container->get('db');
         $rawFooter = $databaseConnection->fetchAssoc($query, array($footer['id']));
 
