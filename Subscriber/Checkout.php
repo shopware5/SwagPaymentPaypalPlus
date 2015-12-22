@@ -446,16 +446,16 @@ class Checkout
     }
 
     /**
-     * @param $view
-     * @param $templateVersion
+     * @param \Enlight_View_Default $view
+     * @param int $templateVersion
      */
     private function addInvoiceInstructionsToView($view, $templateVersion)
     {
-        /** @var PaymentInstructionProvider $paymentInstructioProvider */
+        /** @var PaymentInstructionProvider $paymentInstructionProvider */
         $paymentInstructionProvider = $this->bootstrap->get('payment_instruction_provider');
         $orderData = $view->getAssign();
 
-        $instruction = $paymentInstructionProvider->getInstructionsByOrdernumberAndTransactionId($orderData['sOrderNumber'], $orderData['sTransactionumber']);
+        $instruction = $paymentInstructionProvider->getInstructionsByOrderNumberAndTransactionId($orderData['sOrderNumber'], $orderData['sTransactionumber']);
         $view->assign('instruction', $instruction);
 
         $this->bootstrap->registerMyTemplateDir();

@@ -500,8 +500,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
 
         /** @var PaymentInstructionProvider $paymentInstructionProvider */
         $paymentInstructionProvider = $this->get('payment_instruction_provider');
-        $paymentInstruction = $paymentInstructionProvider
-            ->getInstructionsByOrderNumberAndTransactionId($orderNumber, $transactionId);
+        $paymentInstruction = $paymentInstructionProvider->getInstructionsByOrderNumberAndTransactionId($orderNumber, $transactionId);
 
         $document->_template->addTemplateDir(dirname(__FILE__) . '/Views/');
         $document->_template->assign('instruction', (array) $paymentInstruction);
@@ -509,8 +508,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $containerData = $view->getTemplateVars('Containers');
         $containerData['Footer'] = $containerData['Paypal_Footer'];
         $containerData['Content_Info'] = $containerData['Paypal_Content_Info'];
-        $containerData['Content_Info']['value'] = $document->_template
-            ->fetch('string:' . $containerData['Content_Info']['value']);
+        $containerData['Content_Info']['value'] = $document->_template->fetch('string:' . $containerData['Content_Info']['value']);
         $containerData['Content_Info']['style'] = '}' . $containerData['Content_Info']['style'] . ' #info {';
         $view->assign('Containers', $containerData);
     }
