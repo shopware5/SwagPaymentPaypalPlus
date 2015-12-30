@@ -481,7 +481,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         /* @var Smarty_Data $view */
         $view = $document->_view;
 
-        $documentData = $view->getTemplateVars('Document');
         $orderData = $view->getTemplateVars('Order');
         $containers = $view->getTemplateVars('Containers');
 
@@ -494,6 +493,9 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $rawFooter = $invoiceContentProvider->getPayPalInvoiceContentInfo($containers, $orderData);
 
         $containers['Paypal_Content_Info']['value'] = $rawFooter['value'];
+
+        // is necessary to get the data in the invoice template
+        $view->assign('Containers', $containers);
 
         $transactionId = $orderData['_order']['transactionID'];
         $orderNumber = $orderData['_order']['ordernumber'];
@@ -510,6 +512,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $containerData['Content_Info'] = $containerData['Paypal_Content_Info'];
         $containerData['Content_Info']['value'] = $document->_template->fetch('string:' . $containerData['Content_Info']['value']);
         $containerData['Content_Info']['style'] = '}' . $containerData['Content_Info']['style'] . ' #info {';
+
         $view->assign('Containers', $containerData);
     }
 
