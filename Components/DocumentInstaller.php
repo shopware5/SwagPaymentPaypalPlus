@@ -96,7 +96,7 @@ class DocumentInstaller
             . '}',
             '<div class="payment_note">'
                . '<br />'
-               . 'Warum PayPal? Rechnunskauf ist ein Service für den wir mit PayPal zusammenarbeiten. Der Betrag wurde von PayPal soeben direkt an uns gezahlt. Sie bezahlen den Rechnungsbetrag gemäß den Zahlungshinweisen an PayPal, nachdem Sie die Ware erhalten und geprüft haben.'
+               . 'Warum PayPal? Rechnungskauf ist ein Service für den wir mit PayPal zusammenarbeiten. Der Betrag wurde von PayPal soeben direkt an uns gezahlt. Sie bezahlen den Rechnungsbetrag gemäß den Zahlungshinweisen an PayPal, nachdem Sie die Ware erhalten und geprüft haben.'
                . '<br /><br />'
                . 'Bitte überweisen Sie {$instruction.amount_value|currency} bis {$instruction.payment_due_date|date_format: "%d.%m.%Y"} an PayPal.'
                . '<br /><br />'
