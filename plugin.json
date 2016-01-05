@@ -8,10 +8,11 @@
     "link": "http://store.shopware.com",
     "author": "shopware AG",
 
-    "currentVersion": "1.0.8",
+    "currentVersion": "1.0.9",
 
     "changelog": {
         "de": {
+            "1.0.9": "PT-4401 - Feature: Rechnungskauf; PT-4726 - Bugfix: Javascript Fehler; PT-4764 - Bugfix: Falsche Datenbankverbindung;",
             "1.0.8": "PT-4354 - Bugfix: Falscher Methodenaufruf;",
             "1.0.7": "PT-3886 - Bugfix: Beschreibung der Zahlart; PT-3887, PT-4184 - Bugfix: Verbesserung der Usability in Shopware 5;",
             "1.0.6": "PT-3638, PT-3639, PT-3640 - Bugfix: Anpassungen Shopware 5 Responsive Theme;",
@@ -23,6 +24,7 @@
             "1.0.0": "PT-2396 - Erstveröffentlichung"
         },
         "en": {
+            "1.0.9": "PT-4401 - Feature: Pay upon invoice; PT-4726 - Bugfix: Javascript error; PT-4764 - Bugfix: Wrong database connection;",
             "1.0.8": "PT-4354 - Bugfix: Wrong method call;",
             "1.0.7": "PT-3886 - Bugfix: Description of payment method; PT-3887, PT-4184 - Bugfix: Usability improvement in Shopware 5;",
             "1.0.0": "PT-2396 - First release"
