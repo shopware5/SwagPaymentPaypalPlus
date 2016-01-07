@@ -483,8 +483,16 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     {
         /* @var Shopware_Components_Document $document */
         $document = $args->getSubject();
+        $order = $document->_order;
 
-        if ($document->_order->payment['name'] != 'paypal') {
+        if ($order->payment['name'] != 'paypal') {
+            return;
+        }
+
+        $orderNumber = $order->order->ordernumber;
+        $puiOrderNumber = $this->getPuiOrderNumbers(array($orderNumber));
+
+        if (empty($puiOrderNumber)) {
             return;
         }
 
