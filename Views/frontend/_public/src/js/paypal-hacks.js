@@ -68,8 +68,7 @@
             timeOut;
 
         window.addEventListener('message', function (event) {
-            var data = JSON.parse(event.data),
-                $paypalPlusContainer = $('#ppplus'),
+            var $paypalPlusContainer = $('#ppplus'),
                 paypalSandbox = $paypalPlusContainer.attr('data-paypal-sandbox'),
                 originUrl = paypalSandbox == 'true' ? "https://www.sandbox.paypal.com" : 'https://www.paypal.com',
                 isConfirmAction = $('.is--act-confirm').length > 0;
@@ -85,6 +84,8 @@
             if (timeOut !== undefined) {
                 clearTimeout(timeOut);
             }
+
+            var data = JSON.parse(event.data);
 
             events.push(data.action);
             //wait until all events are fired

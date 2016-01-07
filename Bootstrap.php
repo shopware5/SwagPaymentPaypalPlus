@@ -8,6 +8,7 @@
  */
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\DBAL\Connection;
 use Shopware\SwagPaymentPaypalPlus\Components\AdditionalTableInstaller;
 use Shopware\SwagPaymentPaypalPlus\Components\DocumentInstaller;
 use Shopware\SwagPaymentPaypalPlus\Components\InvoiceContentProvider;
@@ -120,6 +121,9 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         if (version_compare(Shopware::VERSION, '4.2.0', '<') && Shopware::VERSION != '___VERSION___') {
             if ($name == 'loader') {
                 return $this->Application()->Loader();
+            }
+            if ($name == 'dbal_connection') {
+                return $this->get('models')->getConnection();
             }
             $name = ucfirst($name);
 
@@ -431,8 +435,11 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $view = $args->getSubject()->View();
 
         if ($args->getRequest()->getActionName() === 'getList') {
-            $payPalPlusPuiOrderNumbers = $this->getPuiOrderNumbers();
             $orders = $view->getAssign('data');
+            $orderNumbers = array_map(function ($order) {
+                return $order['number'];
+            }, $orders);
+            $payPalPlusPuiOrderNumbers = $this->getPuiOrderNumbers($orderNumbers);
 
             foreach ($orders as &$order) {
                 if (in_array($order['number'], $payPalPlusPuiOrderNumbers)) {
@@ -453,8 +460,11 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $view = $args->getSubject()->View();
 
         if ($args->getRequest()->getActionName() === 'getList') {
-            $payPalPlusPuiOrderNumbers = $this->getPuiOrderNumbers();
             $orders = $view->getAssign('data');
+            $orderNumbers = array_map(function ($order) {
+                return $order['orderNumber'];
+            }, $orders);
+            $payPalPlusPuiOrderNumbers = $this->getPuiOrderNumbers($orderNumbers);
 
             foreach ($orders as &$order) {
                 if (in_array($order['orderNumber'], $payPalPlusPuiOrderNumbers)) {
@@ -586,12 +596,23 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     }
 
     /**
+     * @param string[] $orderNumbers
      * @return array
      */
-    private function getPuiOrderNumbers()
+    private function getPuiOrderNumbers($orderNumbers)
     {
-        $sql = "SELECT ordernumber FROM s_payment_paypal_plus_payment_instruction;";
+        $sql = "SELECT ordernumber
+                FROM s_payment_paypal_plus_payment_instruction
+                WHERE ordernumber IN(:orderNumbers);";
 
-        return $this->get('db')->fetchCol($sql);
+        /** @var Connection $dbalConnection */
+        $dbalConnection = Shopware()->Container()->get('dbal_connection');
+        $statement = $dbalConnection->executeQuery(
+            $sql,
+            array('orderNumbers' => $orderNumbers),
+            array('orderNumbers' => Connection::PARAM_STR_ARRAY)
+        );
+
+        return $statement->fetchAll(\PDO::FETCH_COLUMN);
     }
 }
