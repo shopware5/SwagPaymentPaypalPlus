@@ -89,7 +89,7 @@
                 {foreach from=$sPayments item=payment key=paymentKey}
                 {if $payment.name != 'paypal' && isset($PaypalPlusThirdPartyPaymentMethods[$payment.id])}
                     {
-                        "redirectUrl": "{url controller=payment_paypal action=plusRedirect selectPaymentId=$payment.id}",
+                        "redirectUrl": "{url controller=payment_paypal action=plusRedirect selectPaymentId=$payment.id forceSecure}",
                         "methodName": {$payment.description|strip_tags|html_entity_decode:null:utf8|trim|json_encode},
                     {if !empty($PaypalPlusThirdPartyPaymentMethods[$payment.id]['media'])}
                         "imageUrl": "{link file={$PaypalPlusThirdPartyPaymentMethods[$payment.id]['media']} fullPath}",
