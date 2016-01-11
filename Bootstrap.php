@@ -118,16 +118,20 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      */
     public function get($name)
     {
-        if (version_compare(Shopware::VERSION, '4.2.0', '<') && Shopware::VERSION != '___VERSION___') {
-            if ($name == 'loader') {
-                return $this->Application()->Loader();
-            }
-            if ($name == 'dbal_connection') {
+        if (Shopware::VERSION != '___VERSION___') {
+            if (version_compare(Shopware::VERSION, '4.3.2', '<') && $name == 'dbal_connection') {
                 return $this->get('models')->getConnection();
             }
-            $name = ucfirst($name);
 
-            return $this->Application()->Bootstrap()->getResource($name);
+            if (version_compare(Shopware::VERSION, '4.2.0', '<')) {
+                if ($name == 'loader') {
+                    return $this->Application()->Loader();
+                }
+
+                $name = ucfirst($name);
+
+                return $this->Application()->Bootstrap()->getResource($name);
+            }
         }
 
         return parent::get($name);
