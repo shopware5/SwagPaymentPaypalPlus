@@ -614,7 +614,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
                 WHERE ordernumber IN(:orderNumbers);";
 
         /** @var Connection $dbalConnection */
-        $dbalConnection = Shopware()->Container()->get('dbal_connection');
+        $dbalConnection = $this->get('dbal_connection');
         $statement = $dbalConnection->executeQuery(
             $sql,
             array('orderNumbers' => $orderNumbers),
