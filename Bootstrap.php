@@ -219,7 +219,8 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
                 'label' => 'Länder bei denen „PayPal PLUS“ angezeigt wird',
                 'value' => array(2),
                 'store' => 'base.Country',
-                'multiSelect' => true
+                'multiSelect' => true,
+                'scope' => \Shopware\Models\Config\Element::SCOPE_SHOP
             )
         );
         $form->setElement(
@@ -227,7 +228,8 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             'paypalHidePaymentSelection',
             array(
                 'label' => 'Zahlungsart-Auswahl im Bestellabschluss ausblenden (Shopware 4)',
-                'value' => true
+                'value' => true,
+                'scope' => \Shopware\Models\Config\Element::SCOPE_SHOP
             )
         );
         $form->setElement(
@@ -235,7 +237,8 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             'paypalPlusDescription',
             array(
                 'label' => 'Zahlungsart-Bezeichnung überschreiben',
-                'value' => 'PayPal, Lastschrift oder Kreditkarte'
+                'value' => 'PayPal, Lastschrift oder Kreditkarte',
+                'scope' => \Shopware\Models\Config\Element::SCOPE_SHOP
             )
         );
         $form->setElement(
@@ -243,7 +246,8 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             'paypalPlusAdditionalDescription',
             array(
                 'label' => 'Zahlungsart-Beschreibung ergänzen',
-                'value' => ' Zahlung per Lastschrift oder Kreditkarte ist auch ohne PayPal-Konto möglich.'
+                'value' => ' Zahlung per Lastschrift oder Kreditkarte ist auch ohne PayPal-Konto möglich.',
+                'scope' => \Shopware\Models\Config\Element::SCOPE_SHOP
             )
         );
     }
