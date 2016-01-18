@@ -82,7 +82,7 @@
                     }
                 },
                 onContinue: function () {
-                    window.location = '{url action=confirm}';
+                    window.location.href = '{url action=confirm}';
                 },
                 preselection: preSelection,
                 thirdPartyPaymentMethods: [

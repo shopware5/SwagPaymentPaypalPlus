@@ -368,12 +368,8 @@ class Checkout
             return;
         }
 
-        if ($this->session->offsetExists('PaypalCookieValue') && $request->getActionName() != 'shippingPayment') {
-            setcookie('paypalplus_session', $this->session->offsetGet('PaypalCookieValue'));
-            $view->assign('cameFromStep2', $cameFromStep2);
-            $this->session->offsetUnset('PaypalCookieValue');
-            $this->session->offsetUnset('PayPalPlusCameFromStep2');
-        }
+        $view->assign('cameFromStep2', $cameFromStep2);
+        $this->session->offsetUnset('PayPalPlusCameFromStep2');
 
         $this->bootstrap->registerMyTemplateDir();
         if ($request->getActionName() == 'shippingPayment' || !$cameFromStep2) {

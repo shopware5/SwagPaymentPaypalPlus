@@ -37,7 +37,7 @@ class PaypalCookie
     public static function getSubscribedEvents()
     {
         return array(
-            'Enlight_Controller_Action_Frontend_PaymentPaypal_SaveCookieInSession' => 'onSaveCookieInSession'
+            'Enlight_Controller_Action_Frontend_PaymentPaypal_SaveStep2inSession' => 'onSaveStep2inSession'
         );
     }
 
@@ -45,25 +45,12 @@ class PaypalCookie
      * @param \Enlight_Controller_ActionEventArgs $args
      * @return bool
      */
-    public function onSaveCookieInSession(\Enlight_Controller_ActionEventArgs $args)
+    public function onSaveStep2inSession(\Enlight_Controller_ActionEventArgs $args)
     {
         $request = $args->getSubject()->Request();
-        $cookies = $request->getParam('cookies');
         $cameFromStep2 = (bool) $request->getParam('cameFromStep2');
         /** @var Session $session */
         $session = $this->bootstrap->get('session');
-
-        $cookies = explode(';', $cookies);
-        $payPalCookieName = 'paypalplus_session=';
-
-        foreach ($cookies as $cookie) {
-            if (substr($cookie, 0, strlen($payPalCookieName)) == $payPalCookieName) {
-                $payPalCookieValue = substr($cookie, strlen($payPalCookieName));
-                $payPalCookieValue = urldecode($payPalCookieValue);
-
-                $session->offsetSet('PaypalCookieValue', $payPalCookieValue);
-            }
-        }
 
         $session->offsetSet('PayPalPlusCameFromStep2', $cameFromStep2);
 
