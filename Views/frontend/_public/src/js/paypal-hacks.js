@@ -52,9 +52,8 @@
                 if (payPalCheckBox.prop('checked')) {
                     $.ajax({
                         type: 'POST',
-                        url: $paypalPlusContainer.attr('data-paypal-cookie-url'),
+                        url: $paypalPlusContainer.attr('data-paypal-save-in-session-url'),
                         data: {
-                            cookies: document.cookie,
                             cameFromStep2: true
                         }
                     });
