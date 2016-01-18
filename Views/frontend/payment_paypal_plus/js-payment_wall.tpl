@@ -100,7 +100,8 @@
                 {/if}
                 {/foreach}
                 ],
-                showPuiOnSandbox: true
+                showPuiOnSandbox: true,
+                showLoadingIndicator: true
             });
         }
 
