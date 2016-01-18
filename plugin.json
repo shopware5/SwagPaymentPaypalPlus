@@ -8,10 +8,11 @@
     "link": "http://store.shopware.com",
     "author": "shopware AG",
 
-    "currentVersion": "1.1.2",
+    "currentVersion": "1.1.3",
 
     "changelog": {
         "de": {
+            "1.1.3": "PT-4875 - Feature: Pluginkonfiguration Subshop kompatibel; PT-4922 - Bugfix: Weiterleitung zu Paypal;",
             "1.1.2": "Problem mit Datenbankverbindung unter älteren Shopware Versionen;",
             "1.1.1": "PT-4731 - Bugfix: Problem mit Weiterleitung zu Paypal unter HTTPS;",
             "1.1.0": "PT-4716 - Bugfix: Kompatibilität zu anderen Plugins, z.B. Facebook; PT-4838 - Bugfix: Bezahlanweisung auf Rechnungen, die nicht mit Paypal Rechnungskauf bezahlt wurden;",
@@ -27,6 +28,7 @@
             "1.0.0": "PT-2396 - Erstveröffentlichung"
         },
         "en": {
+            "1.1.3": "PT-4875 - Feature: Plugin configuration subshop compatible; PT-4922 - Bugfix: Redirect to Paypal;",
             "1.1.2": "Problem with database connection under older Shopware versions;",
             "1.1.1": "PT-4731 - Bugfix: Problem with redirect to Paypal with HTTPS;",
             "1.1.0": "PT-4716 - Bugfix: Compatibility with other plugins, e.g. Facebook; PT-4838 - Bugfix: Payment instructions on invoices, which are not paid with Paypal payment on invoice;",

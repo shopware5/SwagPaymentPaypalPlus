@@ -181,9 +181,7 @@ class Checkout
             foreach ($profileList as $entry) {
                 if ($entry['name'] == $profile['name']) {
                     $this->restClient->update("$uri/{$entry['id']}", $profile);
-                    $this->session['PaypalProfile'] = array(
-                        'id' => $entry['id']
-                    );
+                    $this->session['PaypalProfile'] = array('id' => $entry['id']);
                     break;
                 }
             }
