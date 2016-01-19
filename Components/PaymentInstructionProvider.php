@@ -25,21 +25,21 @@
 
 namespace Shopware\SwagPaymentPaypalPlus\Components;
 
-use Shopware\Components\DependencyInjection\Container;
+use Enlight_Components_Db_Adapter_Pdo_Mysql as PDOConnection;
 
 class PaymentInstructionProvider
 {
-    /** @var Container */
-    private $container;
+    /** @var PDOConnection $db */
+    private $db;
 
     /**
-     * PaymentInstructionProvider constructor.
+     * InvoiceContentProvider constructor.
      *
-     * @param Container $container
+     * @param PDOConnection $db
      */
-    public function __construct(Container $container)
+    public function __construct(PDOConnection $db)
     {
-        $this->container = $container;
+        $this->db = $db;
     }
 
     /**
@@ -54,7 +54,7 @@ class PaymentInstructionProvider
                 WHERE ordernumber = :orderNumber
                   AND reference_number = :referenceNumber;";
 
-        $result = $this->container->get('db')->fetchRow(
+        $result = $this->db->fetchRow(
             $sql,
             array('orderNumber' => $orderNumber, 'referenceNumber' => $transactionId)
         );
@@ -87,7 +87,7 @@ class PaymentInstructionProvider
             'links' => json_encode($instructions['links'])
         );
 
-        $this->container->get('db')->query($this->getInsertSql(), $parameter);
+        $this->db->query($this->getInsertSql(), $parameter);
     }
 
     /**

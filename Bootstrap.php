@@ -35,10 +35,10 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $this->createMyForm();
         $this->createMyAttributes();
 
-        $documentInstaller = new DocumentInstaller($this);
+        $documentInstaller = new DocumentInstaller($this->get('db'));
         $documentInstaller->installDocuments();
 
-        $tableInstaller = new AdditionalTableInstaller($this);
+        $tableInstaller = new AdditionalTableInstaller($this->get('db'));
         $tableInstaller->installAdditionalDatabaseTable();
 
         return true;
@@ -72,10 +72,10 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $this->createMyForm();
         $this->createMyEvents();
 
-        $documentInstaller = new DocumentInstaller($this);
+        $documentInstaller = new DocumentInstaller($this->get('db'));
         $documentInstaller->installDocuments();
 
-        $tableInstaller = new AdditionalTableInstaller($this);
+        $tableInstaller = new AdditionalTableInstaller($this->get('db'));
         $tableInstaller->installAdditionalDatabaseTable();
 
         if ($version == '1.0.0') {
@@ -189,15 +189,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $this->subscribeEvent(
             'Enlight_Controller_Action_PostDispatch_Backend_PaymentPaypal',
             'onPostDispatchPaymentPaypal'
-        );
-        $this->subscribeEvent(
-            'Enlight_Bootstrap_InitResource_payment_instruction_provider',
-            'intiPaymentInstructionProvider'
-        );
-
-        $this->subscribeEvent(
-            'Enlight_Bootstrap_InitResource_invoice_content_provider',
-            'intiInvoiceContentProvider'
         );
         $this->subscribeEvent(
             'Theme_Compiler_Collect_Plugin_Less',
@@ -515,7 +506,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         }
 
         /** @var InvoiceContentProvider $invoiceContentProvider */
-        $invoiceContentProvider = $this->get('invoice_content_provider');
+        $invoiceContentProvider = new InvoiceContentProvider($this->get('db'));
         $rawFooter = $invoiceContentProvider->getPayPalInvoiceContentInfo($containers, $orderData);
 
         $containers['Paypal_Content_Info']['value'] = $rawFooter['value'];
@@ -540,22 +531,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $containerData['Content_Info']['style'] = '}' . $containerData['Content_Info']['style'] . ' #info {';
 
         $view->assign('Containers', $containerData);
-    }
-
-    /**
-     * @return PaymentInstructionProvider
-     */
-    public function intiPaymentInstructionProvider()
-    {
-        return new PaymentInstructionProvider(Shopware()->Container());
-    }
-
-    /**
-     * @return InvoiceContentProvider
-     */
-    public function intiInvoiceContentProvider()
-    {
-        return new InvoiceContentProvider(Shopware()->Container());
     }
 
     /**

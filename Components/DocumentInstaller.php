@@ -26,20 +26,20 @@
 namespace Shopware\SwagPaymentPaypalPlus\Components;
 
 use Enlight_Components_Db_Adapter_Pdo_Mysql as DatabaseConnection;
-use Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap as Bootstrap;
 
 class DocumentInstaller
 {
-    /** @var Bootstrap */
-    private $pluginBootstrap;
-
     /** @var DatabaseConnection */
     private $databaseConnection;
 
-    public function __construct(Bootstrap $pluginBootstrap)
+    /**
+     * DocumentInstaller constructor.
+     *
+     * @param DatabaseConnection $db
+     */
+    public function __construct(DatabaseConnection $db)
     {
-        $this->pluginBootstrap = $pluginBootstrap;
-        $this->databaseConnection = $this->pluginBootstrap->get('db');
+        $this->databaseConnection = $db;
     }
 
     public function installDocuments()
