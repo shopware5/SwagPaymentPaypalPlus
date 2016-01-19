@@ -206,8 +206,7 @@ class Checkout
 
         $profileName = "{$shop->getHost()}{$shop->getBasePath()}[{$shop->getId()}]";
 
-        $shopName = $this->bootstrap->get('config')->get('shopName');
-        $shopName = $this->config->get('paypalBrandName', $shopName);
+        $shopName = $this->config->get('paypalBrandName') ?: $this->bootstrap->get('config')->get('shopName');
 
         $logoImage = $this->config->get('paypalLogoImage');
         $logoImage = 'string:{link file=' . var_export($logoImage, true) . ' fullPath}';
