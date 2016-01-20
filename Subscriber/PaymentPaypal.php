@@ -152,8 +152,7 @@ class PaymentPaypal
         /**
          * SAVE THE INVOICE-INSTRUCTIONS FROM PAYPAL
          */
-        /** @var PaymentInstructionProvider $paymentInstructionProvider */
-        $paymentInstructionProvider = $this->paypalBootstrap->get('payment_instruction_provider');
+        $paymentInstructionProvider = new PaymentInstructionProvider($this->paypalBootstrap->get('db'));
         $paymentInstructionProvider->saveInstructionByOrderNumber($orderNumber, $payment['payment_instruction']);
     }
 }

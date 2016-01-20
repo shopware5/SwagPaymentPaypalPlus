@@ -25,23 +25,22 @@
 
 namespace Shopware\SwagPaymentPaypalPlus\Components;
 
-use Exception;
-use Shopware\Components\DependencyInjection\Container;
+use Enlight_Components_Db_Adapter_Pdo_Mysql as PDOConnection;
 use Shopware_Components_Translation;
 
 class InvoiceContentProvider
 {
-    /** @var Container */
-    private $container;
+    /** @var PDOConnection $db */
+    private $db;
 
     /**
      * InvoiceContentProvider constructor.
      *
-     * @param Container $container
+     * @param PDOConnection $db
      */
-    public function __construct(Container $container)
+    public function __construct(PDOConnection $db)
     {
-        $this->container = $container;
+        $this->db = $db;
     }
     
     /**
@@ -58,9 +57,7 @@ class InvoiceContentProvider
 
         $query = "SELECT * FROM s_core_documents_box WHERE id = ?";
 
-        /** @var \Enlight_Components_Db_Adapter_Pdo_Mysql $databaseConnection */
-        $databaseConnection = $this->container->get('db');
-        $rawFooter = $databaseConnection->fetchAssoc($query, array($footer['id']));
+        $rawFooter = $this->db->fetchAssoc($query, array($footer['id']));
 
         if (!empty($translation[1]["Paypal_Content_Info_Value"])) {
             $rawFooter["value"] = $translation[1]["Paypal_Content_Info_Value"];

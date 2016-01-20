@@ -444,8 +444,7 @@ class Checkout
      */
     private function addInvoiceInstructionsToView($view, $templateVersion)
     {
-        /** @var PaymentInstructionProvider $paymentInstructionProvider */
-        $paymentInstructionProvider = $this->bootstrap->get('payment_instruction_provider');
+        $paymentInstructionProvider = new PaymentInstructionProvider($this->bootstrap->get('db'));
         $orderData = $view->getAssign();
 
         $instruction = $paymentInstructionProvider->getInstructionsByOrderNumberAndTransactionId($orderData['sOrderNumber'], $orderData['sTransactionumber']);
