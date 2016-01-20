@@ -505,7 +505,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             return;
         }
 
-        /** @var InvoiceContentProvider $invoiceContentProvider */
         $invoiceContentProvider = new InvoiceContentProvider($this->get('db'));
         $rawFooter = $invoiceContentProvider->getPayPalInvoiceContentInfo($containers, $orderData);
 
@@ -517,8 +516,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $transactionId = $orderData['_order']['transactionID'];
         $orderNumber = $orderData['_order']['ordernumber'];
 
-        /** @var PaymentInstructionProvider $paymentInstructionProvider */
-        $paymentInstructionProvider = $this->get('payment_instruction_provider');
+        $paymentInstructionProvider = new PaymentInstructionProvider($this->get('db'));
         $paymentInstruction = $paymentInstructionProvider->getInstructionsByOrderNumberAndTransactionId($orderNumber, $transactionId);
 
         $document->_template->addTemplateDir(dirname(__FILE__) . '/Views/');
