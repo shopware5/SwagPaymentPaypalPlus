@@ -119,7 +119,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     public function get($name)
     {
         if (Shopware::VERSION != '___VERSION___') {
-            if (version_compare(Shopware::VERSION, '4.3.2', '<') && $name == 'dbal_connection') {
+            if (version_compare(Shopware::VERSION, '4.3.3', '<') && $name == 'dbal_connection') {
                 return $this->get('models')->getConnection();
             }
 
