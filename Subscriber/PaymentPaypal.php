@@ -119,6 +119,11 @@ class PaymentPaypal
 
             $orderNumber = $action->saveOrder($transactionId, sha1($payment['id']), $statusId);
 
+            if (!empty($payment['transactions'][0]['related_resources'][0]['sale']['state'])) {
+                $paymentStatus = ucfirst($payment['transactions'][0]['related_resources'][0]['sale']['state']);
+                $this->paypalBootstrap->setPaymentStatus($transactionId, $paymentStatus);
+            }
+
             if ($payment['payment_instruction']) {
                 $this->saveInvoiceInstructions($orderNumber, $payment);
             }
