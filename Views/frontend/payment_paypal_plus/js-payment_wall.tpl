@@ -3,7 +3,7 @@
     <script src="https://www.paypalobjects.com/webstatic/ppplus/ppplus.min.js" type="text/javascript"></script>
     <script type="text/javascript">
 
-        function paymentWall($) {
+        function paymentWall($, approvalUrl) {
             var isCurrentPaymentMethodPaypal = {if $sUserData.additional.payment.id == $PayPalPaymentId}true{else}false{/if},
                 $basketButton = $('#basketButton'),
                 $productTable = $('.confirm--content .product--table .panel'),
@@ -28,6 +28,8 @@
                     return true;
                 };
 
+            approvalUrl = approvalUrl || "{$PaypalPlusApprovalUrl|escape:javascript}";
+
             if (!$basketButton[0]) {
                 $basketButton = $('.main--actions button[type=submit]');
                 bbFunction = 'html';
@@ -51,7 +53,7 @@
             }
 
             ppp = PAYPAL.apps.PPP({
-                approvalUrl: "{$PaypalPlusApprovalUrl|escape:javascript}",
+                approvalUrl: approvalUrl,
                 placeholder: "ppplus",
                 mode: "{if $PaypalPlusModeSandbox}sandbox{else}live{/if}",
                 buttonLocation: "outside",
