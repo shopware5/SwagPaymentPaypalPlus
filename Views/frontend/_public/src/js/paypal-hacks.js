@@ -21,12 +21,21 @@
                 url: url,
                 data: data,
                 success: function (res) {
+                    var approvalUrlCt;
+
                     me.$el.empty().html(res);
                     me.$el.find('input[type="submit"][form], button[form]').swFormPolyfill();
                     $.loadingIndicator.close(function () {
                     });
                     window.picturefill();
-                    paymentWall($);
+
+                    approvalUrlCt = me.$el.find('.pp--approval-url');
+
+                    if (approvalUrlCt) {
+                        paymentWall($, approvalUrlCt.text());
+                    } else {
+                        paymentWall($);
+                    }
 
                     $.publish('plugin/swShippingPayment/onInputChanged', me);
                 }
