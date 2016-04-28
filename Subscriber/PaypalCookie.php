@@ -42,19 +42,20 @@ class PaypalCookie
     }
 
     /**
-     * @param \Enlight_Controller_ActionEventArgs $args
+     * @param \Enlight_Event_EventArgs $args
      * @return bool
      */
-    public function onSaveStep2inSession(\Enlight_Controller_ActionEventArgs $args)
+    public function onSaveStep2inSession(\Enlight_Event_EventArgs $args)
     {
-        $request = $args->getSubject()->Request();
-        $cameFromStep2 = (bool) $request->getParam('cameFromStep2');
+        /** @var \Shopware_Controllers_Frontend_PaymentPaypal $controller */
+        $controller = $args->get('subject');
+        $cameFromStep2 = (bool) $controller->Request()->getParam('cameFromStep2');
         /** @var Session $session */
         $session = $this->bootstrap->get('session');
 
         $session->offsetSet('PayPalPlusCameFromStep2', $cameFromStep2);
 
-        $args->getSubject()->View()->loadTemplate('');
+        $controller->View()->loadTemplate('');
 
         return true;
     }

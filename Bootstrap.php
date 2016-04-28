@@ -400,10 +400,10 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     }
 
     /**
-     * @param Enlight_Controller_ActionEventArgs $args
+     * @param Enlight_Event_EventArgs $args
      * @return bool
      */
-    public function onSaveStep2inSession(Enlight_Controller_ActionEventArgs $args)
+    public function onSaveStep2inSession(Enlight_Event_EventArgs $args)
     {
         $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PaypalCookie($this);
 
