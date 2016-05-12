@@ -57,11 +57,11 @@ class Account
             $view->assign('sFormData', $values);
         }
 
+        $newDescription = $this->bootstrap->Config()->get('paypalPlusDescription', '');
+        $newAdditionalDescription = $this->bootstrap->Config()->get('paypalPlusAdditionalDescription', '');
         if ($request->getActionName() == 'payment') {
             //Fix payment description
             $payments = $action->View()->getAssign('sPaymentMeans');
-            $newDescription = $this->bootstrap->Config()->get('paypalPlusDescription', '');
-            $newAdditionalDescription = $this->bootstrap->Config()->get('paypalPlusAdditionalDescription', '');
             if (!empty($payments)) {
                 foreach ($payments as $key => $payment) {
                     if ($payment['name'] == 'paypal') {
@@ -72,13 +72,13 @@ class Account
                 }
                 $view->assign('sPaymentMeans', $payments);
             }
+        }
 
-            $user = $view->getAssign('sUserData');
-            if (!empty($user['additional']['payment']['name']) && $user['additional']['payment']['name'] == 'paypal') {
-                $user['additional']['payment']['description'] = $newDescription;
-                $user['additional']['payment']['additionaldescription'] = $newAdditionalDescription;
-                $view->assign('sUserData', $user);
-            }
+        $user = $view->getAssign('sUserData');
+        if (!empty($user['additional']['payment']['name']) && $user['additional']['payment']['name'] == 'paypal') {
+            $user['additional']['payment']['description'] = $newDescription;
+            $user['additional']['payment']['additionaldescription'] = $newAdditionalDescription;
+            $view->assign('sUserData', $user);
         }
     }
 }
