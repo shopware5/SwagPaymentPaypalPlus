@@ -292,7 +292,7 @@ class Checkout
         $shopContext = $this->bootstrap->get('shop');
         $templateVersion = $shopContext->getTemplate()->getVersion();
 
-        if ($request->getActionName() == 'finish') {
+        if ($request->getActionName() === 'finish') {
             $this->addInvoiceInstructionsToView($view, $templateVersion);
         }
 
@@ -302,7 +302,7 @@ class Checkout
         $payments = $view->getAssign('sPayments');
         if (!empty($payments)) {
             foreach ($payments as $key => $payment) {
-                if ($payment['name'] == 'paypal') {
+                if ($payment['name'] === 'paypal') {
                     $payments[$key]['description'] = $newDescription;
                     $payments[$key]['additionaldescription'] = $payment['additionaldescription'] . $newAdditionalDescription;
                     break;
@@ -312,7 +312,7 @@ class Checkout
         }
         $user = $view->getAssign('sUserData');
 
-        if (!empty($user['additional']['payment']['name']) && $user['additional']['payment']['name'] == 'paypal') {
+        if (!empty($user['additional']['payment']['name']) && $user['additional']['payment']['name'] === 'paypal') {
             $user['additional']['payment']['description'] = $newDescription;
             $user['additional']['payment']['additionaldescription'] = $newAdditionalDescription;
             $view->assign('sUserData', $user);
@@ -369,7 +369,7 @@ class Checkout
         $this->session->offsetUnset('PayPalPlusCameFromStep2');
 
         $this->bootstrap->registerMyTemplateDir();
-        if ($request->getActionName() == 'shippingPayment' || !$cameFromStep2) {
+        if ($request->getActionName() === 'shippingPayment' || !$cameFromStep2) {
             $this->onPaypalPlus($action);
         }
 
@@ -449,6 +449,12 @@ class Checkout
 
         $instruction = $paymentInstructionProvider->getInstructionsByOrderNumberAndTransactionId($orderData['sOrderNumber'], $orderData['sTransactionumber']);
         $view->assign('instruction', $instruction);
+        $payment = $orderData['sPayment'];
+
+        if ($payment['name'] === 'paypal') {
+            $payment['description'] = $this->bootstrap->Config()->get('paypalPlusDescription', '');
+            $view->assign('sPayment', $payment);
+        }
 
         $this->bootstrap->registerMyTemplateDir();
 
