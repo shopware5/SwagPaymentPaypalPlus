@@ -12,7 +12,7 @@
 
     "changelog": {
         "de": {
-            "1.1.4": "PT-5620 - Bugfix: Zahlungsarten-Wechsel vor Bestell-Abschluss mit Paypal gefixt;",
+            "1.1.4": "PT-5096 - Bugfix: Buchungsdatum im Paypal Backend Modul; PT-5620 - Bugfix: Zahlungsartenwechsel vor Bestellabschluss mit Paypal;",
             "1.1.3": "PT-4875 - Feature: Pluginkonfiguration Subshop kompatibel; PT-4922 - Bugfix: Weiterleitung zu Paypal; PT-4940 - Bugfix: Rechnungskauf in Shopware 4.1.x, Bestellmodul in Shopware 4.3.2;",
             "1.1.2": "Problem mit Datenbankverbindung unter älteren Shopware Versionen;",
             "1.1.1": "PT-4731 - Bugfix: Problem mit Weiterleitung zu Paypal unter HTTPS;",
@@ -29,7 +29,7 @@
             "1.0.0": "PT-2396 - Erstveröffentlichung"
         },
         "en": {
-            "1.1.4": "PT-5620 - Bugfix: Fixed changing the payment-method before finishing an order via paypal;",
+            "1.1.4": "PT-5096 - Bugfix: Order date in Paypal backend modulel; PT-5620 - Bugfix: Changing the payment method before finishing an order via Paypal;",
             "1.1.3": "PT-4875 - Feature: Plugin configuration subshop compatible; PT-4922 - Bugfix: Redirect to Paypal; PT-4940 - Bugfix: Payment upon invoice in Shopware 4.1.x, order module in Shopware 4.3.2;",
             "1.1.2": "Problem with database connection under older Shopware versions;",
             "1.1.1": "PT-4731 - Bugfix: Problem with redirect to Paypal with HTTPS;",
