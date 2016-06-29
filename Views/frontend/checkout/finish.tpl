@@ -1,8 +1,9 @@
 {extends file="parent:frontend/checkout/finish.tpl"}
 
-{block name='frontend_checkout_finish_info'}
-    {if $instruction}
+{block name='frontend_checkout_finish_teaser'}
+    {$smarty.block.parent}
 
+    {if $instruction}
         {block name='paypal_plus_main'}
             <div class="paypal-plus--finish-main block panel has--border is--rounded">
 
@@ -12,7 +13,7 @@
                             <tr>
                                 <td class="ppp-header--left-td"><h3>{$instruction.amount_value|currency}</h3></td>
                                 <td class="ppp-header--center-td"><img class="" src="{link file='frontend/_public/src/img/PP_PLUS_PUI_ArrowGraphic.png'}"></td>
-                                <td class="ppp-header--right-td"><img class="" src="{link file='frontend/_public/src/img/PP_PLUS_PUI_logo.png'}" /></td>
+                                <td class="ppp-header--right-td"><img class="" src="{link file='frontend/_public/src/img/PP_PLUS_PUI_logo.png'}"/></td>
                             </tr>
                         </table>
                     </div>
@@ -20,7 +21,6 @@
 
                 {block name='paypal_plus_main_content'}
                     <div class="finish-main--content">
-                        
                         {block name='paypal_plus_main_content_instructions'}
                             <div class="content--instruction">
                                 <p class="instruction--paragraph">
@@ -28,7 +28,7 @@
                                 </p>
                             </div>
                         {/block}
-                        
+
                         {block name='paypal_plus_main_content_container'}
                             <div class="content--instruction-details">
                                 {block name='paypal_plus_main_content_container_table'}
@@ -70,7 +70,7 @@
                                             </tr>
                                         {/block}
                                     </table>
-                                {/block}                                
+                                {/block}
                             </div>
                         {/block}
                     </div>
@@ -81,11 +81,7 @@
                         <p>{s name=whyPayPal namespace=frontend/snippets}Why PayPal? PayPal is our partner for processing invoice payments. PayPal has just transferred the amount to us directly. You pay the amount to PayPal according to the payment instructions after you have received and checked your purchase.{/s}</p>
                     </div>
                 {/block}
-
             </div>
         {/block}
-
     {/if}
-
-    {$smarty.block.parent}
 {/block}
