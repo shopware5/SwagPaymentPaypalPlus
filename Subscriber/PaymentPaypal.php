@@ -1,4 +1,5 @@
 <?php
+
 /*
  * (c) shopware AG <info@shopware.com>
  *
@@ -10,7 +11,7 @@ namespace Shopware\SwagPaymentPaypalPlus\Subscriber;
 
 use Enlight_Components_Session_Namespace as Session;
 use Shopware\SwagPaymentPaypalPlus\Components\PaymentInstructionProvider;
-use Shopware_Components_Paypal_RestClient as RestClient;
+use Shopware\SwagPaymentPaypalPlus\Components\RestClient;
 use Shopware_Plugins_Frontend_SwagPaymentPaypal_Bootstrap as PaypalBootstrap;
 
 /**
@@ -40,10 +41,9 @@ class PaymentPaypal
      * @param Session $session
      * @param PaypalBootstrap $paypalBootstrap
      */
-    public function __construct(RestClient $restClient, $session, $paypalBootstrap)
+    public function __construct(RestClient $restClient, Session $session, PaypalBootstrap $paypalBootstrap)
     {
         $this->restClient = $restClient;
-        $this->restClient->setHeaders('PayPal-Partner-Attribution-Id', 'ShopwareAG_Cart_PayPalPlus_1017');
         $this->session = $session;
         $this->paypalBootstrap = $paypalBootstrap;
     }
@@ -78,7 +78,6 @@ class PaymentPaypal
         }
 
         $payerId = $request->getParam('PayerID');
-        $this->restClient->setAuthToken();
         $uri = 'payments/payment/' . $paymentId;
         $payment = $this->restClient->get($uri, array('payer_id' => $payerId));
 

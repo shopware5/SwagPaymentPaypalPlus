@@ -1,4 +1,5 @@
 <?php
+
 /*
  * (c) shopware AG <info@shopware.com>
  *
@@ -11,6 +12,7 @@ namespace Shopware\SwagPaymentPaypalPlus\Subscriber;
 use Enlight_Components_Session_Namespace as Session;
 use Enlight_Controller_Action as ControllerAction;
 use Shopware\SwagPaymentPaypalPlus\Components\PaymentInstructionProvider;
+use Shopware\SwagPaymentPaypalPlus\Components\RestClient;
 use Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap as Bootstrap;
 use Shopware_Plugins_Frontend_SwagPaymentPaypal_Bootstrap as PaypalBootstrap;
 
@@ -42,7 +44,7 @@ class Checkout
     protected $session;
 
     /**
-     * @var \Shopware_Components_Paypal_RestClient
+     * @var RestClient
      */
     protected $restClient;
 
@@ -55,8 +57,7 @@ class Checkout
         $this->paypalBootstrap = $bootstrap->Collection()->get('SwagPaymentPaypal');
         $this->config = $this->paypalBootstrap->Config();
         $this->session = $bootstrap->get('session');
-        $this->restClient = $bootstrap->get('paypalRestClient');
-        $this->restClient->setHeaders('PayPal-Partner-Attribution-Id', 'ShopwareAG_Cart_PayPalPlus_1017');
+        $this->restClient = $bootstrap->get('paypal_plus.rest_client');
     }
 
     /**
@@ -176,11 +177,10 @@ class Checkout
         if (!isset($this->session['PaypalProfile'])) {
             $profile = $this->getProfileData();
             $uri = 'payment-experience/web-profiles';
-            $this->restClient->setAuthToken();
             $profileList = $this->restClient->get($uri);
             foreach ($profileList as $entry) {
                 if ($entry['name'] == $profile['name']) {
-                    $this->restClient->update("$uri/{$entry['id']}", $profile);
+                    $this->restClient->put("$uri/{$entry['id']}", $profile);
                     $this->session['PaypalProfile'] = array('id' => $entry['id']);
                     break;
                 }
@@ -406,8 +406,6 @@ class Checkout
         );
 
         $profile = $this->getProfile();
-
-        $this->restClient->setAuthToken();
 
         $uri = 'payments/payment';
         $params = array(
