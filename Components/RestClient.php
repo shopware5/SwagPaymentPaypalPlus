@@ -38,8 +38,9 @@ class RestClient
 
     /**
      * @param PayPalConfig $config
+     * @param string|bool $certPath path to Bundle of CA Root Certificates (see: https://curl.haxx.se/ca/cacert.pem)
      */
-    public function __construct(PayPalConfig $config)
+    public function __construct(PayPalConfig $config, $certPath = true)
     {
         $restUser = $config->get('paypalClientId');
         $restPw = $config->get('paypalSecret');
@@ -58,6 +59,7 @@ class RestClient
                 'headers' => [
                     'PayPal-Partner-Attribution-Id' => 'ShopwareAG_Cart_PayPalPlus_1017'
                 ],
+                'verify' => $certPath
             ]
         );
 

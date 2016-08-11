@@ -330,7 +330,13 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      */
     public function onInitRestClient()
     {
-        $client = new RestClient($this->Collection()->get('SwagPaymentPaypal')->Config());
+        $rootDir = Shopware()->Container()->getParameter('kernel.root_dir');
+        $certPath = $rootDir . '/engine/Shopware/Components/HttpClient/cacert.pem';
+        if (!is_readable($certPath)) {
+            $certPath = true;
+        }
+
+        $client = new RestClient($this->Collection()->get('SwagPaymentPaypal')->Config(), $certPath);
 
         return $client;
     }
