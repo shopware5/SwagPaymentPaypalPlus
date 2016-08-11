@@ -64,15 +64,14 @@ class PaymentPaypal
     public function onPreDispatchPaymentPaypal(\Enlight_Controller_ActionEventArgs $args)
     {
         $request = $args->getRequest();
-
-        /** @var \Shopware_Controllers_Frontend_PaymentPaypal $action */
-        $action = $args->getSubject();
+        /** @var \Shopware_Controllers_Frontend_PaymentPaypal $controller */
+        $controller = $args->getSubject();
 
         if ($request->getActionName() != 'return') {
             return;
         }
 
-        $paymentId = $this->session->PaypalPlusPayment;
+        $paymentId = $this->session->get('PaypalPlusPayment');
         if (empty($paymentId)) {
             return;
         }
@@ -80,8 +79,6 @@ class PaymentPaypal
         $payerId = $request->getParam('PayerID');
         $uri = 'payments/payment/' . $paymentId;
         $payment = $this->restClient->get($uri, array('payer_id' => $payerId));
-
-        $statusId = $this->paypalBootstrap->Config()->get('paypalStatusId', 12);
 
         if (!empty($payment['transactions'][0]['amount']['total'])) {
             $ppAmount = floatval($payment['transactions'][0]['amount']['total']);
@@ -91,10 +88,10 @@ class PaymentPaypal
             $ppCurrency = '';
         }
 
-        $swAmount = $action->getAmount();
-        $swCurrency = $action->getCurrencyShortName();
+        $swAmount = $controller->getAmount();
+        $swCurrency = $controller->getCurrencyShortName();
         if (abs($swAmount - $ppAmount) >= 0.01 || $ppCurrency != $swCurrency) {
-            $action->redirect(
+            $controller->redirect(
                 array(
                     'controller' => 'checkout',
                     'action' => 'confirm'
@@ -104,7 +101,36 @@ class PaymentPaypal
             return;
         }
 
+        $paypalConfig = $this->paypalBootstrap->Config();
+        $statusId = $paypalConfig->get('paypalStatusId', 12);
+        $transactionId = $payment['id'];
+        $orderNumber = null;
+
         if ($payment['state'] == 'created') {
+            if ($paypalConfig->get('paypalSendInvoiceId')) {
+                $orderNumber = $controller->saveOrder($transactionId, sha1($payment['id']), $statusId);
+                $params = array(
+                    array(
+                        'op' => 'add',
+                        'path' => '/transactions/0/invoice_number',
+                        'value' => $orderNumber
+                    )
+                );
+
+                $prefix = $paypalConfig->get('paypalPrefixInvoiceId');
+                if ($prefix) {
+                    // Set prefixed invoice id - Remove special chars and spaces
+                    $prefix = str_replace(' ', '', $prefix);
+                    $prefix = preg_replace('/[^A-Za-z0-9\_]/', '', $prefix);
+
+                    $params[0]['value'] = $prefix . $orderNumber;
+                }
+
+                $uri = 'payments/payment/' . $paymentId;
+
+                $this->restClient->patch($uri, $params);
+            }
+
             $uri = "payments/payment/$paymentId/execute";
             $payment = $this->restClient->create($uri, array('payer_id' => $payerId));
         }
@@ -116,7 +142,15 @@ class PaymentPaypal
                 $transactionId = $payment['id'];
             }
 
-            $orderNumber = $action->saveOrder($transactionId, sha1($payment['id']), $statusId);
+            if (!$orderNumber) {
+                $orderNumber = $controller->saveOrder($transactionId, sha1($payment['id']), $statusId);
+            } else {
+                $sql = 'UPDATE s_order
+                        SET transactionID = ?
+                        WHERE ordernumber = ?;';
+
+                $controller->get('db')->query($sql, array($transactionId, $orderNumber));
+            }
 
             if (!empty($payment['transactions'][0]['related_resources'][0]['sale']['state'])) {
                 $paymentStatus = ucfirst($payment['transactions'][0]['related_resources'][0]['sale']['state']);
@@ -133,11 +167,11 @@ class PaymentPaypal
                     SELECT id, 2 FROM s_order WHERE ordernumber = ?
                     ON DUPLICATE KEY UPDATE swag_payal_express = 2
                 ';
-                $action->get('db')->query($sql, array($orderNumber));
+                $controller->get('db')->query($sql, array($orderNumber));
             } catch (\Exception $e) {
             }
 
-            $action->redirect(
+            $controller->redirect(
                 array(
                     'controller' => 'checkout',
                     'action' => 'finish',

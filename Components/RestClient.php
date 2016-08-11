@@ -46,16 +46,15 @@ class RestClient
         $restPw = $config->get('paypalSecret');
         $sandBoxMode = $config->get('paypalSandbox');
 
-        $configArray = array();
         if ($sandBoxMode) {
-            $configArray['base_uri'] = self::URL_SANDBOX;
+            $base_uri = self::URL_SANDBOX;
         } else {
-            $configArray['base_uri'] = self::URL_LIVE;
+            $base_uri = self::URL_LIVE;
         }
 
         $this->restClient = new Client(
             [
-                'base_uri' => 'https://api.sandbox.paypal.com/v1/',
+                'base_uri' => $base_uri,
                 'headers' => [
                     'PayPal-Partner-Attribution-Id' => 'ShopwareAG_Cart_PayPalPlus_1017'
                 ],
@@ -79,6 +78,20 @@ class RestClient
     }
 
     /**
+     * creates a new resource depending on uri
+     *
+     * @param string $uri
+     * @param array $params
+     * @return array
+     */
+    public function create($uri, array $params = array())
+    {
+        $params = array('json' => $params);
+
+        return $this->sendRequest('POST', $uri, $params);
+    }
+
+    /**
      * updates a given resource
      *
      * @param string $uri
@@ -93,17 +106,17 @@ class RestClient
     }
 
     /**
-     * creates a new resource depending on uri
+     * updates a given resource
      *
      * @param string $uri
      * @param array $params
      * @return array
      */
-    public function create($uri, array $params = array())
+    public function patch($uri, array $params = array())
     {
         $params = array('json' => $params);
 
-        return $this->sendRequest('POST', $uri, $params);
+        return $this->sendRequest('PATCH', $uri, $params);
     }
 
     /**
