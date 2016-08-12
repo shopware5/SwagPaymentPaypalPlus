@@ -13,6 +13,7 @@ use Shopware\SwagPaymentPaypalPlus\Components\AdditionalTableInstaller;
 use Shopware\SwagPaymentPaypalPlus\Components\DocumentInstaller;
 use Shopware\SwagPaymentPaypalPlus\Components\InvoiceContentProvider;
 use Shopware\SwagPaymentPaypalPlus\Components\PaymentInstructionProvider;
+use Shopware\SwagPaymentPaypalPlus\Components\RestClient;
 
 class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
@@ -194,6 +195,10 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             'Theme_Compiler_Collect_Plugin_Less',
             'addLessFiles'
         );
+        $this->subscribeEvent(
+            'Enlight_Bootstrap_InitResource_paypal_plus.rest_client',
+            'onInitRestClient'
+        );
     }
 
     /**
@@ -321,6 +326,22 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     }
 
     /**
+     * @return RestClient
+     */
+    public function onInitRestClient()
+    {
+        $rootDir = Shopware()->Container()->getParameter('kernel.root_dir');
+        $certPath = $rootDir . '/engine/Shopware/Components/HttpClient/cacert.pem';
+        if (!is_readable($certPath)) {
+            $certPath = true;
+        }
+
+        $client = new RestClient($this->Collection()->get('SwagPaymentPaypal')->Config(), $certPath);
+
+        return $client;
+    }
+
+    /**
      * Provide the file collection for less
      *
      * @param Enlight_Event_EventArgs $args
@@ -361,7 +382,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     public function onPreDispatchPaymentPaypal($args)
     {
         $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PaymentPaypal(
-            $this->get('paypalRestClient'),
+            $this->get('paypal_plus.rest_client'),
             $this->get('session'),
             $this->Collection()->get('SwagPaymentPaypal')
         );
