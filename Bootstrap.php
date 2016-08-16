@@ -148,10 +148,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             'onPostDispatchCheckout'
         );
         $this->subscribeEvent(
-            'Enlight_Controller_Action_PostDispatch_Backend_Payment',
-            'onExtendBackendPayment'
-        );
-        $this->subscribeEvent(
             'Enlight_Controller_Action_PreDispatch_Frontend_PaymentPaypal',
             'onPreDispatchPaymentPaypal'
         );
@@ -365,15 +361,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     {
         $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Checkout($this);
         $subscriber->onPostDispatchCheckout($args);
-    }
-
-    /**
-     * @param $args
-     */
-    public function onExtendBackendPayment($args)
-    {
-        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PaymentForm($this);
-        $subscriber->onExtendBackendPayment($args);
     }
 
     /**
