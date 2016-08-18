@@ -427,11 +427,6 @@ class Checkout
             $view->assign('PaypalPlusModeSandbox', $config->get('paypalSandbox'));
             $view->assign('PaypalLocale', $this->paypalBootstrap->getLocaleCode());
 
-            $db = $this->bootstrap->get('db');
-            $sql = 'SELECT paymentmeanID AS id, paypal_plus_media AS media
-                    FROM s_core_paymentmeans_attributes WHERE paypal_plus_active = 1';
-            $paymentMethods = $db->fetchAssoc($sql);
-            $view->assign('PaypalPlusThirdPartyPaymentMethods', $paymentMethods);
             $this->session->PaypalPlusPayment = $payment['id'];
         }
     }
