@@ -34,7 +34,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     {
         $this->createMyEvents();
         $this->createMyForm();
-        $this->createMyAttributes();
 
         $documentInstaller = new DocumentInstaller($this->get('db'));
         $documentInstaller->installDocuments();
@@ -78,10 +77,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
 
         $tableInstaller = new AdditionalTableInstaller($this->get('db'));
         $tableInstaller->installAdditionalDatabaseTable();
-
-        if ($version == '1.0.0') {
-            $this->createMyAttributes();
-        }
 
         return array(
             'success' => true,
@@ -242,44 +237,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
                 'scope' => \Shopware\Models\Config\Element::SCOPE_SHOP
             )
         );
-    }
-
-    private function createMyAttributes()
-    {
-        /** @var $modelManager \Shopware\Components\Model\ModelManager */
-        $modelManager = $this->get('models');
-
-        try {
-            $modelManager->addAttribute(
-                's_core_paymentmeans_attributes',
-                'paypal',
-                'plus_media',
-                'VARCHAR(255)'
-            );
-        } catch (Exception $e) {
-        }
-        try {
-            $modelManager->addAttribute(
-                's_core_paymentmeans_attributes',
-                'paypal',
-                'plus_active',
-                'tinyint(1)'
-            );
-        } catch (Exception $e) {
-        }
-        try {
-            $modelManager->addAttribute(
-                's_core_paymentmeans_attributes',
-                'paypal',
-                'plus_redirect',
-                'tinyint(1)'
-            );
-        } catch (Exception $e) {
-        }
-        try {
-            $modelManager->generateAttributeModels(array('s_core_paymentmeans_attributes'));
-        } catch (Exception $e) {
-        }
     }
 
     private function removeMyAttributes()
