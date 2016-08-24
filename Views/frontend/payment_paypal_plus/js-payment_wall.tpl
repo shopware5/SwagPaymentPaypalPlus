@@ -6,7 +6,6 @@
         function paymentWall($, approvalUrl) {
             var isCurrentPaymentMethodPaypal = {if $sUserData.additional.payment.id == $PayPalPaymentId}true{else}false{/if},
                 $basketButton = $('#basketButton'),
-                $productTable = $('.confirm--content .product--table .panel'),
                 bbFunction = 'val',
                 $agb = $('#sAGB'),
                 ppp,
@@ -67,27 +66,10 @@
                     {$PaypalPlusLang = $PaypalLocale}
                 {/if}
                 language: '{$PaypalPlusLang}',
-                onThirdPartyPaymentMethodDeselected: function (e) {
-                    if ($basketButton) {
-                        $basketButton[bbFunction]($basketButton.data('orgValue'));
-                    }
-                    if ($productTable) {
-                        $productTable.show();
-                    }
-                },
-                onThirdPartyPaymentMethodSelected: function (e) {
-                    if ($basketButton) {
-                        $basketButton[bbFunction]({$PayPalPlusContinue|json_encode});
-                    }
-                    if ($productTable) {
-                        $productTable.hide();
-                    }
-                },
                 onContinue: function () {
-                    window.location.href = '{url action=confirm}';
+                    window.location.href = '{url action=confirm forceSecure}';
                 },
                 preselection: preSelection,
-                thirdPartyPaymentMethods: [],
                 showPuiOnSandbox: true,
                 showLoadingIndicator: true
             });

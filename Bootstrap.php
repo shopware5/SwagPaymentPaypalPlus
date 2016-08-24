@@ -501,7 +501,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      */
     public function onCollectJavascript()
     {
-        $jsPath = array(__DIR__ . '/Views/frontend/_public/src/js/paypal-hacks.js');
+        $jsPath = array(__DIR__ . '/Views/frontend/_public/src/js/jquery.payment-wall-shipping-payment.js');
 
         return new ArrayCollection($jsPath);
     }
