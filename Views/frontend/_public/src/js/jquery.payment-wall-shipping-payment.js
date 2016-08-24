@@ -1,53 +1,24 @@
 (function ($, undefined) {
     /**
-     * this override is necessary to pass an empty function to
-     * $.loadingIndicator.close() to prevent a JS error in SW 5.0.x
-     *
-     * additionally the PayPal Payment Wall has to be called after AJAX request
+     * event listener which will be triggered if the customer changes their shipping or payment method
+     * to call the PayPal payment wall after AJAX request
      */
-    $.overridePlugin('swShippingPayment', {
-        onInputChanged: function () {
-            var me = this,
-                form = me.$el.find(me.opts.formSelector),
-                url = form.attr('action'),
-                data = form.serialize() + '&isXHR=1';
+    $.subscribe('plugin/swShippingPayment/onInputChanged', function (event, plugin) {
+        var approvalUrl = plugin.$el.find('.pp--approval-url');
 
-            $.publish('plugin/swShippingPayment/onInputChangedBefore', me);
-
-            $.loadingIndicator.open();
-
-            $.ajax({
-                type: "POST",
-                url: url,
-                data: data,
-                success: function (res) {
-                    var approvalUrlCt;
-
-                    me.$el.empty().html(res);
-                    me.$el.find('input[type="submit"][form], button[form]').swFormPolyfill();
-                    $.loadingIndicator.close(function () {
-                    });
-                    window.picturefill();
-
-                    approvalUrlCt = me.$el.find('.pp--approval-url');
-
-                    if (approvalUrlCt) {
-                        paymentWall($, approvalUrlCt.text());
-                    } else {
-                        paymentWall($);
-                    }
-
-                    $.publish('plugin/swShippingPayment/onInputChanged', me);
-                }
-            })
+        if (approvalUrl) {
+            paymentWall($, approvalUrl.text());
+            return;
         }
+
+        paymentWall($);
     });
 
     /**
-     * listens to message events fired by the PayPal PaymentWall iframe
+     * listens to message events fired by the PayPal payment wall iFrame
      *
-     * makes AJAX call to save the paypalplus_session cookie value in the session
-     * sets the current payment method to paypal if clicked in the iframe
+     * makes AJAX call to save the PayPalPlus_session cookie value in the session
+     * sets the current payment method to paypal if clicked in the iFrame
      */
     $(function () {
         var isClick = function () {
