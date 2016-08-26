@@ -72,7 +72,7 @@ class PaymentPaypal
         }
 
         $paymentId = $this->session->get('PaypalPlusPayment');
-        if (empty($paymentId)) {
+        if (!$paymentId) {
             return;
         }
 
