@@ -3,12 +3,25 @@
     <script type="text/javascript">
         function prepareCheckout($) {
             var $agb = $('#sAGB'),
-                onConfirm = function () {
-                    if (!$agb.length || $agb.attr('checked') || $agb[0].checked) {
-                        PAYPAL.apps.PPP.doCheckout();
-                        return false;
+                urlForSendingCustomerData = '{url controller=checkout action=preRedirect forceSecure}',
+                onConfirm = function (event) {
+                    if (!$agb.prop('checked')) {
+                        return;
                     }
-                    return true;
+
+                    event.preventDefault();
+
+                    $.ajax({
+                        type: "POST",
+                        url: urlForSendingCustomerData,
+                        success: function (result) {
+                            var resultObject = $.parseJSON(result);
+
+                            if (resultObject.success) {
+                                PAYPAL.apps.PPP.doCheckout();
+                            }
+                        }
+                    });
                 };
 
             $('#confirm--form').on('submit', onConfirm);

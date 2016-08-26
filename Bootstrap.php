@@ -139,8 +139,12 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     private function createMyEvents()
     {
         $this->subscribeEvent(
-            'Enlight_Controller_Action_PostDispatch_Frontend_Checkout',
+            'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout',
             'onPostDispatchCheckout'
+        );
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_Frontend_Checkout_PreRedirect',
+            'onPreRedirectToPayPal'
         );
         $this->subscribeEvent(
             'Enlight_Controller_Action_PreDispatch_Frontend_PaymentPaypal',
@@ -318,6 +322,17 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     {
         $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Checkout($this);
         $subscriber->onPostDispatchCheckout($args);
+    }
+
+    /**
+     * @param Enlight_Controller_ActionEventArgs $args
+     * @return bool
+     */
+    public function onPreRedirectToPayPal($args)
+    {
+        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Checkout($this);
+
+        return $subscriber->onPreRedirectToPayPal($args);
     }
 
     /**

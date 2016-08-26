@@ -12,19 +12,31 @@
                 preSelection = 'none',
                 $payPalCheckBox = $("#payment_mean" + {$PayPalPaymentId}),
                 isConfirmAction = $('.is--act-confirm').length > 0,
-                onConfirm = function () {
-                    if (isCurrentPaymentMethodPaypal && (!$agb.length || $agb.attr('checked') || $agb[0].checked)) {
-                        ppp.doCheckout();
-                        return false;
+                urlForSendingCustomerData = '{url controller=checkout action=preRedirect forceSecure}',
+                onConfirm = function (event) {
+                    if (!isCurrentPaymentMethodPaypal || !$agb.prop('checked')) {
+                        return;
                     }
-                    return true;
+
+                    event.preventDefault();
+
+                    $.ajax({
+                        type: "POST",
+                        url: urlForSendingCustomerData,
+                        success: function (result) {
+                            var resultObject = $.parseJSON(result);
+
+                            if (resultObject.success) {
+                                ppp.doCheckout();
+                            }
+                        }
+                    });
                 },
-                onContinue = function () {
+                onContinue = function (event) {
                     if ($payPalCheckBox.prop('checked')) {
+                        event.preventDefault();
                         ppp.doContinue();
-                        return false;
                     }
-                    return true;
                 };
 
             approvalUrl = approvalUrl || "{$PaypalPlusApprovalUrl|escape:javascript}";
