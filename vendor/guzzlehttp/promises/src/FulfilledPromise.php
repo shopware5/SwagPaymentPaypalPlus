@@ -31,7 +31,7 @@ class FulfilledPromise implements PromiseInterface
         }
 
         $queue = queue();
-        $p = new Promise([$queue, 'run']);
+        $p = new Promise(array($queue, 'run'));
         $value = $this->value;
         $queue->add(static function () use ($p, $value, $onFulfilled) {
             if ($p->getState() === self::PENDING) {

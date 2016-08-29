@@ -12,14 +12,14 @@ use Psr\Http\Message\UriInterface;
  */
 class Uri implements UriInterface
 {
-    private static $schemes = [
+    private static $schemes = array(
         'http'  => 80,
         'https' => 443,
-    ];
+    );
 
     private static $charUnreserved = 'a-zA-Z0-9_\-\.~';
     private static $charSubDelims = '!\$&\'\(\)\*\+,;=';
-    private static $replaceQuery = ['=' => '%3D', '&' => '%26'];
+    private static $replaceQuery = array('=' => '%3D', '&' => '%26');
 
     /** @var string Uri scheme. */
     private $scheme = '';
@@ -77,14 +77,14 @@ class Uri implements UriInterface
      */
     public static function removeDotSegments($path)
     {
-        static $noopPaths = ['' => true, '/' => true, '*' => true];
-        static $ignoreSegments = ['.' => true, '..' => true];
+        static $noopPaths = array('' => true, '/' => true, '*' => true);
+        static $ignoreSegments = array('.' => true, '..' => true);
 
         if (isset($noopPaths[$path])) {
             return $path;
         }
 
-        $results = [];
+        $results = array();
         $segments = explode('/', $path);
         foreach ($segments as $segment) {
             if ($segment === '..') {
@@ -568,7 +568,7 @@ class Uri implements UriInterface
 
         return preg_replace_callback(
             '/(?:[^' . self::$charUnreserved . self::$charSubDelims . '%:@\/]++|%(?![A-Fa-f0-9]{2}))/',
-            [$this, 'rawurlencodeMatchZero'],
+            array($this, 'rawurlencodeMatchZero'),
             $path
         );
     }
@@ -590,7 +590,7 @@ class Uri implements UriInterface
 
         return preg_replace_callback(
             '/(?:[^' . self::$charUnreserved . self::$charSubDelims . '%:@\/\?]++|%(?![A-Fa-f0-9]{2}))/',
-            [$this, 'rawurlencodeMatchZero'],
+            array($this, 'rawurlencodeMatchZero'),
             $str
         );
     }

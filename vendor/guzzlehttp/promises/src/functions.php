@@ -38,7 +38,7 @@ function queue()
 function task(callable $task)
 {
     $queue = queue();
-    $promise = new Promise([$queue, 'run']);
+    $promise = new Promise(array($queue, 'run'));
     $queue->add(function () use ($task, $promise) {
         try {
             $promise->resolve($task());
@@ -67,10 +67,10 @@ function promise_for($value)
 
     // Return a Guzzle promise that shadows the given promise.
     if (method_exists($value, 'then')) {
-        $wfn = method_exists($value, 'wait') ? [$value, 'wait'] : null;
-        $cfn = method_exists($value, 'cancel') ? [$value, 'cancel'] : null;
+        $wfn = method_exists($value, 'wait') ? array($value, 'wait') : null;
+        $cfn = method_exists($value, 'cancel') ? array($value, 'cancel') : null;
         $promise = new Promise($wfn, $cfn);
-        $value->then([$promise, 'resolve'], [$promise, 'reject']);
+        $value->then(array($promise, 'resolve'), array($promise, 'reject'));
         return $promise;
     }
 
@@ -122,7 +122,7 @@ function iter_for($value)
     } elseif (is_array($value)) {
         return new \ArrayIterator($value);
     } else {
-        return new \ArrayIterator([$value]);
+        return new \ArrayIterator(array($value));
     }
 }
 
@@ -143,16 +143,16 @@ function iter_for($value)
 function inspect(PromiseInterface $promise)
 {
     try {
-        return [
+        return array(
             'state' => PromiseInterface::FULFILLED,
             'value' => $promise->wait()
-        ];
+        );
     } catch (RejectionException $e) {
-        return ['state' => PromiseInterface::REJECTED, 'reason' => $e->getReason()];
+        return array('state' => PromiseInterface::REJECTED, 'reason' => $e->getReason());
     } catch (\Throwable $e) {
-        return ['state' => PromiseInterface::REJECTED, 'reason' => $e];
+        return array('state' => PromiseInterface::REJECTED, 'reason' => $e);
     } catch (\Exception $e) {
-        return ['state' => PromiseInterface::REJECTED, 'reason' => $e];
+        return array('state' => PromiseInterface::REJECTED, 'reason' => $e);
     }
 }
 
@@ -169,7 +169,7 @@ function inspect(PromiseInterface $promise)
  */
 function inspect_all($promises)
 {
-    $results = [];
+    $results = array();
     foreach ($promises as $key => $promise) {
         $results[$key] = inspect($promise);
     }
@@ -192,7 +192,7 @@ function inspect_all($promises)
  */
 function unwrap($promises)
 {
-    $results = [];
+    $results = array();
     foreach ($promises as $key => $promise) {
         $results[$key] = $promise->wait();
     }
@@ -214,7 +214,7 @@ function unwrap($promises)
  */
 function all($promises)
 {
-    $results = [];
+    $results = array();
     return each(
         $promises,
         function ($value, $idx) use (&$results) {
@@ -247,8 +247,8 @@ function all($promises)
  */
 function some($count, $promises)
 {
-    $results = [];
-    $rejections = [];
+    $results = array();
+    $rejections = array();
 
     return each(
         $promises,
@@ -304,15 +304,15 @@ function any($promises)
  */
 function settle($promises)
 {
-    $results = [];
+    $results = array();
 
     return each(
         $promises,
         function ($value, $idx) use (&$results) {
-            $results[$idx] = ['state' => PromiseInterface::FULFILLED, 'value' => $value];
+            $results[$idx] = array('state' => PromiseInterface::FULFILLED, 'value' => $value);
         },
         function ($reason, $idx) use (&$results) {
-            $results[$idx] = ['state' => PromiseInterface::REJECTED, 'reason' => $reason];
+            $results[$idx] = array('state' => PromiseInterface::REJECTED, 'reason' => $reason);
         }
     )->then(function () use (&$results) {
         ksort($results);
@@ -344,10 +344,11 @@ function each(
     callable $onFulfilled = null,
     callable $onRejected = null
 ) {
-    return (new EachPromise($iterable, [
+    return (new EachPromise($iterable, array(
         'fulfilled' => $onFulfilled,
         'rejected'  => $onRejected
-    ]))->promise();
+    )
+    ))->promise();
 }
 
 /**
@@ -371,11 +372,12 @@ function each_limit(
     callable $onFulfilled = null,
     callable $onRejected = null
 ) {
-    return (new EachPromise($iterable, [
+    return (new EachPromise($iterable, array(
         'fulfilled'   => $onFulfilled,
         'rejected'    => $onRejected,
         'concurrency' => $concurrency
-    ]))->promise();
+    )
+    ))->promise();
 }
 
 /**

@@ -7,7 +7,7 @@ namespace GuzzleHttp\Promise;
  */
 class EachPromise implements PromisorInterface
 {
-    private $pending = [];
+    private $pending = array();
 
     /** @var \Iterator */
     private $iterable;
@@ -48,7 +48,7 @@ class EachPromise implements PromisorInterface
      * @param mixed    $iterable Promises or values to iterate.
      * @param array    $config   Configuration options
      */
-    public function __construct($iterable, array $config = [])
+    public function __construct($iterable, array $config = array())
     {
         $this->iterable = iter_for($iterable);
 

@@ -13,7 +13,7 @@ class HandlerStack
     private $handler;
 
     /** @var array */
-    private $stack = [];
+    private $stack = array();
 
     /** @var callable|null */
     private $cached;
@@ -75,7 +75,7 @@ class HandlerStack
     public function __toString()
     {
         $depth = 0;
-        $stack = [];
+        $stack = array();
         if ($this->handler) {
             $stack[] = "0) Handler: " . $this->debugCallable($this->handler);
         }
@@ -126,7 +126,7 @@ class HandlerStack
      */
     public function unshift(callable $middleware, $name = null)
     {
-        array_unshift($this->stack, [$middleware, $name]);
+        array_unshift($this->stack, array($middleware, $name));
         $this->cached = null;
     }
 
@@ -138,7 +138,7 @@ class HandlerStack
      */
     public function push(callable $middleware, $name = '')
     {
-        $this->stack[] = [$middleware, $name];
+        $this->stack[] = array($middleware, $name);
         $this->cached = null;
     }
 
@@ -232,19 +232,19 @@ class HandlerStack
     {
         $this->cached = null;
         $idx = $this->findByName($findName);
-        $tuple = [$middleware, $withName];
+        $tuple = array($middleware, $withName);
 
         if ($before) {
             if ($idx === 0) {
                 array_unshift($this->stack, $tuple);
             } else {
-                $replacement = [$tuple, $this->stack[$idx]];
+                $replacement = array($tuple, $this->stack[$idx]);
                 array_splice($this->stack, $idx, 1, $replacement);
             }
         } elseif ($idx === count($this->stack) - 1) {
             $this->stack[] = $tuple;
         } else {
-            $replacement = [$this->stack[$idx], $tuple];
+            $replacement = array($this->stack[$idx], $tuple);
             array_splice($this->stack, $idx, 1, $replacement);
         }
     }

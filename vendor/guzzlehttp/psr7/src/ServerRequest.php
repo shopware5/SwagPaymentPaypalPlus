@@ -27,12 +27,12 @@ class ServerRequest extends Request implements ServerRequestInterface
     /**
      * @var array
      */
-    private $attributes = [];
+    private $attributes = array();
 
     /**
      * @var array
      */
-    private $cookieParams = [];
+    private $cookieParams = array();
 
     /**
      * @var null|array|object
@@ -42,7 +42,7 @@ class ServerRequest extends Request implements ServerRequestInterface
     /**
      * @var array
      */
-    private $queryParams = [];
+    private $queryParams = array();
 
     /**
      * @var array
@@ -52,7 +52,7 @@ class ServerRequest extends Request implements ServerRequestInterface
     /**
      * @var array
      */
-    private $uploadedFiles = [];
+    private $uploadedFiles = array();
 
     /**
      * @param string                               $method       HTTP method
@@ -65,10 +65,10 @@ class ServerRequest extends Request implements ServerRequestInterface
     public function __construct(
         $method,
         $uri,
-        array $headers = [],
+        array $headers = array(),
         $body = null,
         $version = '1.1',
-        array $serverParams = []
+        array $serverParams = array()
     ) {
         $this->serverParams = $serverParams;
 
@@ -84,7 +84,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      */
     public static function normalizeFiles(array $files)
     {
-        $normalized = [];
+        $normalized = array();
 
         foreach ($files as $key => $value) {
             if ($value instanceof UploadedFileInterface) {
@@ -135,18 +135,18 @@ class ServerRequest extends Request implements ServerRequestInterface
      * @param array $files
      * @return UploadedFileInterface[]
      */
-    private static function normalizeNestedFileSpec(array $files = [])
+    private static function normalizeNestedFileSpec(array $files = array())
     {
-        $normalizedFiles = [];
+        $normalizedFiles = array();
 
         foreach (array_keys($files['tmp_name']) as $key) {
-            $spec = [
+            $spec = array(
                 'tmp_name' => $files['tmp_name'][$key],
                 'size'     => $files['size'][$key],
                 'error'    => $files['error'][$key],
                 'name'     => $files['name'][$key],
                 'type'     => $files['type'][$key],
-            ];
+            );
             $normalizedFiles[$key] = self::createUploadedFileFromSpec($spec);
         }
 
@@ -166,7 +166,7 @@ class ServerRequest extends Request implements ServerRequestInterface
     public static function fromGlobals()
     {
         $method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'GET';
-        $headers = function_exists('getallheaders') ? getallheaders() : [];
+        $headers = function_exists('getallheaders') ? getallheaders() : array();
         $uri = self::getUriFromGlobals();
         $body = new LazyOpenStream('php://input', 'r+');
         $protocol = isset($_SERVER['SERVER_PROTOCOL']) ? str_replace('HTTP/', '', $_SERVER['SERVER_PROTOCOL']) : '1.1';

@@ -17,7 +17,7 @@ use Psr\Http\Message\StreamInterface;
  */
 class StreamHandler
 {
-    private $lastHeaders = [];
+    private $lastHeaders = array();
 
     /**
      * Sends an HTTP request.
@@ -84,7 +84,7 @@ class StreamHandler
                 $response,
                 microtime(true) - $startTime,
                 $error,
-                []
+                array()
             );
             call_user_func($options['on_stats'], $stats);
         }
@@ -97,9 +97,10 @@ class StreamHandler
         $startTime
     ) {
         $hdrs = $this->lastHeaders;
-        $this->lastHeaders = [];
+        $this->lastHeaders = array();
         $parts = explode(' ', array_shift($hdrs), 3);
-        $ver = explode('/', $parts[0])[1];
+        $ver = explode('/', $parts[0]);
+        $ver = $ver[1];
         $status = $parts[1];
         $reason = isset($parts[2]) ? $parts[2] : null;
         $headers = \GuzzleHttp\headers_from_lines($hdrs);
@@ -177,14 +178,14 @@ class StreamHandler
                         if ($length === 0) {
                             unset($headers[$normalizedKeys['content-length']]);
                         } else {
-                            $headers[$normalizedKeys['content-length']] = [$length];
+                            $headers[$normalizedKeys['content-length']] = array($length);
                         }
                     }
                 }
             }
         }
 
-        return [$stream, $headers];
+        return array($stream, $headers);
     }
 
     /**
@@ -231,11 +232,11 @@ class StreamHandler
     {
         $errors = null;
         set_error_handler(function ($_, $msg, $file, $line) use (&$errors) {
-            $errors[] = [
+            $errors[] = array(
                 'message' => $msg,
                 'file'    => $file,
                 'line'    => $line
-            ];
+            );
             return true;
         });
 
@@ -275,7 +276,7 @@ class StreamHandler
             $options['verify'] = true;
         }
 
-        $params = [];
+        $params = array();
         $context = $this->getDefaultContext($request, $options);
 
         if (isset($options['on_headers']) && !is_callable($options['on_headers'])) {
@@ -325,15 +326,15 @@ class StreamHandler
             }
         }
 
-        $context = [
-            'http' => [
+        $context = array(
+            'http' => array(
                 'method'           => $request->getMethod(),
                 'header'           => $headers,
                 'protocol_version' => $request->getProtocolVersion(),
                 'ignore_errors'    => true,
                 'follow_location'  => 0,
-            ],
-        ];
+            ),
+        );
 
         $body = (string) $request->getBody();
 
@@ -434,7 +435,7 @@ class StreamHandler
             return;
         }
 
-        static $map = [
+        static $map = array(
             STREAM_NOTIFY_CONNECT       => 'CONNECT',
             STREAM_NOTIFY_AUTH_REQUIRED => 'AUTH_REQUIRED',
             STREAM_NOTIFY_AUTH_RESULT   => 'AUTH_RESULT',
@@ -445,9 +446,11 @@ class StreamHandler
             STREAM_NOTIFY_FAILURE       => 'FAILURE',
             STREAM_NOTIFY_COMPLETED     => 'COMPLETED',
             STREAM_NOTIFY_RESOLVE       => 'RESOLVE',
-        ];
-        static $args = ['severity', 'message', 'message_code',
-            'bytes_transferred', 'bytes_max'];
+        );
+        static $args = array(
+            'severity', 'message', 'message_code',
+            'bytes_transferred', 'bytes_max'
+        );
 
         $value = \GuzzleHttp\debug_resource($value);
         $ident = $request->getMethod() . ' ' . $request->getUri()->withFragment('');
@@ -471,10 +474,10 @@ class StreamHandler
         if (!isset($params['notification'])) {
             $params['notification'] = $notify;
         } else {
-            $params['notification'] = $this->callArray([
+            $params['notification'] = $this->callArray(array(
                 $params['notification'],
                 $notify
-            ]);
+            ));
         }
     }
 

@@ -24,7 +24,7 @@ class RequestException extends TransferException
         RequestInterface $request,
         ResponseInterface $response = null,
         \Exception $previous = null,
-        array $handlerContext = []
+        array $handlerContext = array()
     ) {
         // Set the code of the exception if the response is set and not future.
         $code = $response && !($response instanceof PromiseInterface)
@@ -65,7 +65,7 @@ class RequestException extends TransferException
         RequestInterface $request,
         ResponseInterface $response = null,
         \Exception $previous = null,
-        array $ctx = []
+        array $ctx = array()
     ) {
         if (!$response) {
             return new self(

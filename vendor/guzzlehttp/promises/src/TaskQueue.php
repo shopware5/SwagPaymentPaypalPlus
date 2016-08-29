@@ -13,7 +13,7 @@ namespace GuzzleHttp\Promise;
 class TaskQueue
 {
     private $enableShutdown = true;
-    private $queue = [];
+    private $queue = array();
 
     public function __construct($withShutdown = true)
     {

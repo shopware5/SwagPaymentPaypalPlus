@@ -11,7 +11,7 @@ class UploadedFile implements UploadedFileInterface
     /**
      * @var int[]
      */
-    private static $errors = [
+    private static $errors = array(
         UPLOAD_ERR_OK,
         UPLOAD_ERR_INI_SIZE,
         UPLOAD_ERR_FORM_SIZE,
@@ -20,7 +20,7 @@ class UploadedFile implements UploadedFileInterface
         UPLOAD_ERR_NO_TMP_DIR,
         UPLOAD_ERR_CANT_WRITE,
         UPLOAD_ERR_EXTENSION,
-    ];
+    );
 
     /**
      * @var string
@@ -144,7 +144,7 @@ class UploadedFile implements UploadedFileInterface
      */
     private function isStringOrNull($param)
     {
-        return in_array(gettype($param), ['string', 'NULL']);
+        return in_array(gettype($param), array('string', 'NULL'));
     }
 
     /**

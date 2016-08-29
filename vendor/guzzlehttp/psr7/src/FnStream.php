@@ -15,9 +15,11 @@ class FnStream implements StreamInterface
     private $methods;
 
     /** @var array Methods that must be implemented in the given array */
-    private static $slots = ['__toString', 'close', 'detach', 'rewind',
+    private static $slots = array(
+        '__toString', 'close', 'detach', 'rewind',
         'getSize', 'tell', 'eof', 'isSeekable', 'seek', 'isWritable', 'write',
-        'isReadable', 'read', 'getContents', 'getMetadata'];
+        'isReadable', 'read', 'getContents', 'getMetadata'
+    );
 
     /**
      * @param array $methods Hash of method name to a callable.
@@ -66,7 +68,7 @@ class FnStream implements StreamInterface
         // If any of the required methods were not provided, then simply
         // proxy to the decorated stream.
         foreach (array_diff(self::$slots, array_keys($methods)) as $diff) {
-            $methods[$diff] = [$stream, $diff];
+            $methods[$diff] = array($stream, $diff);
         }
 
         return new self($methods);

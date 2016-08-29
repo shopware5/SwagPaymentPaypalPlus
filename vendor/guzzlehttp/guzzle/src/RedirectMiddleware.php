@@ -19,13 +19,13 @@ class RedirectMiddleware
 {
     const HISTORY_HEADER = 'X-Guzzle-Redirect-History';
 
-    public static $defaultSettings = [
+    public static $defaultSettings = array(
         'max'             => 5,
-        'protocols'       => ['http', 'https'],
+        'protocols'       => array('http', 'https'),
         'strict'          => false,
         'referer'         => false,
         'track_redirects' => false,
-    ];
+    );
 
     /** @var callable  */
     private $nextHandler;
@@ -158,7 +158,7 @@ class RedirectMiddleware
         ResponseInterface $response
     ) {
         // Request modifications to apply.
-        $modify = [];
+        $modify = array();
         $protocols = $options['allow_redirects']['protocols'];
 
         // Use a GET request if this is an entity enclosing request and we are
