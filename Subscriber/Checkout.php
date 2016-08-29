@@ -201,10 +201,10 @@ class Checkout
         try {
             $this->restClient->patch($uri, $requestData);
         } catch (\Exception $e) {
-            echo json_encode(['success' => false]);
+            echo json_encode(array('success' => false));
         }
 
-        echo json_encode(['success' => true]);
+        echo json_encode(array('success' => true));
 
         return true;
     }
