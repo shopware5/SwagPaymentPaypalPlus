@@ -1,17 +1,36 @@
-(function ($, undefined) {
+(function ($, window, undefined) {
     /**
      * event listener which will be triggered if the customer changes their shipping or payment method
      * to call the PayPal payment wall after AJAX request
      */
     $.subscribe('plugin/swShippingPayment/onInputChanged', function (event, plugin) {
-        var approvalUrl = plugin.$el.find('.pp--approval-url');
+        var me = plugin,
+            form = me.$el.find(me.opts.formSelector),
+            data = form.serializeArray(),
+            approvalUrl = me.$el.find('.pp--approval-url'),
+            $paypalPlusContainer = $('#ppplus'),
+            paypalPaymentId = window.parseInt($paypalPlusContainer.attr('data-paypal-payment-id'));
 
         if (approvalUrl) {
-            paymentWall($, approvalUrl.text());
-            return;
+            window.ppp = paymentWall($, approvalUrl.text());
+        } else {
+            window.ppp = paymentWall($);
         }
 
-        paymentWall($);
+        var paymentId = -1;
+        $.each(data, function(i, item) {
+            if (item.hasOwnProperty('name') && item.name === 'payment') {
+                paymentId = window.parseInt(item.value);
+                return false;
+            }
+        });
+
+        $paypalPlusContainer.find('iframe').one('load', function() {
+            if (paymentId !== -1 && paymentId !== paypalPaymentId) {
+                window.ppp.deselectPaymentMethod();
+            }
+        });
+
     });
 
     /**
@@ -64,7 +83,7 @@
                 clearTimeout(timeOut);
             }
 
-            var data = JSON.parse(event.data);
+            var data = $.parseJSON(event.data);
 
             events.push(data.action);
             //wait until all events are fired
@@ -73,4 +92,4 @@
             }, 500);
         }, false);
     });
-})(jQuery);
+})(jQuery, window);

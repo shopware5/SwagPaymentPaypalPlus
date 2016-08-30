@@ -2,10 +2,10 @@
     {$PayPalPlusContinue = "{s name='PaypalPlusLinkChangePayment'}Weiter{/s}"}
     <script src="https://www.paypalobjects.com/webstatic/ppplus/ppplus.min.js" type="text/javascript"></script>
     <script type="text/javascript">
+        window.paypalIsCurrentPaymentMethodPaypal = {if $sUserData.additional.payment.id == $PayPalPaymentId}true{else}false{/if}
 
         function paymentWall($, approvalUrl) {
-            var isCurrentPaymentMethodPaypal = {if $sUserData.additional.payment.id == $PayPalPaymentId}true{else}false{/if},
-                $basketButton = $('#basketButton'),
+                var $basketButton = $('#basketButton'),
                 bbFunction = 'val',
                 $agb = $('#sAGB'),
                 ppp,
@@ -14,7 +14,7 @@
                 isConfirmAction = $('.is--act-confirm').length > 0,
                 urlForSendingCustomerData = '{url controller=checkout action=preRedirect forceSecure}',
                 onConfirm = function (event) {
-                    if (!isCurrentPaymentMethodPaypal || !$agb.prop('checked')) {
+                    if (!window.paypalIsCurrentPaymentMethodPaypal || !$agb.prop('checked')) {
                         return;
                     }
 
@@ -59,7 +59,7 @@
 
             if ($payPalCheckBox.length > 0 && $payPalCheckBox.prop('checked')) {
                 preSelection = 'paypal';
-            } else if (isConfirmAction && isCurrentPaymentMethodPaypal) {
+            } else if (isConfirmAction && window.paypalIsCurrentPaymentMethodPaypal) {
                 preSelection = 'paypal'
             }
 
@@ -85,10 +85,38 @@
                 showPuiOnSandbox: true,
                 showLoadingIndicator: true
             });
+
+            return ppp;
         }
 
-        jQuery(document).ready(function ($) {
-            paymentWall($);
-        });
+        function deselectPayPalMethod($) {
+            var callback = function(event) {
+                var $paypalPlusContainer = $('#ppplus'),
+                    paypalSandbox = $paypalPlusContainer.attr('data-paypal-sandbox'),
+                    originUrl = paypalSandbox == 'true' ? "https://www.sandbox.paypal.com" : 'https://www.paypal.com',
+                    data;
+
+                if (event.origin !== originUrl) {
+                    return;
+                }
+
+                data = $.parseJSON(event.data);
+
+                if (data.action !== 'loaded') {
+                    return;
+                }
+
+                if (!window.paypalIsCurrentPaymentMethodPaypal) {
+                    window.ppp.deselectPaymentMethod();
+                }
+
+                window.removeEventListener('message', callback, false);
+            };
+
+            window.addEventListener('message', callback, false);
+        }
+
+        window.ppp = paymentWall($);
+        deselectPayPalMethod($);
     </script>
 {/block}
