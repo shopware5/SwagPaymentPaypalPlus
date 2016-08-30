@@ -66,7 +66,7 @@ class Checkout
     public static function getSubscribedEvents()
     {
         return array(
-            'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onPostDispatchCheckout',
+            'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onPostDispatchCheckoutSecure',
             'Enlight_Controller_Action_Frontend_Checkout_PreRedirect' => 'onPreRedirectToPayPal'
         );
     }
@@ -74,7 +74,7 @@ class Checkout
     /**
      * @param \Enlight_Controller_ActionEventArgs $args
      */
-    public function onPostDispatchCheckout($args)
+    public function onPostDispatchCheckoutSecure($args)
     {
         $controller = $args->getSubject();
         $request = $controller->Request();

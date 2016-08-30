@@ -140,7 +140,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     {
         $this->subscribeEvent(
             'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout',
-            'onPostDispatchCheckout'
+            'onPostDispatchCheckoutSecure'
         );
         $this->subscribeEvent(
             'Enlight_Controller_Action_Frontend_Checkout_PreRedirect',
@@ -318,10 +318,10 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     /**
      * @param $args
      */
-    public function onPostDispatchCheckout($args)
+    public function onPostDispatchCheckoutSecure($args)
     {
         $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Checkout($this);
-        $subscriber->onPostDispatchCheckout($args);
+        $subscriber->onPostDispatchCheckoutSecure($args);
     }
 
     /**
