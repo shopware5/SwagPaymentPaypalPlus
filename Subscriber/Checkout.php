@@ -81,14 +81,14 @@ class Checkout
         $response = $controller->Response();
         $view = $controller->View();
 
-        if ($response->isRedirect()) {
-            return;
-        }
-
         $cameFromStep2 = $this->session->offsetGet('PayPalPlusCameFromStep2');
 
         if (!$cameFromStep2 && $request->getActionName() !== 'preRedirect') {
             unset($this->session->PaypalPlusPayment);
+        }
+
+        if ($response->isRedirect()) {
+            return;
         }
 
         /** @var $shopContext \Shopware\Models\Shop\Shop */
@@ -97,6 +97,7 @@ class Checkout
 
         if ($request->getActionName() === 'finish') {
             $this->addInvoiceInstructionsToView($view, $templateVersion);
+            unset($this->session->PayPalPlusCameFromStep2);
         }
 
         //Fix payment description
