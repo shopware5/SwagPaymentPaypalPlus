@@ -78,7 +78,6 @@ class Checkout
     {
         $controller = $args->getSubject();
         $request = $controller->Request();
-        $response = $controller->Response();
         $view = $controller->View();
 
         $cameFromStep2 = $this->session->offsetGet('PayPalPlusCameFromStep2');
