@@ -47,18 +47,20 @@ class RestClient
         $sandBoxMode = $config->get('paypalSandbox');
 
         if ($sandBoxMode) {
-            $base_uri = self::URL_SANDBOX;
+            $base_url = self::URL_SANDBOX;
         } else {
-            $base_uri = self::URL_LIVE;
+            $base_url = self::URL_LIVE;
         }
 
         $this->restClient = new Client(
             [
-                'base_uri' => $base_uri,
-                'headers' => [
-                    'PayPal-Partner-Attribution-Id' => 'ShopwareAG_Cart_PayPalPlus_1017'
-                ],
-                'verify' => $certPath
+                'base_url' => $base_url,
+                'defaults' => [
+                    'headers' => [
+                        'PayPal-Partner-Attribution-Id' => 'ShopwareAG_Cart_PayPalPlus_1017'
+                    ],
+                    'verify' => $certPath
+                ]
             ]
         );
 
@@ -74,6 +76,8 @@ class RestClient
      */
     public function get($uri, array $params = array())
     {
+        $params = array('json' => $params);
+
         return $this->sendRequest('GET', $uri, $params);
     }
 
@@ -130,7 +134,8 @@ class RestClient
     private function sendRequest($method, $uri, array $params = array())
     {
         $params = array_merge($params, $this->authHeader);
-        $result = $this->restClient->request($method, $uri, $params);
+        $request = $this->restClient->createRequest($method, $uri, $params);
+        $result = $this->restClient->send($request);
 
         return json_decode($result->getBody()->getContents(), true);
     }
@@ -143,7 +148,7 @@ class RestClient
     {
         $params = array(
             'auth' => array($restUser, $restPw),
-            'form_params' => array(
+            'body' => array(
                 'grant_type' => 'client_credentials',
             )
         );

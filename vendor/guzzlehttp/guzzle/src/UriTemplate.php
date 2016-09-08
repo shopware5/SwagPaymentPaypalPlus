@@ -27,17 +27,13 @@ class UriTemplate
     );
 
     /** @var array Delimiters */
-    private static $delims = array(
-        ':', '/', '?', '#', '[', ']', '@', '!', '$',
-        '&', '\'', '(', ')', '*', '+', ',', ';', '='
-    );
+    private static $delims = array(':', '/', '?', '#', '[', ']', '@', '!', '$',
+        '&', '\'', '(', ')', '*', '+', ',', ';', '=');
 
     /** @var array Percent encoded delimiters */
-    private static $delimsPct = array(
-        '%3A', '%2F', '%3F', '%23', '%5B', '%5D',
+    private static $delimsPct = array('%3A', '%2F', '%3F', '%23', '%5B', '%5D',
         '%40', '%21', '%24', '%26', '%27', '%28', '%29', '%2A', '%2B', '%2C',
-        '%3B', '%3D'
-    );
+        '%3B', '%3D');
 
     public function expand($template, array $variables)
     {
@@ -50,7 +46,7 @@ class UriTemplate
 
         return preg_replace_callback(
             '/\{([^\}]+)\}/',
-            array($this, 'expandMatch'),
+            [$this, 'expandMatch'],
             $this->template
         );
     }
@@ -80,7 +76,7 @@ class UriTemplate
                 $varspec['value'] = substr($value, 0, $colonPos);
                 $varspec['modifier'] = ':';
                 $varspec['position'] = (int) substr($value, $colonPos + 1);
-            } elseif (substr($value, -1) === '*') {
+            } elseif (substr($value, -1) == '*') {
                 $varspec['modifier'] = '*';
                 $varspec['value'] = substr($value, 0, -1);
             } else {
@@ -135,20 +131,20 @@ class UriTemplate
 
                     if (!$isNestedArray) {
                         $var = rawurlencode($var);
-                        if ($parsed['operator'] === '+' ||
-                            $parsed['operator'] === '#'
+                        if ($parsed['operator'] == '+' ||
+                            $parsed['operator'] == '#'
                         ) {
                             $var = $this->decodeReserved($var);
                         }
                     }
 
-                    if ($value['modifier'] === '*') {
+                    if ($value['modifier'] == '*') {
                         if ($isAssoc) {
                             if ($isNestedArray) {
                                 // Nested arrays must allow for deeply nested
                                 // structures.
                                 $var = strtr(
-                                    http_build_query(array($key => $var)),
+                                    http_build_query([$key => $var]),
                                     $rfc1738to3986
                                 );
                             } else {
@@ -164,7 +160,7 @@ class UriTemplate
 
                 if (empty($variable)) {
                     $actuallyUseQuery = false;
-                } elseif ($value['modifier'] === '*') {
+                } elseif ($value['modifier'] == '*') {
                     $expanded = implode($joiner, $kvp);
                     if ($isAssoc) {
                         // Don't prepend the value name when using the explode
@@ -185,17 +181,17 @@ class UriTemplate
                 }
 
             } else {
-                if ($value['modifier'] === ':') {
+                if ($value['modifier'] == ':') {
                     $variable = substr($variable, 0, $value['position']);
                 }
                 $expanded = rawurlencode($variable);
-                if ($parsed['operator'] === '+' || $parsed['operator'] === '#') {
+                if ($parsed['operator'] == '+' || $parsed['operator'] == '#') {
                     $expanded = $this->decodeReserved($expanded);
                 }
             }
 
             if ($actuallyUseQuery) {
-                if (!$expanded && $joiner !== '&') {
+                if (!$expanded && $joiner != '&') {
                     $expanded = $value['value'];
                 } else {
                     $expanded = $value['value'] . '=' . $expanded;
