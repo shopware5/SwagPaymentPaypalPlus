@@ -182,14 +182,13 @@ class PaymentPaypal
     }
 
     /**
+     * save the invoice instructions from paypal
+     *
      * @param string $orderNumber
      * @param array $payment
      */
     private function saveInvoiceInstructions($orderNumber, array $payment)
     {
-        /**
-         * SAVE THE INVOICE-INSTRUCTIONS FROM PAYPAL
-         */
         $paymentInstructionProvider = new PaymentInstructionProvider($this->paypalBootstrap->get('db'));
         $paymentInstructionProvider->saveInstructionByOrderNumber($orderNumber, $payment['payment_instruction']);
     }

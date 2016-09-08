@@ -87,10 +87,6 @@ class Checkout
             unset($this->session->PaypalPlusPayment);
         }
 
-        if ($response->isRedirect()) {
-            return;
-        }
-
         /** @var $shopContext \Shopware\Models\Shop\Shop */
         $shopContext = $this->bootstrap->get('shop');
         $templateVersion = $shopContext->getTemplate()->getVersion();
@@ -132,8 +128,7 @@ class Checkout
 
         $allowedActions = array(
             'confirm',
-            'shippingPayment',
-            'saveShippingPayment',
+            'shippingPayment'
         );
 
         // Check action
@@ -173,7 +168,9 @@ class Checkout
         $this->session->offsetUnset('PayPalPlusCameFromStep2');
 
         $this->bootstrap->registerMyTemplateDir();
-        if ($request->getActionName() === 'shippingPayment' || !$cameFromStep2) {
+        if ($request->getActionName() === 'shippingPayment'
+            || (!$cameFromStep2 && $user['additional']['payment']['name'] === 'paypal')
+        ) {
             $this->onPaypalPlus($controller);
         }
 
@@ -190,14 +187,18 @@ class Checkout
     {
         $controller = $args->getSubject();
         $view = $controller->View();
-        $user = $view->getAssign('sUserData');
+        $userData = $view->getAssign('sUserData');
         $paymentId = $this->session->get('PaypalPlusPayment');
+        $payment = $userData['additional']['payment'];
+
+        Shopware()->Session()->sOrderVariables['sPayment'] = $payment;
+        Shopware()->Session()->sOrderVariables['sUserData']['additional']['payment'] = $payment;
 
         $requestData = array(
             array(
                 'op' => 'add',
                 'path' => '/transactions/0/item_list/shipping_address',
-                'value' => $this->getShippingAddress($user)
+                'value' => $this->getShippingAddress($userData)
             )
         );
 
@@ -225,7 +226,7 @@ class Checkout
         $orderData = $view->getAssign();
 
         $instruction = $paymentInstructionProvider->getInstructionsByOrderNumberAndTransactionId($orderData['sOrderNumber'], $orderData['sTransactionumber']);
-        $view->assign('instruction', $instruction);
+        $view->assign('payPalPlusInvoiceInstruction', $instruction);
         $payment = $orderData['sPayment'];
 
         if ($payment['name'] === 'paypal') {
