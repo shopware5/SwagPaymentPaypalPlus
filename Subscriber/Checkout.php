@@ -83,7 +83,7 @@ class Checkout
         $cameFromStep2 = $this->session->offsetGet('PayPalPlusCameFromStep2');
 
         if (!$cameFromStep2 && $request->getActionName() !== 'preRedirect') {
-            unset($this->session->PaypalPlusPayment);
+            $this->session->offsetUnset('PaypalPlusPayment');
         }
 
         /** @var $shopContext \Shopware\Models\Shop\Shop */
@@ -92,7 +92,7 @@ class Checkout
 
         if ($request->getActionName() === 'finish') {
             $this->addInvoiceInstructionsToView($view, $templateVersion);
-            unset($this->session->PayPalPlusCameFromStep2);
+            $this->session->offsetUnset('PayPalPlusCameFromStep2');
         }
 
         //Fix payment description
@@ -163,18 +163,23 @@ class Checkout
             return;
         }
 
+        $this->bootstrap->registerMyTemplateDir();
+        if ($templateVersion < 3) { // emotion template
+            $view->extendsTemplate('frontend/payment_paypal_plus/checkout.tpl');
+        }
+
+        if ($request->getActionName() === 'shippingPayment' && !$request->getParam('isXHR')) {
+            $this->session->offsetSet('PayPalPlusCameFromStep2', true);
+            $this->onPaypalPlus($controller);
+
+            return;
+        }
+
         $view->assign('cameFromStep2', $cameFromStep2);
         $this->session->offsetUnset('PayPalPlusCameFromStep2');
 
-        $this->bootstrap->registerMyTemplateDir();
-        if ($request->getActionName() === 'shippingPayment'
-            || (!$cameFromStep2 && $user['additional']['payment']['name'] === 'paypal')
-        ) {
+        if (!$cameFromStep2 && $user['additional']['payment']['name'] === 'paypal') {
             $this->onPaypalPlus($controller);
-        }
-
-        if ($templateVersion < 3) { // emotion template
-            $view->extendsTemplate('frontend/payment_paypal_plus/checkout.tpl');
         }
     }
 
