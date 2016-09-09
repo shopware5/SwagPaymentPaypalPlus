@@ -1,4 +1,13 @@
 (function ($, window, undefined) {
+
+    /**
+     * prevent closing of the indicator on click by overwriting the default value
+     */
+    var initialSetting = $.loadingIndicator.defaults.closeOnClick;
+    $.subscribe('plugin/swShippingPayment/onInputChangedBefore', function () {
+        $.loadingIndicator.defaults.closeOnClick = false;
+    });
+
     /**
      * event listener which will be triggered if the customer changes their shipping or payment method
      * to call the PayPal payment wall after AJAX request
@@ -10,6 +19,9 @@
             approvalUrl = me.$el.find('.pp--approval-url'),
             $paypalPlusContainer = $('#ppplus'),
             paypalPaymentId = window.parseInt($paypalPlusContainer.attr('data-paypal-payment-id'));
+
+        // reset the default
+        $.loadingIndicator.defaults.closeOnClick = initialSetting;
 
         if (approvalUrl) {
             window.ppp = paymentWall($, approvalUrl.text());
@@ -30,7 +42,6 @@
                 window.ppp.deselectPaymentMethod();
             }
         });
-
     });
 
     /**
