@@ -59,15 +59,7 @@
                     paypalPaymentId = $paypalPlusContainer.attr('data-paypal-payment-id'),
                     payPalCheckBox = $("#payment_mean" + paypalPaymentId);
 
-                if (payPalCheckBox.prop('checked')) {
-                    $.ajax({
-                        type: 'POST',
-                        url: $paypalPlusContainer.attr('data-paypal-save-in-session-url'),
-                        data: {
-                            cameFromStep2: true
-                        }
-                    });
-                } else if (isClick()) {
+                if (isClick()) {
                     payPalCheckBox.prop('checked', true);
                     $('*[data-ajax-shipping-payment="true"]').data('plugin_swShippingPayment').onInputChanged();
                 }

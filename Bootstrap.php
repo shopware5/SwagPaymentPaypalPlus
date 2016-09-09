@@ -163,10 +163,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             'onPostDispatchAccount'
         );
         $this->subscribeEvent(
-            'Enlight_Controller_Action_Frontend_PaymentPaypal_SaveStep2inSession',
-            'onSaveStep2inSession'
-        );
-        $this->subscribeEvent(
             'Theme_Compiler_Collect_Plugin_Javascript',
             'onCollectJavascript'
         );
@@ -377,17 +373,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     {
         $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Account($this);
         $subscriber->onPostDispatchAccount($args);
-    }
-
-    /**
-     * @param Enlight_Event_EventArgs $args
-     * @return bool
-     */
-    public function onSaveStep2inSession(Enlight_Event_EventArgs $args)
-    {
-        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PaypalCookie($this);
-
-        return $subscriber->onSaveStep2inSession($args);
     }
 
     /**
