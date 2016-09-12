@@ -11,6 +11,7 @@ namespace Shopware\SwagPaymentPaypalPlus\Subscriber;
 
 use Enlight_Components_Session_Namespace as Session;
 use Enlight_Controller_Action as Controller;
+use Enlight_View_Default as View;
 use Shopware\SwagPaymentPaypalPlus\Components\PaymentInstructionProvider;
 use Shopware\SwagPaymentPaypalPlus\Components\RestClient;
 use Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap as Bootstrap;
@@ -86,44 +87,13 @@ class Checkout
             $this->session->offsetUnset('PaypalPlusPayment');
         }
 
-        /** @var $shopContext \Shopware\Models\Shop\Shop */
-        $shopContext = $this->bootstrap->get('shop');
-        $templateVersion = $shopContext->getTemplate()->getVersion();
+        /** @var $shop \Shopware\Models\Shop\Shop */
+        $shop = $this->bootstrap->get('shop');
+        $templateVersion = $shop->getTemplate()->getVersion();
 
         if ($request->getActionName() === 'finish') {
             $this->addInvoiceInstructionsToView($view, $templateVersion);
-            $this->session->offsetUnset('PayPalPlusCameFromStep2');
         }
-
-        //Fix payment description
-        $newDescription = $this->bootstrap->Config()->get('paypalPlusDescription', '');
-        $newAdditionalDescription = $this->bootstrap->Config()->get('paypalPlusAdditionalDescription', '');
-        $payments = $view->getAssign('sPayments');
-        if (!empty($payments)) {
-            foreach ($payments as $key => $payment) {
-                if ($payment['name'] === 'paypal') {
-                    $payments[$key]['description'] = $newDescription;
-                    $payments[$key]['additionaldescription'] = $payment['additionaldescription'] . $newAdditionalDescription;
-                    break;
-                }
-            }
-            $view->assign('sPayments', $payments);
-        }
-        $user = $view->getAssign('sUserData');
-
-        if (!empty($user['additional']['payment']['name']) && $user['additional']['payment']['name'] === 'paypal') {
-            $user['additional']['payment']['description'] = $newDescription;
-            $user['additional']['payment']['additionaldescription'] = $newAdditionalDescription;
-            $view->assign('sUserData', $user);
-        }
-
-        if (method_exists($this->paypalBootstrap, 'getPayment')) {
-            $payPalPaymentId = $this->paypalBootstrap->getPayment()->getId();
-        } else {
-            //fallback for SwagPaymentPaypal version < 3.3.4
-            $payPalPaymentId = $this->paypalBootstrap->Payment()->getId();
-        }
-        $view->assign('PayPalPaymentId', $payPalPaymentId);
 
         $allowedActions = array(
             'confirm',
@@ -132,6 +102,7 @@ class Checkout
 
         // Check action
         if (!in_array($request->getActionName(), $allowedActions, true)) {
+            $this->session->offsetUnset('PayPalPlusCameFromStep2');
             return;
         }
 
@@ -168,7 +139,9 @@ class Checkout
             $view->extendsTemplate('frontend/payment_paypal_plus/checkout.tpl');
         }
 
-        if ($request->getActionName() === 'shippingPayment' && !$request->getParam('isXHR')) {
+        $this->addTemplateVariables($view);
+
+        if ($request->getActionName() === 'shippingPayment') {
             $this->session->offsetSet('PayPalPlusCameFromStep2', true);
             $this->onPaypalPlus($controller);
 
@@ -243,6 +216,43 @@ class Checkout
         if ($templateVersion < 3) {
             $view->extendsTemplate('frontend/checkout/emotion/finish.tpl');
         }
+    }
+
+    /**
+     * extends the PayPal description
+     *
+     * @param View $view
+     */
+    private function addTemplateVariables(View $view)
+    {
+        $newDescription = $this->bootstrap->Config()->get('paypalPlusDescription', '');
+        $newAdditionalDescription = $this->bootstrap->Config()->get('paypalPlusAdditionalDescription', '');
+        $payments = $view->getAssign('sPayments');
+        if (!empty($payments)) {
+            foreach ($payments as $key => $payment) {
+                if ($payment['name'] === 'paypal') {
+                    $payments[$key]['description'] = $newDescription;
+                    $payments[$key]['additionaldescription'] = $payment['additionaldescription'] . $newAdditionalDescription;
+                    break;
+                }
+            }
+            $view->assign('sPayments', $payments);
+        }
+        $user = $view->getAssign('sUserData');
+
+        if (!empty($user['additional']['payment']['name']) && $user['additional']['payment']['name'] === 'paypal') {
+            $user['additional']['payment']['description'] = $newDescription;
+            $user['additional']['payment']['additionaldescription'] = $newAdditionalDescription;
+            $view->assign('sUserData', $user);
+        }
+
+        if (method_exists($this->paypalBootstrap, 'getPayment')) {
+            $payPalPaymentId = $this->paypalBootstrap->getPayment()->getId();
+        } else {
+            //fallback for SwagPaymentPaypal version < 3.3.4
+            $payPalPaymentId = $this->paypalBootstrap->Payment()->getId();
+        }
+        $view->assign('PayPalPaymentId', $payPalPaymentId);
     }
 
     /**
