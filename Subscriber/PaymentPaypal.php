@@ -71,7 +71,7 @@ class PaymentPaypal
             return;
         }
 
-        $paymentId = $this->session->get('PaypalPlusPayment');
+        $paymentId = $this->session->offsetGet('PaypalPlusPayment');
         if (!$paymentId) {
             return;
         }

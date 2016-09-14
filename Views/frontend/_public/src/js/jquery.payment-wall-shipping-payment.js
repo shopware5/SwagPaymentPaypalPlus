@@ -30,14 +30,14 @@
         }
 
         var paymentId = -1;
-        $.each(data, function(i, item) {
+        $.each(data, function (i, item) {
             if (item.hasOwnProperty('name') && item.name === 'payment') {
                 paymentId = window.parseInt(item.value);
                 return false;
             }
         });
 
-        $paypalPlusContainer.find('iframe').one('load', function() {
+        $paypalPlusContainer.find('iframe').one('load', function () {
             if (paymentId !== -1 && paymentId !== paypalPaymentId) {
                 window.ppp.deselectPaymentMethod();
             }
@@ -47,7 +47,6 @@
     /**
      * listens to message events fired by the PayPal payment wall iFrame
      *
-     * makes AJAX call to save the PayPalPlus_session cookie value in the session
      * sets the current payment method to paypal if clicked in the iFrame
      */
     $(function () {
@@ -60,8 +59,10 @@
                     payPalCheckBox = $("#payment_mean" + paypalPaymentId);
 
                 if (isClick()) {
-                    payPalCheckBox.prop('checked', true);
-                    $('*[data-ajax-shipping-payment="true"]').data('plugin_swShippingPayment').onInputChanged();
+                    if (!payPalCheckBox.prop('checked')) {
+                        payPalCheckBox.prop('checked', true);
+                        $('*[data-ajax-shipping-payment="true"]').data('plugin_swShippingPayment').onInputChanged();
+                    }
                 }
                 events = [];
             },
