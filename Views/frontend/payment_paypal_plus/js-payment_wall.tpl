@@ -5,7 +5,7 @@
         window.paypalIsCurrentPaymentMethodPaypal = {if $sUserData.additional.payment.id == $PayPalPaymentId}true{else}false{/if}
 
         function paymentWall($, approvalUrl) {
-                var $basketButton = $('#basketButton'),
+            var $basketButton = $('#basketButton'),
                 bbFunction = 'val',
                 $agb = $('#sAGB'),
                 ppp,
@@ -31,12 +31,6 @@
                             }
                         }
                     });
-                },
-                onContinue = function (event) {
-                    if ($payPalCheckBox.prop('checked')) {
-                        event.preventDefault();
-                        ppp.doContinue();
-                    }
                 };
 
             approvalUrl = approvalUrl || "{$PaypalPlusApprovalUrl|escape:javascript}";
@@ -50,8 +44,6 @@
 
             $('#confirm--form').on('submit', onConfirm);
             $basketButton.on('click', onConfirm);
-
-            $('button.main--actions').on('click', onContinue);
 
             if (!$('#ppplus').length) {
                 return;
@@ -78,9 +70,6 @@
                     {$PaypalPlusLang = $PaypalLocale}
                 {/if}
                 language: '{$PaypalPlusLang}',
-                onContinue: function () {
-                    window.location.href = '{url action=confirm forceSecure}';
-                },
                 preselection: preSelection,
                 showPuiOnSandbox: true,
                 showLoadingIndicator: true
@@ -90,7 +79,7 @@
         }
 
         function deselectPayPalMethod($) {
-            var callback = function(event) {
+            var callback = function (event) {
                 var $paypalPlusContainer = $('#ppplus'),
                     paypalSandbox = $paypalPlusContainer.attr('data-paypal-sandbox'),
                     originUrl = paypalSandbox == 'true' ? "https://www.sandbox.paypal.com" : 'https://www.paypal.com',

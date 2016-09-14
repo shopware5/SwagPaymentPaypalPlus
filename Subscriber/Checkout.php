@@ -81,6 +81,10 @@ class Checkout
         $request = $controller->Request();
         $view = $controller->View();
 
+        if ($controller->Response()->isRedirect()) {
+            return;
+        }
+
         $cameFromStep2 = $this->session->offsetGet('PayPalPlusCameFromStep2');
 
         if (!$cameFromStep2 && $request->getActionName() !== 'preRedirect') {
