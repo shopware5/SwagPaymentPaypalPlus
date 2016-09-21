@@ -29,9 +29,15 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      * Installs the plugin
      *
      * @return bool
+     * @throws Exception
      */
     public function install()
     {
+        // Check if PHP version matches
+        if (version_compare(phpversion(), '5.4', '<')) {
+            throw new Exception("This plugin requires PHP 5.4 or a later version");
+        }
+
         $this->createMyEvents();
         $this->createMyForm();
 
@@ -65,10 +71,16 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
 
     /**
      * @param string $version
-     * @return bool|array
+     * @return array
+     * @throws Exception
      */
     public function update($version)
     {
+        // Check if PHP version matches
+        if (version_compare(phpversion(), '5.4', '<')) {
+            throw new Exception("This plugin requires PHP 5.4 or a later version");
+        }
+
         $this->createMyForm();
         $this->createMyEvents();
 
