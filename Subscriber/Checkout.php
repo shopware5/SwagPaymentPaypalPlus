@@ -13,6 +13,7 @@ use Enlight_Components_Session_Namespace as Session;
 use Enlight_Controller_Action as Controller;
 use Enlight_View_Default as View;
 use Exception;
+use Shopware\Components\Logger;
 use Shopware\SwagPaymentPaypalPlus\Components\PaymentInstructionProvider;
 use Shopware\SwagPaymentPaypalPlus\Components\RestClient;
 use Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap as Bootstrap;
@@ -51,6 +52,11 @@ class Checkout
     protected $restClient;
 
     /**
+     * @var Logger
+     */
+    private $pluginLogger;
+
+    /**
      * @param Bootstrap $bootstrap
      */
     public function __construct(Bootstrap $bootstrap)
@@ -60,6 +66,7 @@ class Checkout
         $this->config = $this->paypalBootstrap->Config();
         $this->session = $bootstrap->get('session');
         $this->restClient = $bootstrap->get('paypal_plus.rest_client');
+        $this->pluginLogger = $bootstrap->get('pluginlogger');
     }
 
     /**
@@ -144,8 +151,6 @@ class Checkout
             $view->extendsTemplate('frontend/payment_paypal_plus/checkout.tpl');
         }
 
-        $this->addTemplateVariables($view);
-
         if ($request->getActionName() === 'shippingPayment') {
             $this->session->offsetSet('PayPalPlusCameFromStep2', true);
             $this->onPaypalPlus($controller);
@@ -190,6 +195,7 @@ class Checkout
         try {
             $this->restClient->patch($uri, $requestData);
         } catch (Exception $e) {
+            $this->pluginLogger->error('An error occurred on patching the address to the payment: ' . $e->getMessage());
             echo json_encode(array('success' => false));
             return true;
         }
@@ -305,12 +311,14 @@ class Checkout
         try {
             $payment = $this->restClient->create($uri, $params);
         } catch (Exception $e) {
+            $this->pluginLogger->error('An error occurred on creating a payment: ' . $e->getMessage());
         }
 
         if (!empty($payment['links'][1]['href'])) {
             $view->assign('PaypalPlusApprovalUrl', $payment['links'][1]['href']);
             $view->assign('PaypalPlusModeSandbox', $this->config->get('paypalSandbox'));
             $view->assign('PaypalLocale', $this->paypalBootstrap->getLocaleCode());
+            $this->addTemplateVariables($view);
 
             $this->session->PaypalPlusPayment = $payment['id'];
         }
@@ -328,6 +336,7 @@ class Checkout
             try {
                 $profileList = $this->restClient->get($uri);
             } catch (Exception $e) {
+                $this->pluginLogger->error('An error occurred getting the experience profiles: ' . $e->getMessage());
             }
 
             foreach ($profileList as $entry) {
@@ -343,6 +352,7 @@ class Checkout
                 try {
                     $payPalProfile = $this->restClient->create($uri, $profile);
                 } catch (Exception $e) {
+                    $this->pluginLogger->error('An error occurred on creating an experience profiles: ' . $e->getMessage());
                 }
                 $this->session['PaypalProfile'] = $payPalProfile;
             }
