@@ -169,7 +169,7 @@ class Checkout
         $controller = $args->getSubject();
         $view = $controller->View();
         $userData = $view->getAssign('sUserData');
-        $paymentId = $this->session->get('PaypalPlusPayment');
+        $paymentId = $this->session->offsetGet('PaypalPlusPayment');
         $payment = $userData['additional']['payment'];
 
         Shopware()->Session()->sOrderVariables['sPayment'] = $payment;
