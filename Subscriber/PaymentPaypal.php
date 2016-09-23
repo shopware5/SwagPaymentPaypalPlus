@@ -78,7 +78,11 @@ class PaymentPaypal
 
         $payerId = $request->getParam('PayerID');
         $uri = 'payments/payment/' . $paymentId;
-        $payment = $this->restClient->get($uri, array('payer_id' => $payerId));
+        $payment = array();
+        try {
+            $payment = $this->restClient->get($uri, array('payer_id' => $payerId));
+        } catch (\Exception $e) {
+        }
 
         if (!empty($payment['transactions'][0]['amount']['total'])) {
             $ppAmount = floatval($payment['transactions'][0]['amount']['total']);

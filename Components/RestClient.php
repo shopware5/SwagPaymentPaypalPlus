@@ -153,11 +153,17 @@ class RestClient
             )
         );
 
-        $auth = $this->createToken('oauth2/token', $params);
+        $authorization = ' ';
+
+        try {
+            $auth = $this->createToken('oauth2/token', $params);
+            $authorization = $auth['token_type'] . ' ' . $auth['access_token'];
+        } catch (\Exception $e) {
+        }
 
         $this->authHeader = array(
             'headers' => array(
-                'Authorization' => $auth['token_type'] . ' ' . $auth['access_token']
+                'Authorization' => $authorization
             )
         );
     }
