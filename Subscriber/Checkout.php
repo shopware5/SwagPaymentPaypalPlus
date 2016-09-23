@@ -12,6 +12,7 @@ namespace Shopware\SwagPaymentPaypalPlus\Subscriber;
 use Enlight_Components_Session_Namespace as Session;
 use Enlight_Controller_Action as Controller;
 use Enlight_View_Default as View;
+use Exception;
 use Shopware\SwagPaymentPaypalPlus\Components\PaymentInstructionProvider;
 use Shopware\SwagPaymentPaypalPlus\Components\RestClient;
 use Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap as Bootstrap;
@@ -172,8 +173,8 @@ class Checkout
         $paymentId = $this->session->offsetGet('PaypalPlusPayment');
         $payment = $userData['additional']['payment'];
 
-        Shopware()->Session()->sOrderVariables['sPayment'] = $payment;
-        Shopware()->Session()->sOrderVariables['sUserData']['additional']['payment'] = $payment;
+        $this->session->sOrderVariables['sPayment'] = $payment;
+        $this->session->sOrderVariables['sUserData']['additional']['payment'] = $payment;
 
         $requestData = array(
             array(
@@ -188,8 +189,9 @@ class Checkout
 
         try {
             $this->restClient->patch($uri, $requestData);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             echo json_encode(array('success' => false));
+            return true;
         }
 
         echo json_encode(array('success' => true));
@@ -298,7 +300,12 @@ class Checkout
                 'cancel_url' => $cancelUrl
             ),
         );
-        $payment = $this->restClient->create($uri, $params);
+
+        $payment = array();
+        try {
+            $payment = $this->restClient->create($uri, $params);
+        } catch (Exception $e) {
+        }
 
         if (!empty($payment['links'][1]['href'])) {
             $view->assign('PaypalPlusApprovalUrl', $payment['links'][1]['href']);
@@ -317,7 +324,12 @@ class Checkout
         if (!isset($this->session['PaypalProfile'])) {
             $profile = $this->getProfileData();
             $uri = 'payment-experience/web-profiles';
-            $profileList = $this->restClient->get($uri);
+            $profileList = array();
+            try {
+                $profileList = $this->restClient->get($uri);
+            } catch (Exception $e) {
+            }
+
             foreach ($profileList as $entry) {
                 if ($entry['name'] == $profile['name']) {
                     $this->restClient->put("$uri/{$entry['id']}", $profile);
@@ -325,8 +337,14 @@ class Checkout
                     break;
                 }
             }
+
             if (!isset($this->session['PaypalProfile'])) {
-                $this->session['PaypalProfile'] = $this->restClient->create($uri, $profile);
+                $payPalProfile = null;
+                try {
+                    $payPalProfile = $this->restClient->create($uri, $profile);
+                } catch (Exception $e) {
+                }
+                $this->session['PaypalProfile'] = $payPalProfile;
             }
         }
 
