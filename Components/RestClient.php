@@ -159,6 +159,9 @@ class RestClient
             $auth = $this->createToken('oauth2/token', $params);
             $authorization = $auth['token_type'] . ' ' . $auth['access_token'];
         } catch (\Exception $e) {
+            /** @var \Shopware\Components\Logger $pluginLogger */
+            $pluginLogger = Shopware()->Container()->get('pluginlogger');
+            $pluginLogger->error('An error occurred on initialising PayPal Plus: ' . $e->getMessage());
         }
 
         $this->authHeader = array(

@@ -351,7 +351,8 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\PaymentPaypal(
             $this->get('paypal_plus.rest_client'),
             $this->get('session'),
-            $this->Collection()->get('SwagPaymentPaypal')
+            $this->Collection()->get('SwagPaymentPaypal'),
+            $this->get('pluginlogger')
         );
         $subscriber->onPreDispatchPaymentPaypal($args);
     }

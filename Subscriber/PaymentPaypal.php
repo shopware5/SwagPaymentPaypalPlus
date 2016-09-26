@@ -10,6 +10,7 @@
 namespace Shopware\SwagPaymentPaypalPlus\Subscriber;
 
 use Enlight_Components_Session_Namespace as Session;
+use Shopware\Components\Logger;
 use Shopware\SwagPaymentPaypalPlus\Components\PaymentInstructionProvider;
 use Shopware\SwagPaymentPaypalPlus\Components\RestClient;
 use Shopware_Plugins_Frontend_SwagPaymentPaypal_Bootstrap as PaypalBootstrap;
@@ -37,15 +38,22 @@ class PaymentPaypal
     protected $paypalBootstrap;
 
     /**
+     * @var Logger
+     */
+    private $logger;
+
+    /**
      * @param RestClient $restClient
      * @param Session $session
      * @param PaypalBootstrap $paypalBootstrap
+     * @param Logger $logger
      */
-    public function __construct(RestClient $restClient, Session $session, PaypalBootstrap $paypalBootstrap)
+    public function __construct(RestClient $restClient, Session $session, PaypalBootstrap $paypalBootstrap, Logger $logger)
     {
         $this->restClient = $restClient;
         $this->session = $session;
         $this->paypalBootstrap = $paypalBootstrap;
+        $this->logger = $logger;
     }
 
     /**
@@ -82,6 +90,7 @@ class PaymentPaypal
         try {
             $payment = $this->restClient->get($uri, array('payer_id' => $payerId));
         } catch (\Exception $e) {
+            $this->logger->error('An error occurred on getting the payment on returning from PayPal: ' . $e->getMessage());
         }
 
         if (!empty($payment['transactions'][0]['amount']['total'])) {
