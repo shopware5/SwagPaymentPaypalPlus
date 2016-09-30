@@ -10,6 +10,7 @@
 namespace Shopware\SwagPaymentPaypalPlus\Subscriber;
 
 use Enlight_Components_Session_Namespace as Session;
+use Exception;
 use Shopware\Components\Logger;
 use Shopware\SwagPaymentPaypalPlus\Components\PaymentInstructionProvider;
 use Shopware\SwagPaymentPaypalPlus\Components\RestClient;
@@ -89,7 +90,7 @@ class PaymentPaypal
         $payment = array();
         try {
             $payment = $this->restClient->get($uri, array('payer_id' => $payerId));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('An error occurred on getting the payment on returning from PayPal: ' . $e->getMessage());
         }
 
@@ -115,13 +116,11 @@ class PaymentPaypal
         }
 
         $paypalConfig = $this->paypalBootstrap->Config();
-        $statusId = $paypalConfig->get('paypalStatusId', 12);
-        $transactionId = $payment['id'];
         $orderNumber = null;
 
         if ($payment['state'] == 'created') {
             if ($paypalConfig->get('paypalSendInvoiceId')) {
-                $orderNumber = $controller->saveOrder($transactionId, sha1($payment['id']), $statusId);
+                $orderNumber = $controller->saveOrder($payment['id'], sha1($payment['id']));
                 $params = array(
                     array(
                         'op' => 'add',
@@ -141,11 +140,19 @@ class PaymentPaypal
 
                 $uri = 'payments/payment/' . $paymentId;
 
-                $this->restClient->patch($uri, $params);
+                try {
+                    $this->restClient->patch($uri, $params);
+                } catch (Exception $e) {
+                    $this->logger->error('An error occurred on patching the order number to the payment: ' . $e->getMessage());
+                }
             }
 
             $uri = "payments/payment/$paymentId/execute";
-            $payment = $this->restClient->create($uri, array('payer_id' => $payerId));
+            try {
+                $payment = $this->restClient->create($uri, array('payer_id' => $payerId));
+            } catch (Exception $e) {
+                $this->logger->error('An error occurred on executing the payment: ' . $e->getMessage());
+            }
         }
 
         if ($payment['state'] == 'approved') {
@@ -156,7 +163,7 @@ class PaymentPaypal
             }
 
             if (!$orderNumber) {
-                $orderNumber = $controller->saveOrder($transactionId, sha1($payment['id']), $statusId);
+                $orderNumber = $controller->saveOrder($transactionId, sha1($payment['id']));
             } else {
                 $sql = 'UPDATE s_order
                         SET transactionID = ?
@@ -181,7 +188,7 @@ class PaymentPaypal
                     ON DUPLICATE KEY UPDATE swag_payal_express = 2
                 ';
                 $controller->get('db')->query($sql, array($orderNumber));
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
             }
 
             $controller->redirect(
