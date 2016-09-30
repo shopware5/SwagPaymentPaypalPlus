@@ -53,15 +53,15 @@ class RestClient
         }
 
         $this->restClient = new Client(
-            [
+            array(
                 'base_url' => $base_url,
-                'defaults' => [
-                    'headers' => [
+                'defaults' => array(
+                    'headers' => array(
                         'PayPal-Partner-Attribution-Id' => 'ShopwareAG_Cart_PayPalPlus_1017'
-                    ],
+                    ),
                     'verify' => $certPath
-                ]
-            ]
+                )
+            )
         );
 
         $this->setAuth($restUser, $restPw);
