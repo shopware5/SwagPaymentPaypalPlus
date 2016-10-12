@@ -100,7 +100,7 @@ class Account
         /** @var RestClient $client */
         $client = $this->bootstrap->get('paypal_plus.rest_client');
 
-        if($client === null) {
+        if ($client === null) {
             return false;
         }
 
@@ -110,8 +110,12 @@ class Account
         //The method can be extended with several other exceptions to generate a correct result. The existing ones
         //do only check whether or not the SSL setup is correct.
         try {
-            $client->get('identity/openidconnect/userinfo', array('schema' => 'openid'));
+            $client->get('payments/payment', array());
         } catch (ClientException $ce) {
+            //Unauthorized: impossible to continue using PayPal plus
+            if ($ce->getCode() === 401) {
+                return false;
+            }
             //It's okay, since this call is just a SSL test.
         } catch (RequestException $re) {
             //It's not okay, since it's an SSL exception
