@@ -14,6 +14,7 @@ use Enlight_Controller_Action as Controller;
 use Enlight_View_Default as View;
 use Exception;
 use Shopware\Components\Logger;
+use Shopware\SwagPaymentPaypalPlus\Components\APIValidator;
 use Shopware\SwagPaymentPaypalPlus\Components\PaymentInstructionProvider;
 use Shopware\SwagPaymentPaypalPlus\Components\RestClient;
 use Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap as Bootstrap;
@@ -218,7 +219,13 @@ class Checkout
         $view->assign('payPalPlusInvoiceInstruction', $instruction);
         $payment = $orderData['sPayment'];
 
-        if ($payment['name'] === 'paypal') {
+        if ($payment['name'] !== 'paypal') {
+            return;
+        }
+
+        $validator = new APIValidator($this->restClient);
+
+        if ($validator->isAPIAvailable()) {
             $payment['description'] = $this->bootstrap->Config()->get('paypalPlusDescription', '');
             $view->assign('sPayment', $payment);
         }
@@ -240,19 +247,28 @@ class Checkout
         $newDescription = $this->bootstrap->Config()->get('paypalPlusDescription', '');
         $newAdditionalDescription = $this->bootstrap->Config()->get('paypalPlusAdditionalDescription', '');
         $payments = $view->getAssign('sPayments');
-        if (!empty($payments)) {
-            foreach ($payments as $key => $payment) {
-                if ($payment['name'] === 'paypal') {
-                    $payments[$key]['description'] = $newDescription;
-                    $payments[$key]['additionaldescription'] = $payment['additionaldescription'] . $newAdditionalDescription;
-                    break;
-                }
-            }
-            $view->assign('sPayments', $payments);
-        }
-        $user = $view->getAssign('sUserData');
+        $validator = new APIValidator($this->restClient);
 
-        if (!empty($user['additional']['payment']['name']) && $user['additional']['payment']['name'] === 'paypal') {
+        if (empty($payments)) {
+            return;
+        }
+
+        foreach ($payments as $key => $payment) {
+            if ($payment['name'] !== 'paypal' || !$validator->isAPIAvailable()) {
+                continue;
+            }
+
+            //Update the payment description
+            $payments[$key]['description'] = $newDescription;
+            $payments[$key]['additionaldescription'] = $payment['additionaldescription'] . $newAdditionalDescription;
+
+            break;
+        }
+
+        $view->assign('sPayments', $payments);
+
+        $user = $view->getAssign('sUserData');
+        if (!empty($user['additional']['payment']['name']) && $user['additional']['payment']['name'] === 'paypal' && $validator->isAPIAvailable()) {
             $user['additional']['payment']['description'] = $newDescription;
             $user['additional']['payment']['additionaldescription'] = $newAdditionalDescription;
             $view->assign('sUserData', $user);
