@@ -12,7 +12,7 @@
 
     "changelog": {
         "de": {
-            "1.2.2": "PT-5397 - Feature: Bestellnummern an PayPal senden; PT-6532 - Bugfix: Abwählen der Zahlungsart im PayPal iFrame; PT-6533 - Bugfix: Separater Call für Kundendaten; PT-6573 - Bugfix: Optimierung des Javascript Codes; PT-6760, PT-6763 - Bugfix: Falsche API Credentials oder ungültige SSL Zertifikate werden nun abgefangen; PT-6771 - Bugfix: Laden des iFrames unter Shopware 4; PT-6784 - Bugfix: Falscher Zahlungsstatus bei fehlerhaften Bestellvorgängen;",
+            "1.2.2": "PT-5397 - Feature: Bestellnummern an PayPal senden; PT-6532 - Bugfix: Abwählen der Zahlungsart im PayPal iFrame; PT-6533 - Bugfix: Separater Call für Kundendaten; PT-6573 - Bugfix: Optimierung des Javascript Codes; PT-6760, PT-6763 - Bugfix: Falsche API Credentials oder ungültige SSL Zertifikate werden nun abgefangen; PT-6771 - Bugfix: Laden des iFrames unter Shopware 4; PT-6784 - Bugfix: Falscher Zahlungsstatus bei fehlerhaften Bestellvorgängen; PT-6976 - Falsche Weiterleitung bei Gastlogin;",
             "1.2.0": "PT-5836 - Feature: Shopware 5.2 Kompatibilität;",
             "1.1.4": "PT-5096 - Bugfix: Buchungsdatum im Paypal Backend Modul; PT-5620 - Bugfix: Zahlungsartenwechsel vor Bestellabschluss mit Paypal;",
             "1.1.3": "PT-4875 - Feature: Pluginkonfiguration Subshop kompatibel; PT-4922 - Bugfix: Weiterleitung zu Paypal; PT-4940 - Bugfix: Rechnungskauf in Shopware 4.1.x, Bestellmodul in Shopware 4.3.2;",
@@ -31,7 +31,7 @@
             "1.0.0": "PT-2396 - Erstveröffentlichung"
         },
         "en": {
-            "1.2.2": "PT-5397 - Feature: Send order numbers to PayPal; PT-6532 - Bugfix: Deselect payment method in PayPal iFrame; PT-6533 - Bugfix: Separate call for customer data; PT-6573 - Bugfix: Optimization of javascript code; PT-6760, PT-6763 - Bugfix: False API credentials or invalide SSL certificates are caught; PT-6771 - Bugfix: Loading of the  iFrame under Shopware 4; PT-6784 - Bugfix: Wrong payment status at false checkout processes;",
+            "1.2.2": "PT-5397 - Feature: Send order numbers to PayPal; PT-6532 - Bugfix: Deselect payment method in PayPal iFrame; PT-6533 - Bugfix: Separate call for customer data; PT-6573 - Bugfix: Optimization of javascript code; PT-6760, PT-6763 - Bugfix: False API credentials or invalide SSL certificates are caught; PT-6771 - Bugfix: Loading of the  iFrame under Shopware 4; PT-6784 - Bugfix: Wrong payment status at false checkout processes; PT-6976 - Wrong redirect on guest login;",
             "1.2.0": "PT-5836 - Feature: Shopware 5.2 compatibility;",
             "1.1.4": "PT-5096 - Bugfix: Order date in Paypal backend modulel; PT-5620 - Bugfix: Changing the payment method before finishing an order via Paypal;",
             "1.1.3": "PT-4875 - Feature: Plugin configuration subshop compatible; PT-4922 - Bugfix: Redirect to Paypal; PT-4940 - Bugfix: Payment upon invoice in Shopware 4.1.x, order module in Shopware 4.3.2;",

@@ -152,6 +152,8 @@ class Checkout
             $view->extendsTemplate('frontend/payment_paypal_plus/checkout.tpl');
         }
 
+        $this->addTemplateVariables($view);
+
         if ($request->getActionName() === 'shippingPayment') {
             $this->session->offsetSet('PayPalPlusCameFromStep2', true);
             $this->onPaypalPlus($controller);
@@ -334,7 +336,6 @@ class Checkout
             $view->assign('PaypalPlusApprovalUrl', $payment['links'][1]['href']);
             $view->assign('PaypalPlusModeSandbox', $this->config->get('paypalSandbox'));
             $view->assign('PaypalLocale', $this->paypalBootstrap->getLocaleCode());
-            $this->addTemplateVariables($view);
 
             $this->session->PaypalPlusPayment = $payment['id'];
         }
