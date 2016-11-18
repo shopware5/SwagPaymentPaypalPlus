@@ -502,17 +502,25 @@ class Checkout
         $list = array();
         $currency = $this->getCurrency();
         foreach ($basket['content'] as $basketItem) {
+            $name = $basketItem['articlename'];
+            $quantity = (int)$basketItem['quantity'];
             if (!empty($user['additional']['charge_vat']) && !empty($basketItem['amountWithTax'])) {
                 $amount = round($basketItem['amountWithTax'], 2);
-                $quantity = 1;
             } else {
                 $amount = str_replace(',', '.', $basketItem['amount']);
-                $quantity = (int) $basketItem['quantity'];
-                $amount = $amount / $basketItem['quantity'];
             }
-            $amount = round($amount, 2);
+
+            // If more than 2 decimal places
+            if (round($amount / $quantity, 2) * $quantity != $amount) {
+                if ($quantity != 1) {
+                    $name = $quantity . 'x ' . $name;
+                }
+                $quantity = 1;
+            } else {
+                $amount = round($amount / $quantity, 2);
+            }
             $list[] = array(
-                'name' => $basketItem['articlename'],
+                'name' => $name,
                 'sku' => $basketItem['ordernumber'],
                 'price' => number_format($amount, 2, '.', ','),
                 'currency' => $currency,
