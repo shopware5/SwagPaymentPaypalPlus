@@ -11,6 +11,7 @@ namespace Shopware\SwagPaymentPaypalPlus\Subscriber;
 
 use Enlight_Components_Session_Namespace as Session;
 use Exception;
+use GuzzleHttp\Exception\RequestException;
 use Shopware\Components\Logger;
 use Shopware\SwagPaymentPaypalPlus\Components\PaymentInstructionProvider;
 use Shopware\SwagPaymentPaypalPlus\Components\RestClient;
@@ -80,7 +81,7 @@ class PaymentPaypal
             return;
         }
 
-        $paymentId = $this->session->offsetGet('PaypalPlusPayment');
+        $paymentId = $request->get('paymentId');
         if (!$paymentId) {
             return;
         }
@@ -91,7 +92,7 @@ class PaymentPaypal
         try {
             $payment = $this->restClient->get($uri, array('payer_id' => $payerId));
         } catch (Exception $e) {
-            $this->logger->error('An error occurred on getting the payment on returning from PayPal: ' . $e->getMessage());
+            $this->logException('An error occurred on getting the payment on returning from PayPal', $e);
         }
 
         if (!empty($payment['transactions'][0]['amount']['total'])) {
@@ -111,7 +112,6 @@ class PaymentPaypal
                     'action' => 'confirm'
                 )
             );
-
             return;
         }
 
@@ -134,7 +134,6 @@ class PaymentPaypal
                     // Set prefixed invoice id - Remove special chars and spaces
                     $prefix = str_replace(' ', '', $prefix);
                     $prefix = preg_replace('/[^A-Za-z0-9\_]/', '', $prefix);
-
                     $params[0]['value'] = $prefix . $orderNumber;
                 }
 
@@ -143,7 +142,7 @@ class PaymentPaypal
                 try {
                     $this->restClient->patch($uri, $params);
                 } catch (Exception $e) {
-                    $this->logger->error('An error occurred on patching the order number to the payment: ' . $e->getMessage());
+                    $this->logException('An error occurred on patching the order number to the payment', $e);
                 }
             }
 
@@ -151,7 +150,7 @@ class PaymentPaypal
             try {
                 $payment = $this->restClient->create($uri, array('payer_id' => $payerId));
             } catch (Exception $e) {
-                $this->logger->error('An error occurred on executing the payment: ' . $e->getMessage());
+                $this->logException('An error occurred on executing the payment', $e);
             }
         }
 
@@ -211,5 +210,20 @@ class PaymentPaypal
     {
         $paymentInstructionProvider = new PaymentInstructionProvider($this->paypalBootstrap->get('db'));
         $paymentInstructionProvider->saveInstructionByOrderNumber($orderNumber, $payment['payment_instruction']);
+    }
+
+    /**
+     * Writes an exception to the plugin log.
+     *
+     * @param string $message
+     * @param Exception $e
+     */
+    private function logException($message, Exception $e)
+    {
+        $context = ['exception' => $e];
+        if ($e instanceof RequestException) {
+            $context['response'] = $e->getResponse();
+        }
+        $this->logger->error($message . ': ' . $e->getMessage(), $context);
     }
 }

@@ -14,7 +14,7 @@
                 isConfirmAction = $('.is--act-confirm').length > 0,
                 urlForSendingCustomerData = '{url controller=checkout action=preRedirect forceSecure}',
                 onConfirm = function (event) {
-                    if (!window.paypalIsCurrentPaymentMethodPaypal || !$agb.prop('checked')) {
+                    if (!window.paypalIsCurrentPaymentMethodPaypal || ($agb.length && !$agb.prop('checked'))) {
                         return;
                     }
 

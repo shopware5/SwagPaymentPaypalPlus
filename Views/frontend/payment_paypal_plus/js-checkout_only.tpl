@@ -5,7 +5,7 @@
             var $agb = $('#sAGB'),
                 urlForSendingCustomerData = '{url controller=checkout action=preRedirect forceSecure}',
                 onConfirm = function (event) {
-                    if (!$agb.prop('checked')) {
+                    if ($agb.length && !$agb.prop('checked')) {
                         return;
                     }
 

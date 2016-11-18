@@ -137,7 +137,7 @@ class Checkout
         if ($countries instanceof \Enlight_Config) {
             $countries = $countries->toArray();
         } else {
-            $countries = (array) $countries;
+            $countries = (array)$countries;
         }
 
         if (!empty($this->session->PaypalResponse['TOKEN']) // PP-Express
@@ -392,6 +392,11 @@ class Checkout
         $profileName = "{$shop->getHost()}{$shop->getBasePath()}[{$shop->getId()}]";
 
         $shopName = $this->config->get('paypalBrandName') ?: $this->bootstrap->get('config')->get('shopName');
+
+        // (max length 127)
+        if (strlen($shopName) > 127) {
+            $shopName = substr($shopName, 0, 124) . '...';
+        }
 
         $logoImage = $this->config->get('paypalLogoImage');
         $logoImage = 'string:{link file=' . var_export($logoImage, true) . ' fullPath}';
