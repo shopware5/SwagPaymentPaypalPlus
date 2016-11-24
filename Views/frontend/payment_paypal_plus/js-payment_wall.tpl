@@ -1,8 +1,12 @@
 {block name="frontend_checkout_payment_paypalplus_paymentwall"}
     {$PayPalPlusContinue = "{s name='PaypalPlusLinkChangePayment'}Weiter{/s}"}
+    <script type="text/javascript">
+        var jQuery_SW = $.noConflict(true);
+    </script>
     <script src="https://www.paypalobjects.com/webstatic/ppplus/ppplus.min.js" type="text/javascript"></script>
     <script type="text/javascript">
-        window.paypalIsCurrentPaymentMethodPaypal = {if $sUserData.additional.payment.id == $PayPalPaymentId}true{else}false{/if}
+        var $ = jQuery_SW;
+        window.paypalIsCurrentPaymentMethodPaypal = {if $sUserData.additional.payment.id == $PayPalPaymentId}true{else}false{/if};
 
         function paymentWall($, approvalUrl) {
             var $basketButton = $('#basketButton'),
@@ -13,8 +17,8 @@
                 $payPalCheckBox = $("#payment_mean" + {$PayPalPaymentId}),
                 isConfirmAction = $('.is--act-confirm').length > 0,
                 urlForSendingCustomerData = '{url controller=checkout action=preRedirect forceSecure}',
-                onConfirm = function (event) {
-                    if (!window.paypalIsCurrentPaymentMethodPaypal || ($agb.length && !$agb.prop('checked'))) {
+                onConfirm = function(event) {
+                    if (!window.paypalIsCurrentPaymentMethodPaypal || ($agb && $agb.length > 0 && !$agb.prop('checked'))) {
                         return;
                     }
 
@@ -23,7 +27,7 @@
                     $.ajax({
                         type: "POST",
                         url: urlForSendingCustomerData,
-                        success: function (result) {
+                        success: function(result) {
                             var resultObject = $.parseJSON(result);
 
                             if (resultObject.success) {
@@ -79,7 +83,7 @@
         }
 
         function deselectPayPalMethod($) {
-            var callback = function (event) {
+            var callback = function(event) {
                 var $paypalPlusContainer = $('#ppplus'),
                     paypalSandbox = $paypalPlusContainer.attr('data-paypal-sandbox'),
                     originUrl = paypalSandbox == 'true' ? "https://www.sandbox.paypal.com" : 'https://www.paypal.com',
