@@ -1,11 +1,15 @@
 {block name="frontend_checkout_payment_paypalplus_checkoutonly"}
+    <script type="text/javascript">
+        var jQuery_SW = $.noConflict(true);
+    </script>
     <script src="https://www.paypalobjects.com/webstatic/ppplus/ppplus.min.js" type="text/javascript"></script>
     <script type="text/javascript">
+        var $ = jQuery_SW;
         function prepareCheckout($) {
             var $agb = $('#sAGB'),
                 urlForSendingCustomerData = '{url controller=checkout action=preRedirect forceSecure}',
-                onConfirm = function (event) {
-                    if ($agb.length && !$agb.prop('checked')) {
+                onConfirm = function(event) {
+                    if ($agb && $agb.length > 0 && !$agb.prop('checked')) {
                         return;
                     }
 
@@ -14,7 +18,7 @@
                     $.ajax({
                         type: "POST",
                         url: urlForSendingCustomerData,
-                        success: function (result) {
+                        success: function(result) {
                             var resultObject = $.parseJSON(result);
 
                             if (resultObject.success) {
@@ -27,7 +31,7 @@
             $('#confirm--form').on('submit', onConfirm);
         }
 
-        jQuery(document).ready(function ($) {
+        jQuery(document).ready(function($) {
             prepareCheckout($);
         });
     </script>
