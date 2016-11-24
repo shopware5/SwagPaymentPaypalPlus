@@ -13,6 +13,7 @@ use Enlight_Components_Session_Namespace as Session;
 use Enlight_Controller_Action as Controller;
 use Enlight_View_Default as View;
 use Exception;
+use GuzzleHttp\Exception\RequestException;
 use Shopware\Components\Logger;
 use Shopware\SwagPaymentPaypalPlus\Components\APIValidator;
 use Shopware\SwagPaymentPaypalPlus\Components\PaymentInstructionProvider;
@@ -198,7 +199,7 @@ class Checkout
         try {
             $this->restClient->patch($uri, $requestData);
         } catch (Exception $e) {
-            $this->pluginLogger->error('An error occurred on patching the address to the payment: ' . $e->getMessage());
+            $this->logException('An error occurred on patching the address to the payment', $e);
             echo json_encode(array('success' => false));
             return true;
         }
@@ -329,7 +330,7 @@ class Checkout
         try {
             $payment = $this->restClient->create($uri, $params);
         } catch (Exception $e) {
-            $this->pluginLogger->error('An error occurred on creating a payment: ' . $e->getMessage());
+            $this->logException('An error occurred on creating a payment', $e);
         }
 
         if (!empty($payment['links'][1]['href'])) {
@@ -353,7 +354,7 @@ class Checkout
             try {
                 $profileList = $this->restClient->get($uri);
             } catch (Exception $e) {
-                $this->pluginLogger->error('An error occurred getting the experience profiles: ' . $e->getMessage());
+                $this->logException('An error occurred getting the experience profiles', $e);
             }
 
             foreach ($profileList as $entry) {
@@ -369,7 +370,7 @@ class Checkout
                 try {
                     $payPalProfile = $this->restClient->create($uri, $profile);
                 } catch (Exception $e) {
-                    $this->pluginLogger->error('An error occurred on creating an experience profiles: ' . $e->getMessage());
+                    $this->logException('An error occurred on creating an experience profiles', $e);
                 }
                 $this->session['PaypalProfile'] = $payPalProfile;
             }
@@ -502,6 +503,7 @@ class Checkout
         $list = array();
         $currency = $this->getCurrency();
         foreach ($basket['content'] as $basketItem) {
+            $sku = $basketItem['ordernumber'];
             $name = $basketItem['articlename'];
             $quantity = (int)$basketItem['quantity'];
             if (!empty($user['additional']['charge_vat']) && !empty($basketItem['amountWithTax'])) {
@@ -519,9 +521,24 @@ class Checkout
             } else {
                 $amount = round($amount / $quantity, 2);
             }
+
+            // Add support for custom products
+            if (!empty($basketItem['customProductMode'])) {
+                $last = count($list) - 1;
+                if (isset($list[$last])) {
+                    if ($basketItem['customProductMode'] == 2) {
+                        $sku = $sku ?: $list[$last]['sku'];
+                    } elseif ($basketItem['customProductMode'] == 3) {
+                        $list[$last]['name'] .= ': ' . $name;
+                        $list[$last]['price'] += $amount;
+                        continue;
+                    }
+                }
+            }
+
             $list[] = array(
                 'name' => $name,
-                'sku' => $basketItem['ordernumber'],
+                'sku' => $sku,
                 'price' => number_format($amount, 2, '.', ','),
                 'currency' => $currency,
                 'quantity' => $quantity,
@@ -546,5 +563,20 @@ class Checkout
         );
 
         return $address;
+    }
+
+    /**
+     * Writes an exception to the plugin log.
+     *
+     * @param string $message
+     * @param Exception $e
+     */
+    private function logException($message, Exception $e)
+    {
+        $context = ['exception' => $e];
+        if ($e instanceof RequestException) {
+            $context['response'] = $e->getResponse();
+        }
+        $this->pluginLogger->error($message . ': ' . $e->getMessage(), $context);
     }
 }
