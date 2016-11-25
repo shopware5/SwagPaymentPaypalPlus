@@ -5,7 +5,7 @@
     </script>
     <script src="https://www.paypalobjects.com/webstatic/ppplus/ppplus.min.js" type="text/javascript"></script>
     <script type="text/javascript">
-        var $ = jQuery_SW;
+        var jQuery = $ = jQuery_SW;
         window.paypalIsCurrentPaymentMethodPaypal = {if $sUserData.additional.payment.id == $PayPalPaymentId}true{else}false{/if};
 
         function paymentWall($, approvalUrl) {
