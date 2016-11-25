@@ -502,6 +502,8 @@ class Checkout
     {
         $list = array();
         $currency = $this->getCurrency();
+        $lastCustomProduct = null;
+
         foreach ($basket['content'] as $basketItem) {
             $sku = $basketItem['ordernumber'];
             $name = $basketItem['articlename'];
@@ -524,15 +526,28 @@ class Checkout
 
             // Add support for custom products
             if (!empty($basketItem['customProductMode'])) {
-                $last = count($list) - 1;
-                if (isset($list[$last])) {
-                    if ($basketItem['customProductMode'] == 2) {
-                        $sku = $sku ?: $list[$last]['sku'];
-                    } elseif ($basketItem['customProductMode'] == 3) {
-                        $list[$last]['name'] .= ': ' . $name;
-                        $list[$last]['price'] += $amount;
-                        continue;
-                    }
+                switch ($basketItem['customProductMode']) {
+                    case 1: // Product
+                        $lastCustomProduct = count($list);
+                        break;
+                    case 2: // Option
+                        if (empty($sku) && isset($list[$lastCustomProduct])) {
+                            $sku = $list[$lastCustomProduct]['sku'];
+                        }
+                        break;
+                    case 3; // Value
+                        $last = count($list) - 1;
+                        if (isset($list[$last])) {
+                            if (strpos($list[$last]['name'], ': ') === false) {
+                                $list[$last]['name'] .= ': ' . $name;
+                            } else {
+                                $list[$last]['name'] .= ', ' . $name;
+                            }
+                            $list[$last]['price'] += $amount;
+                        }
+                        continue 2;
+                    default:
+                        break;
                 }
             }
 
