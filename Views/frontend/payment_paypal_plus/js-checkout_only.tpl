@@ -4,35 +4,31 @@
     </script>
     <script src="https://www.paypalobjects.com/webstatic/ppplus/ppplus.min.js" type="text/javascript"></script>
     <script type="text/javascript">
-        var $ = jQuery_SW;
-        function prepareCheckout($) {
+        var jQuery = $ = jQuery_SW;
+        jQuery(document).ready(function($) {
             var $agb = $('#sAGB'),
-                urlForSendingCustomerData = '{url controller=checkout action=preRedirect forceSecure}',
-                onConfirm = function(event) {
-                    if ($agb && $agb.length > 0 && !$agb.prop('checked')) {
-                        return;
-                    }
-
-                    event.preventDefault();
-
-                    $.ajax({
-                        type: "POST",
-                        url: urlForSendingCustomerData,
-                        success: function(result) {
-                            var resultObject = $.parseJSON(result);
-
-                            if (resultObject.success) {
-                                PAYPAL.apps.PPP.doCheckout();
-                            }
+                    urlForSendingCustomerData = '{url controller=checkout action=preRedirect forceSecure}',
+                    onConfirm = function(event) {
+                        if ($agb && $agb.length > 0 && !$agb.prop('checked')) {
+                            return;
                         }
-                    });
-                };
+
+                        event.preventDefault();
+
+                        $.ajax({
+                            type: "POST",
+                            url: urlForSendingCustomerData,
+                            success: function(result) {
+                                var resultObject = $.parseJSON(result);
+
+                                if (resultObject.success) {
+                                    PAYPAL.apps.PPP.doCheckout();
+                                }
+                            }
+                        });
+                    };
 
             $('#confirm--form').on('submit', onConfirm);
-        }
-
-        jQuery(document).ready(function($) {
-            prepareCheckout($);
         });
     </script>
 {/block}
