@@ -301,7 +301,11 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             $certPath = true;
         }
 
-        $client = new RestClient($this->Collection()->get('SwagPaymentPaypal')->Config(), $certPath);
+        $client = new RestClient(
+            $this->Collection()->get('SwagPaymentPaypal')->Config(),
+            Shopware()->Container()->get('shopware.cache_manager'),
+            $certPath
+        );
 
         return $client;
     }

@@ -1,5 +1,4 @@
 <?php
-
 /*
  * (c) shopware AG <info@shopware.com>
  *
@@ -13,6 +12,7 @@ require(__DIR__ . "/../vendor/autoload.php");
 
 use Enlight_Config as PayPalConfig;
 use GuzzleHttp\Client;
+use Shopware\Components\CacheManager;
 
 class RestClient
 {
@@ -30,18 +30,26 @@ class RestClient
      */
     const URL_LIVE = 'https://api.paypal.com/v1/';
 
+    /** @var string */
+    const CACHE_ID = 'paypal_classic_auth';
+
     /** @var Client $restClient */
     private $restClient;
 
     /** @var array $authHeader */
     private $authHeader;
 
+    /** @var CacheManager $cacheManager */
+    private $cacheManager;
+
     /**
      * @param PayPalConfig $config
+     * @param CacheManager $cacheManager
      * @param string|bool $certPath path to Bundle of CA Root Certificates (see: https://curl.haxx.se/ca/cacert.pem)
      */
-    public function __construct(PayPalConfig $config, $certPath = true)
+    public function __construct(PayPalConfig $config, CacheManager $cacheManager, $certPath = true)
     {
+        $this->cacheManager = $cacheManager;
         $restUser = $config->get('paypalClientId');
         $restPw = $config->get('paypalSecret');
         $sandBoxMode = $config->get('paypalSandbox');
@@ -153,15 +161,18 @@ class RestClient
             )
         );
 
-        $authorization = ' ';
+        $authorization = $this->getAuthorizationFromCache();
 
-        try {
-            $auth = $this->createToken('oauth2/token', $params);
-            $authorization = $auth['token_type'] . ' ' . $auth['access_token'];
-        } catch (\Exception $e) {
-            /** @var \Shopware\Components\Logger $pluginLogger */
-            $pluginLogger = Shopware()->Container()->get('pluginlogger');
-            $pluginLogger->error('An error occurred on initialising PayPal Plus: ' . $e->getMessage());
+        if (!$authorization) {
+            try {
+                $auth = $this->createToken('oauth2/token', $params);
+                $authorization = $auth['token_type'] . ' ' . $auth['access_token'];
+                $this->setAuthorizationToCache($authorization, (int) $auth['expires_in']);
+            } catch (\Exception $e) {
+                /** @var \Shopware\Components\Logger $pluginLogger */
+                $pluginLogger = Shopware()->Container()->get('pluginlogger');
+                $pluginLogger->error('An error occurred on initialising PayPal Plus: ' . $e->getMessage());
+            }
         }
 
         $this->authHeader = array(
@@ -183,5 +194,23 @@ class RestClient
         $result = $this->restClient->post($uri, $params);
 
         return json_decode($result->getBody()->getContents(), true);
+    }
+
+    /**
+     * @return string|false
+     */
+    private function getAuthorizationFromCache()
+    {
+        return $this->cacheManager->getCoreCache()->load(self::CACHE_ID);
+    }
+
+    /**
+     * @param string $token
+     * @param int $expiresIn
+     */
+    private function setAuthorizationToCache($token, $expiresIn)
+    {
+        //Decrease expire date by one hour (3600s) just to make sure, we don't run into an unauthorized exception.
+        $this->cacheManager->getCoreCache()->save($token, self::CACHE_ID, array(), $expiresIn - 3600);
     }
 }
