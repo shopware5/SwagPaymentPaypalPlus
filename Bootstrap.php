@@ -245,7 +245,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             'paypalPlusAdditionalDescription',
             array(
                 'label' => 'Zahlungsart-Beschreibung ergänzen',
-                'value' => ' Zahlung per Lastschrift oder Kreditkarte ist auch ohne PayPal-Konto möglich.',
+                'value' => 'Zahlung per Lastschrift oder Kreditkarte ist auch ohne PayPal-Konto möglich.',
                 'scope' => \Shopware\Models\Config\Element::SCOPE_SHOP
             )
         );
