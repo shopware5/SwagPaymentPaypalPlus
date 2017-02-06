@@ -8,6 +8,8 @@
         jQuery(document).ready(function($) {
             var $agb = $('#sAGB'),
                     urlForSendingCustomerData = '{url controller=checkout action=preRedirect forceSecure}',
+                    urlForSendingCustomerDataError  = '{url controller=payment_paypal action=return forceSecure}',
+
                     onConfirm = function(event) {
                         if ($agb && $agb.length > 0 && !$agb.prop('checked')) {
                             return;
@@ -18,12 +20,11 @@
                         $.ajax({
                             type: "POST",
                             url: urlForSendingCustomerData,
-                            success: function(result) {
-                                var resultObject = $.parseJSON(result);
-
-                                if (resultObject.success) {
-                                    PAYPAL.apps.PPP.doCheckout();
-                                }
+                            success: function() {
+                                PAYPAL.apps.PPP.doCheckout();
+                            },
+                            error: function() {
+                                $(location).attr('href', urlForSendingCustomerDataError);
                             }
                         });
                     };

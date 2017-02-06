@@ -173,6 +173,7 @@ class Checkout
     /**
      * @param \Enlight_Controller_ActionEventArgs $args
      * @return bool
+     * @throws \Exception
      */
     public function onPreRedirectToPayPal($args)
     {
@@ -200,11 +201,8 @@ class Checkout
             $this->restClient->patch($uri, $requestData);
         } catch (Exception $e) {
             $this->logException('An error occurred on patching the address to the payment', $e);
-            echo json_encode(array('success' => false));
-            return true;
+            throw $e;
         }
-
-        echo json_encode(array('success' => true));
 
         return true;
     }
