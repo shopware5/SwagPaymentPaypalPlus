@@ -573,6 +573,8 @@ class Checkout
             'city' => $user['shippingaddress']['city'],
             'postal_code' => $user['shippingaddress']['zipcode'],
             'country_code' => $user['additional']['countryShipping']['countryiso'],
+            'state' => $user['additional']['stateShipping']['shortcode'],
+            'phone' => $user['shippingaddress']['phone']
         );
 
         return $address;
