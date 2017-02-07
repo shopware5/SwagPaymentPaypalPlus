@@ -8,10 +8,11 @@
     "link": "http://store.shopware.com",
     "author": "shopware AG",
 
-    "currentVersion": "1.2.5",
+    "currentVersion": "1.2.6",
 
     "changelog": {
         "de": {
+            "1.2.6": "PT-7385 - Bugfix: Bundesstaat fehlte in Adresse; PT-7386 - Bugfix: Javascript Fehler während des Checkout Prozess;",
             "1.2.5": "PT-7128 - Bugfix: Autorisierungstoken wird nun gecacht;",
             "1.2.4": "PT-7038 - Bugfix: Problem mit Custom Products; PT-7065 - Bugfix: jQuery Kompatibilität;",
             "1.2.3": "PT-7016 - Bugfix: Falsche Stückzahl bei Nettobestellungen; PT-7028 - Bugfix: Fehlerhafte Requests zu PayPal;",
@@ -34,6 +35,7 @@
             "1.0.0": "PT-2396 - Erstveröffentlichung"
         },
         "en": {
+            "1.2.6": "PT-7385 - Bugfix: Missing state in address; PT-7386 - Bugfix: Javascript error during checkout process;",
             "1.2.5": "PT-7128 - Bugfix: Authorization token is cached now;",
             "1.2.4": "PT-7038 - Bugfix: Problem with Custom Products; PT-7065 - Bugfix: jQuery compatibility;",
             "1.2.3": "PT-7016 - Bugfix: Wrong quantity in net orders; PT-7028 - Bugfix: Incorrect requests to PayPal;",
