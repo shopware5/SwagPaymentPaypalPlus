@@ -23,10 +23,12 @@
         // reset the default
         $.loadingIndicator.defaults.closeOnClick = initialSetting;
 
-        if (approvalUrl) {
-            window.ppp = paymentWall($, approvalUrl.text());
-        } else {
-            window.ppp = paymentWall($);
+        if (typeof paymentWall === 'function') {
+            if (approvalUrl) {
+                window.ppp = paymentWall($, approvalUrl.text());
+            } else {
+                window.ppp = paymentWall($);
+            }
         }
 
         var paymentId = -1;
