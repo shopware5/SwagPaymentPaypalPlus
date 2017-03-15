@@ -23,25 +23,27 @@
         // reset the default
         $.loadingIndicator.defaults.closeOnClick = initialSetting;
 
-        if (approvalUrl) {
-            window.ppp = paymentWall($, approvalUrl.text());
-        } else {
-            window.ppp = paymentWall($);
+        if (typeof paymentWall !== 'undefined') {
+            if (approvalUrl) {
+                window.ppp = paymentWall($, approvalUrl.text());
+            } else {
+                window.ppp = paymentWall($);
+            }
+
+            var paymentId = -1;
+            $.each(data, function (i, item) {
+                if (item.hasOwnProperty('name') && item.name === 'payment') {
+                    paymentId = window.parseInt(item.value);
+                    return false;
+                }
+            });
+
+            $paypalPlusContainer.find('iframe').one('load', function () {
+                if (paymentId !== -1 && paymentId !== paypalPaymentId) {
+                    window.ppp.deselectPaymentMethod();
+                }
+            });
         }
-
-        var paymentId = -1;
-        $.each(data, function (i, item) {
-            if (item.hasOwnProperty('name') && item.name === 'payment') {
-                paymentId = window.parseInt(item.value);
-                return false;
-            }
-        });
-
-        $paypalPlusContainer.find('iframe').one('load', function () {
-            if (paymentId !== -1 && paymentId !== paypalPaymentId) {
-                window.ppp.deselectPaymentMethod();
-            }
-        });
     });
 
     /**
