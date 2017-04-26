@@ -186,6 +186,11 @@ class Checkout
         $this->session->sOrderVariables['sPayment'] = $payment;
         $this->session->sOrderVariables['sUserData']['additional']['payment'] = $payment;
 
+        $request = $controller->Request();
+        if ($request->getParam('sComment')) {
+            $this->session['sComment'] = trim(strip_tags($request->getParam('sComment')));
+        }
+        
         $requestData = array(
             array(
                 'op' => 'add',
