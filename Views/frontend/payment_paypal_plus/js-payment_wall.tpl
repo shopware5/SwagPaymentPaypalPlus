@@ -29,6 +29,7 @@
                     $.ajax({
                         type: "POST",
                         url: urlForSendingCustomerData,
+                        data:  { sComment:  $(".user-comment--hidden").val() },
                         success: function() {
                             ppp.doCheckout();
                         },
