@@ -1,7 +1,7 @@
 {extends file="parent:frontend/checkout/confirm.tpl"}
 
 {* Loaded in Shopware 5 only *}
-{block name="frontend_index_header_javascript_jquery"}
+{block name="frontend_index_header_javascript_jquery_lib"}
     {$smarty.block.parent}
     {if $sUserData.additional.payment.id == $PayPalPaymentId && $cameFromStep2}
         {include file="frontend/payment_paypal_plus/js-checkout_only.tpl"}
