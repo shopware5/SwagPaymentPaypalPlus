@@ -13,6 +13,7 @@ require(__DIR__ . "/../vendor/autoload.php");
 use Enlight_Config as PayPalConfig;
 use GuzzleHttp\Client;
 use Shopware\Components\CacheManager;
+use Shopware\Models\Shop\DetachedShop;
 
 class RestClient
 {
@@ -30,25 +31,40 @@ class RestClient
      */
     const URL_LIVE = 'https://api.paypal.com/v1/';
 
-    /** @var string */
+    /**
+     * @var string
+     */
     const CACHE_ID = 'paypal_classic_auth';
 
-    /** @var Client $restClient */
+    /**
+     * @var Client $restClient
+     */
     private $restClient;
 
-    /** @var array $authHeader */
+    /**
+     * @var array $authHeader
+     */
     private $authHeader;
 
-    /** @var CacheManager $cacheManager */
+    /**
+     * @var CacheManager $cacheManager
+     */
     private $cacheManager;
+
+    /**
+     * @var DetachedShop
+     */
+    private $shop;
 
     /**
      * @param PayPalConfig $config
      * @param CacheManager $cacheManager
      * @param string|bool $certPath path to Bundle of CA Root Certificates (see: https://curl.haxx.se/ca/cacert.pem)
+     * @param DetachedShop $shop
      */
-    public function __construct(PayPalConfig $config, CacheManager $cacheManager, $certPath = true)
+    public function __construct(PayPalConfig $config, CacheManager $cacheManager, $certPath = true, DetachedShop $shop)
     {
+        $this->shop = $shop;
         $this->cacheManager = $cacheManager;
         $restUser = $config->get('paypalClientId');
         $restPw = $config->get('paypalSecret');
@@ -162,7 +178,6 @@ class RestClient
         );
 
         $authorization = $this->getAuthorizationFromCache();
-
         if (!$authorization) {
             try {
                 $auth = $this->createToken('oauth2/token', $params);
@@ -201,7 +216,7 @@ class RestClient
      */
     private function getAuthorizationFromCache()
     {
-        return $this->cacheManager->getCoreCache()->load(self::CACHE_ID);
+        return $this->cacheManager->getCoreCache()->load($this->createCacheId());
     }
 
     /**
@@ -211,6 +226,19 @@ class RestClient
     private function setAuthorizationToCache($token, $expiresIn)
     {
         //Decrease expire date by one hour (3600s) just to make sure, we don't run into an unauthorized exception.
-        $this->cacheManager->getCoreCache()->save($token, self::CACHE_ID, array(), $expiresIn - 3600);
+        $this->cacheManager->getCoreCache()->save(
+            $token,
+            $this->createCacheId(),
+            array(),
+            $expiresIn - 3600
+        );
+    }
+
+    /**
+     * @return string
+     */
+    private function createCacheId()
+    {
+        return self::CACHE_ID . '_' . $this->shop->getId();
     }
 }
