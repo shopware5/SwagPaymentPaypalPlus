@@ -1,12 +1,20 @@
 {block name="frontend_checkout_payment_paypalplus_checkoutonly"}
     <script type="text/javascript">
-        var jQuery_SW = $.noConflict(true);
+        var asyncConf = ~~("{$theme.asyncJavascriptLoading}");
+        if (typeof document.asyncReady === 'function' && asyncConf) {
+            document.asyncReady(function () {
+                window.jQuery_SW = $.noConflict(true);
+            });
+        } else {
+            window.jQuery_SW = $.noConflict(true);
+        }
     </script>
     <script src="https://www.paypalobjects.com/webstatic/ppplus/ppplus.min.js" type="text/javascript"></script>
     <script type="text/javascript">
-        var jQuery = $ = jQuery_SW;
-        jQuery(document).ready(function($) {
-            var $agb = $('#sAGB'),
+        var paymentWallFn = function () {
+            var jQuery = $ = window.jQuery_SW;
+            jQuery(document).ready(function($) {
+                var $agb = $('#sAGB'),
                     urlForSendingCustomerData = '{url controller=checkout action=preRedirect forceSecure}',
                     urlForSendingCustomerDataError  = '{url controller=payment_paypal action=return forceSecure}',
 
@@ -29,7 +37,16 @@
                         });
                     };
 
-            $('#confirm--form').on('submit', onConfirm);
-        });
+                $('#confirm--form').on('submit', onConfirm);
+            });
+        };
+
+        var asyncConf = ~~("{$theme.asyncJavascriptLoading}");
+        if (typeof document.asyncReady === 'function' && asyncConf) {
+            document.asyncReady(paymentWallFn);
+        } else {
+            paymentWallFn();
+        }
+
     </script>
 {/block}
