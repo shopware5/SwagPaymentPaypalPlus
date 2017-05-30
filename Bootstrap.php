@@ -333,7 +333,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      */
     public function onPostDispatchCheckoutSecure($args)
     {
-        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Checkout($this);
+        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Checkout($this, $this->assertMinimumVersion('5.3.0'));
         $subscriber->onPostDispatchCheckoutSecure($args);
     }
 
@@ -343,7 +343,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      */
     public function onPreRedirectToPayPal($args)
     {
-        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Checkout($this);
+        $subscriber = new \Shopware\SwagPaymentPaypalPlus\Subscriber\Checkout($this, $this->assertMinimumVersion('5.3.0'));
 
         return $subscriber->onPreRedirectToPayPal($args);
     }

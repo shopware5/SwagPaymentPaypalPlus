@@ -3,8 +3,15 @@
     /**
      * prevent closing of the indicator on click by overwriting the default value
      */
-    var initialSetting = $.loadingIndicator.defaults.closeOnClick;
+    var hasLoadingIndicatorPrototype = window.hasOwnProperty('LoadingIndicator'),
+        initialSetting = hasLoadingIndicatorPrototype ? window.LoadingIndicator.prototype.defaults.closeOnClick : $.loadingIndicator.defaults.closeOnClick;
+
     $.subscribe('plugin/swShippingPayment/onInputChangedBefore', function () {
+        if (hasLoadingIndicatorPrototype) {
+            window.LoadingIndicator.prototype.defaults.closeOnClick = false;
+
+            return;
+        }
         $.loadingIndicator.defaults.closeOnClick = false;
     });
 
@@ -21,7 +28,11 @@
             paypalPaymentId = window.parseInt($paypalPlusContainer.attr('data-paypal-payment-id'));
 
         // reset the default
-        $.loadingIndicator.defaults.closeOnClick = initialSetting;
+        if (hasLoadingIndicatorPrototype) {
+            window.LoadingIndicator.prototype.defaults.closeOnClick = initialSetting;
+        } else {
+            $.loadingIndicator.defaults.closeOnClick = initialSetting;
+        }
 
         if (typeof paymentWall !== 'undefined') {
             if (approvalUrl) {

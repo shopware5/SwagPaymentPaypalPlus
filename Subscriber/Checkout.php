@@ -59,9 +59,15 @@ class Checkout
     private $pluginLogger;
 
     /**
-     * @param Bootstrap $bootstrap
+     * @var bool
      */
-    public function __construct(Bootstrap $bootstrap)
+    private $isShopware53;
+
+    /**
+     * @param Bootstrap $bootstrap
+     * @param bool $isShopware53
+     */
+    public function __construct(Bootstrap $bootstrap, $isShopware53)
     {
         $this->bootstrap = $bootstrap;
         $this->paypalBootstrap = $bootstrap->Collection()->get('SwagPaymentPaypal');
@@ -69,6 +75,7 @@ class Checkout
         $this->session = $bootstrap->get('session');
         $this->restClient = $bootstrap->get('paypal_plus.rest_client');
         $this->pluginLogger = $bootstrap->get('pluginlogger');
+        $this->isShopware53 = $isShopware53;
     }
 
     /**
@@ -100,6 +107,8 @@ class Checkout
         if (!$cameFromStep2 && $request->getActionName() !== 'preRedirect') {
             $this->session->offsetUnset('PaypalPlusPayment');
         }
+
+        $view->assign('isShopware53', $this->isShopware53);
 
         /** @var $shop \Shopware\Models\Shop\Shop */
         $shop = $this->bootstrap->get('shop');
