@@ -12,11 +12,14 @@
     </script>
     <script src="https://www.paypalobjects.com/webstatic/ppplus/ppplus.min.js" type="text/javascript"></script>
     <script type="text/javascript">
+        var paymentWall,
+            deselectPayPalMethod;
+
         var paymentWallFn = function () {
             var jQuery = $ = window.jQuery_SW;
             window.paypalIsCurrentPaymentMethodPaypal = {if $sUserData.additional.payment.id == $PayPalPaymentId}true{else}false{/if};
 
-            function paymentWall($, approvalUrl) {
+            paymentWall = function($, approvalUrl) {
                 var $basketButton = $('#basketButton'),
                     bbFunction = 'val',
                     $agb = $('#sAGB'),
@@ -89,9 +92,9 @@
                 });
 
                 return ppp;
-            }
+            };
 
-            function deselectPayPalMethod($) {
+            deselectPayPalMethod = function ($) {
                 var callback = function (event) {
                     var $paypalPlusContainer = $('#ppplus'),
                         paypalSandbox = $paypalPlusContainer.attr('data-paypal-sandbox'),
@@ -116,7 +119,7 @@
                 };
 
                 window.addEventListener('message', callback, false);
-            }
+            };
 
             window.ppp = paymentWall($);
             deselectPayPalMethod($);
