@@ -3,7 +3,7 @@
     <script type="text/javascript">
         var asyncConf = ~~("{$theme.asyncJavascriptLoading}");
         if (typeof document.asyncReady === 'function' && asyncConf) {
-            document.asyncReady(function () {
+            document.asyncReady(function() {
                 window.jQuery_SW = $.noConflict(true);
             });
         } else {
@@ -15,7 +15,7 @@
         var paymentWall,
             deselectPayPalMethod;
 
-        var paymentWallFn = function () {
+        var paymentWallFn = function() {
             var jQuery = $ = window.jQuery_SW;
             window.paypalIsCurrentPaymentMethodPaypal = {if $sUserData.additional.payment.id == $PayPalPaymentId}true{else}false{/if};
 
@@ -29,8 +29,9 @@
                     isConfirmAction = $('.is--act-confirm').length > 0,
                     urlForSendingCustomerData = '{url controller=checkout action=preRedirect forceSecure}',
                     urlForSendingCustomerDataError = '{url controller=payment_paypal action=return forceSecure}',
+                    customerCommentField = $(".user-comment--hidden"),
 
-                    onConfirm = function (event) {
+                    onConfirm = function(event) {
                         if (!window.paypalIsCurrentPaymentMethodPaypal || ($agb && $agb.length > 0 && !$agb.prop('checked'))) {
                             return;
                         }
@@ -40,10 +41,11 @@
                         $.ajax({
                             type: "POST",
                             url: urlForSendingCustomerData,
-                            success: function () {
+                            data: { sComment: customerCommentField.val() },
+                            success: function() {
                                 ppp.doCheckout();
                             },
-                            error: function () {
+                            error: function() {
                                 $(location).attr('href', urlForSendingCustomerDataError);
                             }
                         });
@@ -94,8 +96,8 @@
                 return ppp;
             };
 
-            deselectPayPalMethod = function ($) {
-                var callback = function (event) {
+            deselectPayPalMethod = function($) {
+                var callback = function(event) {
                     var $paypalPlusContainer = $('#ppplus'),
                         paypalSandbox = $paypalPlusContainer.attr('data-paypal-sandbox'),
                         originUrl = paypalSandbox == 'true' ? "https://www.sandbox.paypal.com" : 'https://www.paypal.com',
