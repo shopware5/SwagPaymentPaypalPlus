@@ -2,7 +2,7 @@
     <script type="text/javascript">
         var asyncConf = ~~("{$theme.asyncJavascriptLoading}");
         if (typeof document.asyncReady === 'function' && asyncConf) {
-            document.asyncReady(function () {
+            document.asyncReady(function() {
                 window.jQuery_SW = $.noConflict(true);
             });
         } else {
@@ -11,12 +11,13 @@
     </script>
     <script src="https://www.paypalobjects.com/webstatic/ppplus/ppplus.min.js" type="text/javascript"></script>
     <script type="text/javascript">
-        var paymentWallFn = function () {
+        var paymentWallFn = function() {
             var jQuery = $ = window.jQuery_SW;
             jQuery(document).ready(function($) {
                 var $agb = $('#sAGB'),
                     urlForSendingCustomerData = '{url controller=checkout action=preRedirect forceSecure}',
-                    urlForSendingCustomerDataError  = '{url controller=payment_paypal action=return forceSecure}',
+                    urlForSendingCustomerDataError = '{url controller=payment_paypal action=return forceSecure}',
+                    customerCommentField = $(".user-comment--hidden"),
 
                     onConfirm = function(event) {
                         if ($agb && $agb.length > 0 && !$agb.prop('checked')) {
@@ -28,6 +29,7 @@
                         $.ajax({
                             type: "POST",
                             url: urlForSendingCustomerData,
+                            data: { sComment: customerCommentField.val() },
                             success: function() {
                                 PAYPAL.apps.PPP.doCheckout();
                             },
