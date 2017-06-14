@@ -33,10 +33,10 @@ class PaymentInstructionProvider
      */
     public function getInstructionsByOrderNumberAndTransactionId($orderNumber, $transactionId)
     {
-        $sql = "SELECT *
+        $sql = 'SELECT *
                 FROM s_payment_paypal_plus_payment_instruction
                 WHERE ordernumber = :orderNumber
-                  AND reference_number = :referenceNumber;";
+                  AND reference_number = :referenceNumber;';
 
         $result = $this->db->fetchRow(
             $sql,
@@ -72,6 +72,11 @@ class PaymentInstructionProvider
         );
 
         $this->db->query($this->getInsertSql(), $parameter);
+
+        $sql = 'UPDATE  s_order
+                SET internalcomment = CONCAT(internalcomment, :invoiceComment)
+                WHERE ordernumber = :orderNumber';
+        $this->db->query($sql, array('invoiceComment' => "\nPaid with Paypal Invoice\n", 'orderNumber' => $orderNumber));
     }
 
     /**
@@ -79,7 +84,7 @@ class PaymentInstructionProvider
      */
     private function getInsertSql()
     {
-        return "INSERT INTO s_payment_paypal_plus_payment_instruction (
+        return 'INSERT INTO s_payment_paypal_plus_payment_instruction (
                     ordernumber,
                     reference_number,
                     instruction_type,
@@ -103,6 +108,6 @@ class PaymentInstructionProvider
                     :amount_currency,
                     :payment_due_date,
                     :links
-              );";
+              );';
     }
 }
