@@ -16,7 +16,7 @@
             deselectPayPalMethod;
 
         var paymentWallFn = function() {
-            var jQuery = $ = window.jQuery_SW;
+            window.jQuery = $ = window.jQuery_SW;
             window.paypalIsCurrentPaymentMethodPaypal = {if $sUserData.additional.payment.id == $PayPalPaymentId}true{else}false{/if};
 
             paymentWall = function($, approvalUrl) {
