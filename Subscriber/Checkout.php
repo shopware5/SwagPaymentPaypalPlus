@@ -209,7 +209,7 @@ class Checkout
         );
 
         $uri = 'payments/payment/' . $paymentId;
-        $view->loadTemplate('');
+        $this->bootstrap->get('front')->Plugins()->ViewRenderer()->setNoRender();
 
         try {
             $this->restClient->patch($uri, $requestData);
