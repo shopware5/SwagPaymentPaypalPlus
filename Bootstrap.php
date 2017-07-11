@@ -482,6 +482,17 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $view = $document->_view;
 
         $orderData = $view->getTemplateVars('Order');
+        $orderNumber = $orderData['_order']['ordernumber'];
+        $transactionId = $orderData['_order']['transactionID'];
+        $paymentInstructionProvider = new PaymentInstructionProvider($this->get('db'));
+        $paymentInstruction = $paymentInstructionProvider->getInstructionsByOrderNumberAndTransactionId($orderNumber, $transactionId);
+
+        //The manual bank transfer is a special case in invoice. This case does not require to have
+        //instructions on the invoice document
+        if (empty($paymentInstruction) || $paymentInstruction['instruction_type'] === 'MANUAL_BANK_TRANSFER') {
+            return;
+        }
+
         $containers = $view->getTemplateVars('Containers');
 
         if (!isset($containers['Paypal_Content_Info'])) {
@@ -495,12 +506,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
 
         // is necessary to get the data in the invoice template
         $view->assign('Containers', $containers);
-
-        $transactionId = $orderData['_order']['transactionID'];
-        $orderNumber = $orderData['_order']['ordernumber'];
-
-        $paymentInstructionProvider = new PaymentInstructionProvider($this->get('db'));
-        $paymentInstruction = $paymentInstructionProvider->getInstructionsByOrderNumberAndTransactionId($orderNumber, $transactionId);
 
         $document->_template->addTemplateDir(dirname(__FILE__) . '/Views/');
         $document->_template->assign('instruction', (array) $paymentInstruction);
