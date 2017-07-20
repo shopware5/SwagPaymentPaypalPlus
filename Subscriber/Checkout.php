@@ -412,8 +412,16 @@ class Checkout
         }
 
         $logoImage = $this->config->get('paypalLogoImage');
-        $logoImage = 'string:{link file=' . var_export($logoImage, true) . ' fullPath}';
-        $logoImage = $template->fetch($logoImage);
+        if ($logoImage !== null) {
+            if ($this->paypalBootstrap->isShopware51() && !$this->paypalBootstrap->isShopware52()) {
+                /** @var \Shopware\Bundle\MediaBundle\MediaService $mediaService */
+                $mediaService = $this->bootstrap->get('shopware_media.media_service');
+                $logoImage = $mediaService->getUrl($logoImage);
+            }
+
+            $logoImage = 'string:{link file=' . var_export($logoImage, true) . ' fullPath}';
+            $logoImage = $template->fetch($logoImage);
+        }
 
         $notifyUrl = $router->assemble(
             array(
