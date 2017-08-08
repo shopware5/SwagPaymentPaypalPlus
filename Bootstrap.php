@@ -1,6 +1,5 @@
 <?php
-
-/*
+/**
  * (c) shopware AG <info@shopware.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -28,18 +27,19 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     /**
      * Installs the plugin
      *
-     * @return bool
      * @throws RuntimeException
+     *
+     * @return bool
      */
     public function install()
     {
         // Check if PHP version matches
         if (version_compare(PHP_VERSION, '5.4', '<')) {
-            throw new RuntimeException("This plugin requires PHP 5.4 or a later version");
+            throw new RuntimeException('This plugin requires PHP 5.4 or a later version');
         }
 
         // check for Paypal base plugin
-        if (!$this->assertRequiredPluginsPresent(['SwagPaymentPaypal'])) {
+        if (!$this->assertRequiredPluginsPresent(array('SwagPaymentPaypal'))) {
             throw new RuntimeException("The plugin 'SwagPaymentPaypal' needs to be installed");
         }
 
@@ -76,18 +76,20 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
 
     /**
      * @param string $version
-     * @return array
+     *
      * @throws RuntimeException
+     *
+     * @return array
      */
     public function update($version)
     {
         // Check if PHP version matches
         if (version_compare(PHP_VERSION, '5.4', '<')) {
-            throw new RuntimeException("This plugin requires PHP 5.4 or a later version");
+            throw new RuntimeException('This plugin requires PHP 5.4 or a later version');
         }
 
         // check for Paypal base plugin
-        if (!$this->assertRequiredPluginsPresent(['SwagPaymentPaypal'])) {
+        if (!$this->assertRequiredPluginsPresent(array('SwagPaymentPaypal'))) {
             throw new RuntimeException("The plugin 'SwagPaymentPaypal' needs to be installed");
         }
 
@@ -102,7 +104,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
 
         return array(
             'success' => true,
-            'invalidateCache' => $this->getInvalidateCacheArray()
+            'invalidateCache' => $this->getInvalidateCacheArray(),
         );
     }
 
@@ -113,7 +115,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     {
         return array(
             'success' => true,
-            'invalidateCache' => $this->getInvalidateCacheArray()
+            'invalidateCache' => $this->getInvalidateCacheArray(),
         );
     }
 
@@ -124,7 +126,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     {
         return array(
             'success' => true,
-            'invalidateCache' => $this->getInvalidateCacheArray()
+            'invalidateCache' => $this->getInvalidateCacheArray(),
         );
     }
 
@@ -132,6 +134,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      * Legacy wrapper for di container
      *
      * @param string $name
+     *
      * @return mixed
      */
     public function get($name)
@@ -153,146 +156,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         }
 
         return parent::get($name);
-    }
-
-    /**
-     * Creates and subscribe the events and hooks.
-     */
-    private function createMyEvents()
-    {
-        $this->subscribeEvent(
-            'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout',
-            'onPostDispatchCheckoutSecure'
-        );
-        $this->subscribeEvent(
-            'Enlight_Controller_Action_Frontend_Checkout_PreRedirect',
-            'onPreRedirectToPayPal'
-        );
-        $this->subscribeEvent(
-            'Enlight_Controller_Action_PreDispatch_Frontend_PaymentPaypal',
-            'onPreDispatchPaymentPaypal'
-        );
-        $this->subscribeEvent(
-            'Enlight_Controller_Action_Frontend_PaymentPaypal_Webhook',
-            'onPaymentPaypalWebhook'
-        );
-        $this->subscribeEvent(
-            'Enlight_Controller_Action_Frontend_PaymentPaypal_PlusRedirect',
-            'onPaymentPaypalPlusRedirect'
-        );
-        $this->subscribeEvent(
-            'Enlight_Controller_Action_PostDispatch_Frontend_Account',
-            'onPostDispatchAccount'
-        );
-        $this->subscribeEvent(
-            'Theme_Compiler_Collect_Plugin_Javascript',
-            'onCollectJavascript'
-        );
-        $this->subscribeEvent(
-            'Shopware_Components_Document::assignValues::after',
-            'onBeforeRenderDocument'
-        );
-        $this->subscribeEvent(
-            'Enlight_Controller_Action_PostDispatchSecure_Backend_Config',
-            'onPostDispatchConfig'
-        );
-        $this->subscribeEvent(
-            'Enlight_Controller_Action_PostDispatch_Backend_Order',
-            'onPostDispatchOrder'
-        );
-        $this->subscribeEvent(
-            'Enlight_Controller_Action_PostDispatch_Backend_PaymentPaypal',
-            'onPostDispatchPaymentPaypal'
-        );
-        $this->subscribeEvent(
-            'Theme_Compiler_Collect_Plugin_Less',
-            'addLessFiles'
-        );
-        $this->subscribeEvent(
-            'Enlight_Bootstrap_InitResource_paypal_plus.rest_client',
-            'onInitRestClient'
-        );
-    }
-
-    /**
-     * Creates and stores the payment config form.
-     */
-    private function createMyForm()
-    {
-        $form = $this->Form();
-
-        $form->setElement(
-            'select',
-            'paypalPlusCountries',
-            array(
-                'label' => 'Länder bei denen „PayPal PLUS“ angezeigt wird',
-                'value' => array(2),
-                'store' => 'base.Country',
-                'multiSelect' => true,
-                'scope' => \Shopware\Models\Config\Element::SCOPE_SHOP
-            )
-        );
-        $form->setElement(
-            'boolean',
-            'paypalHidePaymentSelection',
-            array(
-                'label' => 'Zahlungsart-Auswahl im Bestellabschluss ausblenden (Shopware 4)',
-                'value' => true,
-                'scope' => \Shopware\Models\Config\Element::SCOPE_SHOP
-            )
-        );
-        $form->setElement(
-            'text',
-            'paypalPlusDescription',
-            array(
-                'label' => 'Zahlungsart-Bezeichnung überschreiben',
-                'value' => 'PayPal, Lastschrift oder Kreditkarte',
-                'scope' => \Shopware\Models\Config\Element::SCOPE_SHOP
-            )
-        );
-        $form->setElement(
-            'text',
-            'paypalPlusAdditionalDescription',
-            array(
-                'label' => 'Zahlungsart-Beschreibung ergänzen',
-                'value' => 'Zahlung per Lastschrift oder Kreditkarte ist auch ohne PayPal-Konto möglich.',
-                'scope' => \Shopware\Models\Config\Element::SCOPE_SHOP
-            )
-        );
-    }
-
-    private function removeMyAttributes()
-    {
-        /** @var $modelManager \Shopware\Components\Model\ModelManager */
-        $modelManager = $this->get('models');
-        try {
-            $modelManager->removeAttribute(
-                's_core_paymentmeans_attributes',
-                'paypal',
-                'plus_media'
-            );
-        } catch (Exception $e) {
-        }
-        try {
-            $modelManager->removeAttribute(
-                's_core_paymentmeans_attributes',
-                'paypal',
-                'plus_active'
-            );
-        } catch (Exception $e) {
-        }
-        try {
-            $modelManager->removeAttribute(
-                's_core_paymentmeans_attributes',
-                'paypal',
-                'plus_redirect'
-            );
-        } catch (Exception $e) {
-        }
-        try {
-            $modelManager->generateAttributeModels(array('s_core_paymentmeans_attributes'));
-        } catch (Exception $e) {
-        }
     }
 
     public function registerMyTemplateDir()
@@ -325,6 +188,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      * Provide the file collection for less
      *
      * @param Enlight_Event_EventArgs $args
+     *
      * @return \Doctrine\Common\Collections\ArrayCollection
      */
     public function addLessFiles(Enlight_Event_EventArgs $args)
@@ -349,6 +213,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
 
     /**
      * @param Enlight_Controller_ActionEventArgs $args
+     *
      * @return bool
      */
     public function onPreRedirectToPayPal($args)
@@ -374,6 +239,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
 
     /**
      * @param Enlight_Controller_ActionEventArgs $args
+     *
      * @return bool
      */
     public function onPaymentPaypalWebhook($args)
@@ -385,6 +251,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
 
     /**
      * @param Enlight_Controller_ActionEventArgs $args
+     *
      * @return bool
      */
     public function onPaymentPaypalPlusRedirect($args)
@@ -551,6 +418,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      * Returns the version of plugin as string.
      *
      * @throws Exception
+     *
      * @return string
      */
     public function getVersion()
@@ -558,9 +426,8 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $info = json_decode(file_get_contents(__DIR__ . '/plugin.json'), true);
         if ($info) {
             return $info['currentVersion'];
-        } else {
-            throw new Exception('The plugin has an invalid version file.');
         }
+        throw new Exception('The plugin has an invalid version file.');
     }
 
     /**
@@ -570,8 +437,148 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     {
         return array(
             'version' => $this->getVersion(),
-            'label' => $this->getLabel()
+            'label' => $this->getLabel(),
         );
+    }
+
+    /**
+     * Creates and subscribe the events and hooks.
+     */
+    private function createMyEvents()
+    {
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout',
+            'onPostDispatchCheckoutSecure'
+        );
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_Frontend_Checkout_PreRedirect',
+            'onPreRedirectToPayPal'
+        );
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_PreDispatch_Frontend_PaymentPaypal',
+            'onPreDispatchPaymentPaypal'
+        );
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_Frontend_PaymentPaypal_Webhook',
+            'onPaymentPaypalWebhook'
+        );
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_Frontend_PaymentPaypal_PlusRedirect',
+            'onPaymentPaypalPlusRedirect'
+        );
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_PostDispatch_Frontend_Account',
+            'onPostDispatchAccount'
+        );
+        $this->subscribeEvent(
+            'Theme_Compiler_Collect_Plugin_Javascript',
+            'onCollectJavascript'
+        );
+        $this->subscribeEvent(
+            'Shopware_Components_Document::assignValues::after',
+            'onBeforeRenderDocument'
+        );
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_PostDispatchSecure_Backend_Config',
+            'onPostDispatchConfig'
+        );
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_PostDispatch_Backend_Order',
+            'onPostDispatchOrder'
+        );
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_PostDispatch_Backend_PaymentPaypal',
+            'onPostDispatchPaymentPaypal'
+        );
+        $this->subscribeEvent(
+            'Theme_Compiler_Collect_Plugin_Less',
+            'addLessFiles'
+        );
+        $this->subscribeEvent(
+            'Enlight_Bootstrap_InitResource_paypal_plus.rest_client',
+            'onInitRestClient'
+        );
+    }
+
+    /**
+     * Creates and stores the payment config form.
+     */
+    private function createMyForm()
+    {
+        $form = $this->Form();
+
+        $form->setElement(
+            'select',
+            'paypalPlusCountries',
+            array(
+                'label' => 'Länder bei denen „PayPal PLUS“ angezeigt wird',
+                'value' => array(2),
+                'store' => 'base.Country',
+                'multiSelect' => true,
+                'scope' => \Shopware\Models\Config\Element::SCOPE_SHOP,
+            )
+        );
+        $form->setElement(
+            'boolean',
+            'paypalHidePaymentSelection',
+            array(
+                'label' => 'Zahlungsart-Auswahl im Bestellabschluss ausblenden (Shopware 4)',
+                'value' => true,
+                'scope' => \Shopware\Models\Config\Element::SCOPE_SHOP,
+            )
+        );
+        $form->setElement(
+            'text',
+            'paypalPlusDescription',
+            array(
+                'label' => 'Zahlungsart-Bezeichnung überschreiben',
+                'value' => 'PayPal, Lastschrift oder Kreditkarte',
+                'scope' => \Shopware\Models\Config\Element::SCOPE_SHOP,
+            )
+        );
+        $form->setElement(
+            'text',
+            'paypalPlusAdditionalDescription',
+            array(
+                'label' => 'Zahlungsart-Beschreibung ergänzen',
+                'value' => 'Zahlung per Lastschrift oder Kreditkarte ist auch ohne PayPal-Konto möglich.',
+                'scope' => \Shopware\Models\Config\Element::SCOPE_SHOP,
+            )
+        );
+    }
+
+    private function removeMyAttributes()
+    {
+        /** @var $modelManager \Shopware\Components\Model\ModelManager */
+        $modelManager = $this->get('models');
+        try {
+            $modelManager->removeAttribute(
+                's_core_paymentmeans_attributes',
+                'paypal',
+                'plus_media'
+            );
+        } catch (Exception $e) {
+        }
+        try {
+            $modelManager->removeAttribute(
+                's_core_paymentmeans_attributes',
+                'paypal',
+                'plus_active'
+            );
+        } catch (Exception $e) {
+        }
+        try {
+            $modelManager->removeAttribute(
+                's_core_paymentmeans_attributes',
+                'paypal',
+                'plus_redirect'
+            );
+        } catch (Exception $e) {
+        }
+        try {
+            $modelManager->generateAttributeModels(array('s_core_paymentmeans_attributes'));
+        } catch (Exception $e) {
+        }
     }
 
     /**
@@ -584,13 +591,14 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
 
     /**
      * @param string[] $orderNumbers
+     *
      * @return array
      */
     private function getPuiOrderNumbers($orderNumbers)
     {
-        $sql = "SELECT ordernumber
+        $sql = 'SELECT ordernumber
                 FROM s_payment_paypal_plus_payment_instruction
-                WHERE ordernumber IN(:orderNumbers);";
+                WHERE ordernumber IN(:orderNumbers);';
 
         /** @var Connection $dbalConnection */
         $dbalConnection = $this->get('dbal_connection');
