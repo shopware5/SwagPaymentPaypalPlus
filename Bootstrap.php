@@ -109,10 +109,22 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     }
 
     /**
+     * @throws RuntimeException
+     *
      * @return array
      */
     public function enable()
     {
+        // Check if PHP version matches
+        if (version_compare(PHP_VERSION, '5.4', '<')) {
+            throw new RuntimeException('This plugin requires PHP 5.4 or a later version');
+        }
+
+        // check for Paypal base plugin
+        if (!$this->assertRequiredPluginsPresent(array('SwagPaymentPaypal'))) {
+            throw new RuntimeException("The plugin 'SwagPaymentPaypal' needs to be installed");
+        }
+
         return array(
             'success' => true,
             'invalidateCache' => $this->getInvalidateCacheArray(),
