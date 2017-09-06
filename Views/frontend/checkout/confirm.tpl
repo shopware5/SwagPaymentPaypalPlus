@@ -16,7 +16,7 @@
     {$smarty.block.parent}
 {/block}
 
-{block name="frontend_index_header_javascript_jquery_lib"}
+{block name="frontend_index_header_javascript_jquery"}
     {$smarty.block.parent}
     {if !$isShopware53}
         {if $sUserData.additional.payment.id == $PayPalPaymentId && $cameFromStep2}
