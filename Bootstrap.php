@@ -418,6 +418,19 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         return new ArrayCollection($jsPath);
     }
 
+	/**
+	 * @return string
+	 */
+	public function onGetPaymentInstructionsApiController()
+	{
+		return __DIR__ . '/Controllers/Api/PaypalPaymentInstruction.php';
+	}
+
+	public function onEnlightControllerFrontStartDispatch()
+	{
+		$this->get('loader')->registerNamespace('Shopware\Components', __DIR__ . '/Components/');
+	}
+
     /**
      * @return string
      */
@@ -509,6 +522,14 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $this->subscribeEvent(
             'Enlight_Bootstrap_InitResource_paypal_plus.rest_client',
             'onInitRestClient'
+        );
+        $this->subscribeEvent(
+            'Enlight_Controller_Dispatcher_ControllerPath_Api_PaypalPaymentInstruction',
+	        'onGetPaymentInstructionsApiController'
+        );
+		$this->subscribeEvent(
+	        'Enlight_Controller_Front_StartDispatch',
+	        'onEnlightControllerFrontStartDispatch'
         );
     }
 
