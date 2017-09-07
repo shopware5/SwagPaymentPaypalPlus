@@ -28,15 +28,26 @@ class DocumentInstaller
 
     public function installDocuments()
     {
-        $this->removeOldEntries();
-        $this->insertDefaultDocuments();
+    	if (!$this->hasDocumentsInstalled()) {
+	        $this->uninstallDocuments();
+	        $this->insertDefaultDocuments();
+	    }
     }
 
-    private function removeOldEntries()
+    public function uninstallDocuments()
     {
         $sql = 'DELETE FROM `s_core_documents_box` WHERE `name` LIKE ?';
 
         $this->databaseConnection->query($sql, array('Paypal_%'));
+    }
+
+	/**
+	 * @return bool
+	 */
+    private function hasDocumentsInstalled()
+    {
+	    $sql = "SELECT id FROM s_core_documents_box WHERE name IN ('Paypal_Footer', 'Paypal_Content_Info')";
+	    return count($this->databaseConnection->executeQuery($sql)->fetchAll()) === 2;
     }
 
     private function insertDefaultDocuments()
