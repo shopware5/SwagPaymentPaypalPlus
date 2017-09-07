@@ -60,6 +60,9 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      */
     public function uninstall()
     {
+	    $documentInstaller = new DocumentInstaller($this->get('db'));
+		$documentInstaller->uninstallDocuments();
+
         $this->secureUninstall();
         $this->removeMyAttributes();
 
@@ -95,9 +98,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
 
         $this->createMyForm();
         $this->createMyEvents();
-
-        $documentInstaller = new DocumentInstaller($this->get('db'));
-        $documentInstaller->installDocuments();
 
         $tableInstaller = new AdditionalTableInstaller($this->get('db'));
         $tableInstaller->installAdditionalDatabaseTable();
