@@ -1,6 +1,5 @@
 <?php
-
-/*
+/**
  * (c) shopware AG <info@shopware.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -18,13 +17,11 @@ use Shopware\Components\Logger;
 use Shopware\SwagPaymentPaypalPlus\Components\APIValidator;
 use Shopware\SwagPaymentPaypalPlus\Components\PaymentInstructionProvider;
 use Shopware\SwagPaymentPaypalPlus\Components\RestClient;
-use Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap as Bootstrap;
 use Shopware_Plugins_Frontend_SwagPaymentPaypal_Bootstrap as PaypalBootstrap;
+use Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap as Bootstrap;
 
 /**
  * Class Checkout
- *
- * @package Shopware\SwagPaymentPaypal\Subscriber
  */
 class Checkout
 {
@@ -65,7 +62,7 @@ class Checkout
 
     /**
      * @param Bootstrap $bootstrap
-     * @param bool $isShopware53
+     * @param bool      $isShopware53
      */
     public function __construct(Bootstrap $bootstrap, $isShopware53)
     {
@@ -85,7 +82,7 @@ class Checkout
     {
         return array(
             'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onPostDispatchCheckoutSecure',
-            'Enlight_Controller_Action_Frontend_Checkout_PreRedirect' => 'onPreRedirectToPayPal'
+            'Enlight_Controller_Action_Frontend_Checkout_PreRedirect' => 'onPreRedirectToPayPal',
         );
     }
 
@@ -120,12 +117,13 @@ class Checkout
 
         $allowedActions = array(
             'confirm',
-            'shippingPayment'
+            'shippingPayment',
         );
 
         // Check action
         if (!in_array($request->getActionName(), $allowedActions, true)) {
             $this->session->offsetUnset('PayPalPlusCameFromStep2');
+
             return;
         }
 
@@ -134,7 +132,7 @@ class Checkout
                 array(
                     'controller' => 'checkout',
                     'action' => 'payment',
-                    'sAGB' => 1
+                    'sAGB' => 1,
                 )
             );
 
@@ -147,7 +145,7 @@ class Checkout
         if ($countries instanceof \Enlight_Config) {
             $countries = $countries->toArray();
         } else {
-            $countries = (array)$countries;
+            $countries = (array) $countries;
         }
 
         if (!empty($this->session->PaypalResponse['TOKEN']) // PP-Express
@@ -181,8 +179,10 @@ class Checkout
 
     /**
      * @param \Enlight_Controller_ActionEventArgs $args
-     * @return bool
+     *
      * @throws \Exception
+     *
+     * @return bool
      */
     public function onPreRedirectToPayPal($args)
     {
@@ -204,8 +204,13 @@ class Checkout
             array(
                 'op' => 'add',
                 'path' => '/transactions/0/item_list/shipping_address',
-                'value' => $this->getShippingAddress($userData)
-            )
+                'value' => $this->getShippingAddress($userData),
+            ),
+            array(
+                'op' => 'replace',
+                'path' => '/payer/payer_info',
+                'value' => $this->getPayerInfo($userData),
+            ),
         );
 
         $uri = 'payments/payment/' . $paymentId;
@@ -223,7 +228,7 @@ class Checkout
 
     /**
      * @param \Enlight_View_Default $view
-     * @param int $templateVersion
+     * @param int                   $templateVersion
      */
     private function addInvoiceInstructionsToView($view, $templateVersion)
     {
@@ -329,12 +334,12 @@ class Checkout
             'intent' => 'sale',
             'experience_profile_id' => $profile['id'],
             'payer' => array(
-                'payment_method' => 'paypal'
+                'payment_method' => 'paypal',
             ),
             'transactions' => $this->getTransactionData($view->getAssign('sBasket'), $view->getAssign('sUserData')),
             'redirect_urls' => array(
                 'return_url' => $returnUrl,
-                'cancel_url' => $cancelUrl
+                'cancel_url' => $cancelUrl,
             ),
         );
 
@@ -427,7 +432,7 @@ class Checkout
             array(
                 'controller' => 'payment_paypal',
                 'action' => 'notify',
-                'forceSecure' => true
+                'forceSecure' => true,
             )
         );
 
@@ -436,15 +441,15 @@ class Checkout
             'presentation' => array(
                 'brand_name' => $shopName,
                 'logo_image' => $logoImage,
-                'locale_code' => $localeCode
+                'locale_code' => $localeCode,
             ),
             'input_fields' => array(
                 'allow_note' => true,
                 'no_shipping' => 0,
-                'address_override' => 1
+                'address_override' => 1,
             ),
             'flow_config' => array(
-                'bank_txn_pending_url' => $notifyUrl
+                'bank_txn_pending_url' => $notifyUrl,
             ),
         );
     }
@@ -452,6 +457,7 @@ class Checkout
     /**
      * @param $basket
      * @param $user
+     *
      * @return array
      */
     private function getTransactionData($basket, $user)
@@ -468,41 +474,43 @@ class Checkout
                         'shipping' => number_format($shipping, 2, '.', ','),
                         'subtotal' => number_format($total - $shipping, 2, '.', ','),
                         'tax' => number_format(0, 2, '.', ','),
-                    )
+                    ),
                 ),
                 'item_list' => array(
-                    'items' => $this->getItemList($basket, $user)
+                    'items' => $this->getItemList($basket, $user),
                 ),
-            )
+            ),
         );
     }
 
     /**
      * @param $basket
      * @param $user
+     *
      * @return string
      */
     private function getTotalAmount($basket, $user)
     {
         if (!empty($user['additional']['charge_vat'])) {
             return empty($basket['AmountWithTaxNumeric']) ? $basket['AmountNumeric'] : $basket['AmountWithTaxNumeric'];
-        } else {
-            return $basket['AmountNetNumeric'];
         }
+
+        return $basket['AmountNetNumeric'];
     }
 
     /**
      * @param $basket
      * @param $user
+     *
      * @return mixed
      */
     private function getTotalShipment($basket, $user)
     {
         if (!empty($user['additional']['charge_vat'])) {
             return $basket['sShippingcostsWithTax'];
-        } else {
-            return str_replace(',', '.', $basket['sShippingcosts']);
         }
+
+        return str_replace(',', '.', $basket['sShippingcosts']);
     }
 
     /**
@@ -516,6 +524,7 @@ class Checkout
     /**
      * @param $basket
      * @param $user
+     *
      * @return array
      */
     private function getItemList($basket, $user)
@@ -527,7 +536,7 @@ class Checkout
         foreach ($basket['content'] as $basketItem) {
             $sku = $basketItem['ordernumber'];
             $name = $basketItem['articlename'];
-            $quantity = (int)$basketItem['quantity'];
+            $quantity = (int) $basketItem['quantity'];
             if (!empty($user['additional']['charge_vat']) && !empty($basketItem['amountWithTax'])) {
                 $amount = round($basketItem['amountWithTax'], 2);
             } else {
@@ -555,7 +564,7 @@ class Checkout
                             $sku = $list[$lastCustomProduct]['sku'];
                         }
                         break;
-                    case 3; // Value
+                    case 3: // Value
                         $last = count($list) - 1;
                         if (isset($list[$last])) {
                             if (strpos($list[$last]['name'], ': ') === false) {
@@ -584,10 +593,11 @@ class Checkout
     }
 
     /**
-     * @param $user
+     * @param array $user
+     *
      * @return array
      */
-    private function getShippingAddress($user)
+    private function getShippingAddress(array $user)
     {
         $address = array(
             'recipient_name' => $user['shippingaddress']['firstname'] . ' ' . $user['shippingaddress']['lastname'],
@@ -595,21 +605,58 @@ class Checkout
             'city' => $user['shippingaddress']['city'],
             'postal_code' => $user['shippingaddress']['zipcode'],
             'country_code' => $user['additional']['countryShipping']['countryiso'],
-            'state' => $user['additional']['stateShipping']['shortcode']
+            'state' => $user['additional']['stateShipping']['shortcode'],
         );
 
         return $address;
     }
 
     /**
+     * @param array $user
+     *
+     * @return array
+     */
+    private function getPayerInfo(array $user)
+    {
+        $payerInfo = array(
+            'country_code' => $user['additional']['country']['countryiso'],
+            'email' => $user['additional']['user']['email'],
+            'first_name' => $user['billingaddress']['firstname'],
+            'last_name' => $user['billingaddress']['lastname'],
+            'phone' => $user['billingaddress']['phone'],
+            'billing_address' => $this->getBillingAddress($user),
+        );
+
+        return $payerInfo;
+    }
+
+    /**
+     * @param array $user
+     *
+     * @return array
+     */
+    private function getBillingAddress(array $user)
+    {
+        $billingAddress = array(
+            'line1' => $user['billingaddress']['street'],
+            'postal_code' => $user['billingaddress']['zipcode'],
+            'city' => $user['billingaddress']['city'],
+            'country_code' => $user['additional']['country']['countryiso'],
+            'state' => $user['additional']['state']['shortcode'],
+        );
+
+        return $billingAddress;
+    }
+
+    /**
      * Writes an exception to the plugin log.
      *
-     * @param string $message
+     * @param string    $message
      * @param Exception $e
      */
     private function logException($message, Exception $e)
     {
-        $context = ['exception' => $e];
+        $context = array('exception' => $e);
         if ($e instanceof RequestException) {
             $context['response'] = $e->getResponse();
         }
