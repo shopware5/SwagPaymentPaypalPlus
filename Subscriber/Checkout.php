@@ -533,6 +533,7 @@ class Checkout
         $currency = $this->getCurrency();
         $lastCustomProduct = null;
 
+        $index = 0;
         foreach ($basket['content'] as $basketItem) {
             $sku = $basketItem['ordernumber'];
             $name = $basketItem['articlename'];
@@ -553,40 +554,85 @@ class Checkout
                 $amount = round($amount / $quantity, 2);
             }
 
-            // Add support for custom products
+            //In the following part, we modify the CustomProducts positions.
+            //By default, custom products may add alot of different positions to the basket, which would probably reach
+            //the items limit of PayPal. Therefore, we group the values with the options.
+            //Actually, that causes a loss of quantity precision but there is no other way around this issue but this.
             if (!empty($basketItem['customProductMode'])) {
+                //A value indicating if the surcharge of this position is only being added once
+                $isSingleSurcharge = $basketItem['customProductIsOncePrice'];
+
                 switch ($basketItem['customProductMode']) {
-                    case 1: // Product
-                        $lastCustomProduct = count($list);
-                        break;
-                    case 2: // Option
-                        if (empty($sku) && isset($list[$lastCustomProduct])) {
-                            $sku = $list[$lastCustomProduct]['sku'];
+                    /*
+                     * The current basket item is of type Option (a group of values)
+                     * This will be our first starting point.
+                     * In this procedure we fake the amount by simply adding a %value%x to the actual name of the group.
+                     * Further more, we add a : to the end of the name (if a value follows this option) to indicate that more values follow.
+                     * At the end, we set the quantity to 1, so PayPal doesn't calculate the total amount. That would cause calculation errors, since we calculate the
+                     * whole position already.
+                     */
+                    case 2: //Option
+                        $nextProduct = $basket['content'][$index + 1];
+
+                        $name = $quantity . 'x ' . $name;
+
+                        //Another value is following?
+                        if ($nextProduct && '3' === $nextProduct['customProductMode']) {
+                            $name .= ': ';
                         }
+
+                        //Calculate the total price of this option
+                        if (!$isSingleSurcharge) {
+                            $amount *= $quantity;
+                        }
+
+                        $quantity = 1;
                         break;
-                    case 3: // Value
-                        $last = count($list) - 1;
-                        if (isset($list[$last])) {
-                            if (strpos($list[$last]['name'], ': ') === false) {
-                                $list[$last]['name'] .= ': ' . $name;
+
+                    /*
+                     * This basket item is of type Value.
+                     * In this procedure we calculate the actual price of the value and add it to the option price.
+                     * Further more, we add a comma to the end of the value (if another value is following) to improve the readability on the PayPal page.
+                     * Afterwards, we set the quantity to 0, so that the basket item is not being added to the list. We don't have to add it again,
+                     * since it's already grouped to the option.
+                     */
+                    case 3: //Value
+                        //The last option that has been added to the final list.
+                        //This value will be grouped to it.
+                        $lastGroup = &$list[count($list) - 1];
+                        $nextProduct = $basket['content'][$index + 1];
+
+                        if ($lastGroup) {
+                            //Check if another value is following, if so, add a comma to the end of the name.
+                            if ($nextProduct && '3' === $nextProduct['customProductMode']) {
+                                //Another value is following
+                                $lastGroup['name'] .= $name . ', ';
                             } else {
-                                $list[$last]['name'] .= ', ' . $name;
+                                //This is the last value in this option
+                                $lastGroup['name'] .= $name;
                             }
-                            $list[$last]['price'] += $amount;
+
+                            //Calculate the total price.
+                            $lastGroup['price'] += $isSingleSurcharge ? $amount : $amount * $quantity;
+
+                            //Don't add it to the final list
+                            $quantity = 0;
                         }
-                        continue 2;
-                    default:
                         break;
                 }
             }
 
-            $list[] = array(
-                'name' => $name,
-                'sku' => $sku,
-                'price' => number_format($amount, 2, '.', ','),
-                'currency' => $currency,
-                'quantity' => $quantity,
-            );
+            if ($quantity !== 0) {
+                $list[] = array(
+                    'name' => $name,
+                    'sku' => $sku,
+                    'price' => number_format($amount, 2, '.', ','),
+                    'currency' => $currency,
+                    'quantity' => $quantity,
+                );
+            }
+
+            $index++;
         }
 
         return $list;
