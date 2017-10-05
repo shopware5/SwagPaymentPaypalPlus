@@ -464,8 +464,9 @@ class Checkout
     {
         $total = $this->getTotalAmount($basket, $user);
         $shipping = $this->getTotalShipment($basket, $user);
+        $edd = $this->getEstimatedDeliveryDate($basket);
 
-        return array(
+        $result = array(
             array(
                 'amount' => array(
                     'currency' => $this->getCurrency(),
@@ -481,6 +482,56 @@ class Checkout
                 ),
             ),
         );
+
+        if ($edd) {
+            $result[0]['shipment_details'] = array(
+                'estimated_delivery_date' => $edd,
+            );
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param array $basket
+     *
+     * @return string|null
+     */
+    private function getEstimatedDeliveryDate(array $basket)
+    {
+        if (version_compare(\Shopware::VERSION, '5.2.10', '<') || count($basket['content']) === 0) {
+            return null;
+        }
+
+        //Check if we have the correct attribute set up
+        /** @var \Shopware\Bundle\AttributeBundle\Service\CrudService $attributeService */
+        $attributeService = $this->bootstrap->get('shopware_attribute.crud_service');
+        $attribute = $attributeService->get('s_articles_attributes', 'swag_paypal_estimated_delivery_date_days');
+
+        if ($attribute === null) {
+            return null;
+        }
+
+        //Calculate the highest delivery time
+        $highestDeliveryTime = 0;
+        foreach ($basket['content'] as $lineItem) {
+            $currentDeliveryTime = $lineItem['additional_details']['swag_paypal_estimated_delivery_date_days'];
+
+            if ($currentDeliveryTime > $highestDeliveryTime) {
+                $highestDeliveryTime = $currentDeliveryTime;
+            }
+        }
+
+        //We do not have any information
+        if ($highestDeliveryTime === 0) {
+            return null;
+        }
+
+        //Calculate the absolute delivery date by adding the days from the product attribute
+        $date = new \DateTime();
+        $date->add(new \DateInterval('P' . $highestDeliveryTime . 'D'));
+
+        return $date->format('Y-m-d');
     }
 
     /**
