@@ -172,7 +172,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
 
     public function registerMyTemplateDir()
     {
-        $this->get('template')->addTemplateDir(__DIR__ . '/Views/', 'paypal_plus');
+        $this->get('template')->addTemplateDir(__DIR__ . '/Views');
     }
 
     /**
@@ -531,6 +531,18 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
 	        'Enlight_Controller_Front_StartDispatch',
 	        'onEnlightControllerFrontStartDispatch'
         );
+		$this->subscribeEvent(
+            'Enlight_Controller_Action_PostDispatchSecure_Frontend',
+            'onPostDispatchSecure'
+        );
+    }
+
+    /**
+     * Registers the template directory on each Secure dispatch to prevent SmartySecurity errors
+     */
+    public function onPostDispatchSecure()
+    {
+        $this->registerMyTemplateDir();
     }
 
     /**
