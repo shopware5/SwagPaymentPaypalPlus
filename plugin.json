@@ -8,10 +8,11 @@
     "link": "http://store.shopware.com",
     "author": "shopware AG",
 
-    "currentVersion": "1.3.1",
+    "currentVersion": "1.3.2",
 
     "changelog": {
         "de": {
+            "1.3.2": "PT-8553 - Bugfix: Die Template Ordner werden früher registriert um den SmartySecurity Fehler zu verhindern",
             "1.3.1": "PT-8010 - Rechnungskauf Zahlungsinformationen werden nicht mehr auf Rechnung angezeigt wenn die Zahlung auf reserviert steht (MANUAL_BANK_TRANSFER); PT-8053 - Weiterleitung zu PayPal korrigiert;",
             "1.3.0": "PT-5184 - Hinweis im internen Kommentar der Bestellung, dass der Kunde PayPal Rechnungskauf genutzt hat; PT-7407 - Kundenkommentare werden nun korrekt gespeichert; PT-7625 - CSRF-Token Fehler behoben; PT-7632, PT-8007 - Shopware 5.3 Kompatibilität; PT-7779 - Fehler bei der Zuordnung von Zahlung behoben, wenn Subshops unterschiedlich konfiguriert sind;",
             "1.2.6": "PT-7385 - Bugfix: Bundesstaat fehlte in Adresse; PT-7386 - Bugfix: Javascript Fehler während des Checkout Prozess;",
@@ -37,6 +38,7 @@
             "1.0.0": "PT-2396 - Erstveröffentlichung"
         },
         "en": {
+            "1.3.2": "PT-8553 - Bugfix: The template folders are registered earlier to prevent the SmartySecurity error",
             "1.3.1": "PT-8010 - Pay upon invoice payment instruction will no longer displayed on invoice document if the payment has the status reserved (MANUAL_BANK_TRANSFER); PT-8053 - Fixed redirect to PayPal;",
             "1.3.0": "PT-5184 - Added hint in internal comment of the order, that the customer used PayPal invoice; PT-7407 - Save customer comments correctly; PT-7625 - Fix CSRF token issue; PT-7632, PT-8007 - Shopware 5.3 compatibility; PT-7779 - Fix wrong assignment of the payment if sub-shops are configured differently;",
             "1.2.6": "PT-7385 - Bugfix: Missing state in address; PT-7386 - Bugfix: Javascript error during checkout process;",
