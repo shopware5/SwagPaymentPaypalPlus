@@ -60,8 +60,8 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      */
     public function uninstall()
     {
-	    $documentInstaller = new DocumentInstaller($this->get('db'));
-		$documentInstaller->uninstallDocuments();
+        $documentInstaller = new DocumentInstaller($this->get('db'));
+        $documentInstaller->uninstallDocuments();
 
         $this->secureUninstall();
         $this->removeMyAttributes();
@@ -151,13 +151,13 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
      */
     public function get($name)
     {
-        if (Shopware::VERSION != '___VERSION___') {
-            if (version_compare(Shopware::VERSION, '4.3.3', '<') && $name == 'dbal_connection') {
+        if (Shopware::VERSION !== '___VERSION___') {
+            if (version_compare(Shopware::VERSION, '4.3.3', '<') && $name === 'dbal_connection') {
                 return $this->get('models')->getConnection();
             }
 
             if (version_compare(Shopware::VERSION, '4.2.0', '<')) {
-                if ($name == 'loader') {
+                if ($name === 'loader') {
                     return $this->Application()->Loader();
                 }
 
@@ -168,11 +168,6 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         }
 
         return parent::get($name);
-    }
-
-    public function registerMyTemplateDir()
-    {
-        $this->get('template')->addTemplateDir(__DIR__ . '/Views');
     }
 
     /**
@@ -199,11 +194,9 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     /**
      * Provide the file collection for less
      *
-     * @param Enlight_Event_EventArgs $args
-     *
      * @return \Doctrine\Common\Collections\ArrayCollection
      */
-    public function addLessFiles(Enlight_Event_EventArgs $args)
+    public function addLessFiles()
     {
         $less = new \Shopware\Components\Theme\LessDefinition(
             array(),
@@ -314,9 +307,10 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
 
             foreach ($orders as &$order) {
                 if (in_array($order['number'], $payPalPlusPuiOrderNumbers)) {
-                    $order['payment']['description'] = $order['payment']['description'] . ' Plus (R)';
+                    $order['payment']['description'] .= ' Plus (R)';
                 }
             }
+            unset($order);
 
             $view->assign('data', $orders);
         }
@@ -339,9 +333,10 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
 
             foreach ($orders as &$order) {
                 if (in_array($order['orderNumber'], $payPalPlusPuiOrderNumbers)) {
-                    $order['paymentDescription'] = $order['paymentDescription'] . ' Plus (R)';
+                    $order['paymentDescription'] .= ' Plus (R)';
                 }
             }
+            unset($order);
 
             $view->assign('data', $orders);
         }
@@ -356,7 +351,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         $document = $args->getSubject();
         $order = $document->_order;
 
-        if ($order->payment['name'] != 'paypal') {
+        if ($order->payment['name'] !== 'paypal') {
             return;
         }
 
@@ -370,6 +365,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         /* @var Smarty_Data $view */
         $view = $document->_view;
 
+        /** @var array $orderData */
         $orderData = $view->getTemplateVars('Order');
         $orderNumber = $orderData['_order']['ordernumber'];
         $transactionId = $orderData['_order']['transactionID'];
@@ -382,6 +378,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             return;
         }
 
+        /** @var array $containers */
         $containers = $view->getTemplateVars('Containers');
 
         if (!isset($containers['Paypal_Content_Info'])) {
@@ -396,9 +393,10 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         // is necessary to get the data in the invoice template
         $view->assign('Containers', $containers);
 
-        $document->_template->addTemplateDir(dirname(__FILE__) . '/Views/');
-        $document->_template->assign('instruction', (array) $paymentInstruction);
+        $document->_template->addTemplateDir(__DIR__ . '/Views/');
+        $document->_template->assign('instruction', $paymentInstruction);
 
+        /** @var array $containerData */
         $containerData = $view->getTemplateVars('Containers');
         $containerData['Footer'] = $containerData['Paypal_Footer'];
         $containerData['Content_Info'] = $containerData['Paypal_Content_Info'];
@@ -418,18 +416,18 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         return new ArrayCollection($jsPath);
     }
 
-	/**
-	 * @return string
-	 */
-	public function onGetPaymentInstructionsApiController()
-	{
-		return __DIR__ . '/Controllers/Api/PaypalPaymentInstruction.php';
-	}
+    /**
+     * @return string
+     */
+    public function onGetPaymentInstructionsApiController()
+    {
+        return __DIR__ . '/Controllers/Api/PaypalPaymentInstruction.php';
+    }
 
-	public function onEnlightControllerFrontStartDispatch()
-	{
-		$this->get('loader')->registerNamespace('Shopware\Components', __DIR__ . '/Components/');
-	}
+    public function onEnlightControllerFrontStartDispatch()
+    {
+        $this->get('loader')->registerNamespace('Shopware\Components', __DIR__ . '/Components/');
+    }
 
     /**
      * @return string
@@ -442,7 +440,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
     /**
      * Returns the version of plugin as string.
      *
-     * @throws Exception
+     * @throws RuntimeException
      *
      * @return string
      */
@@ -452,7 +450,7 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         if ($info) {
             return $info['currentVersion'];
         }
-        throw new Exception('The plugin has an invalid version file.');
+        throw new RuntimeException('The plugin has an invalid version file.');
     }
 
     /**
@@ -464,6 +462,14 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             'version' => $this->getVersion(),
             'label' => $this->getLabel(),
         );
+    }
+
+    /**
+     * Registers the template directory on each Secure dispatch to prevent SmartySecurity errors
+     */
+    public function onPreDispatchSecure()
+    {
+        $this->get('template')->addTemplateDir(__DIR__ . '/Views/');
     }
 
     /**
@@ -525,24 +531,16 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
         );
         $this->subscribeEvent(
             'Enlight_Controller_Dispatcher_ControllerPath_Api_PaypalPaymentInstruction',
-	        'onGetPaymentInstructionsApiController'
+            'onGetPaymentInstructionsApiController'
         );
-		$this->subscribeEvent(
-	        'Enlight_Controller_Front_StartDispatch',
-	        'onEnlightControllerFrontStartDispatch'
+        $this->subscribeEvent(
+            'Enlight_Controller_Front_StartDispatch',
+            'onEnlightControllerFrontStartDispatch'
         );
-		$this->subscribeEvent(
-            'Enlight_Controller_Action_PostDispatchSecure_Frontend',
-            'onPostDispatchSecure'
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_PreDispatch',
+            'onPreDispatchSecure'
         );
-    }
-
-    /**
-     * Registers the template directory on each Secure dispatch to prevent SmartySecurity errors
-     */
-    public function onPostDispatchSecure()
-    {
-        $this->registerMyTemplateDir();
     }
 
     /**

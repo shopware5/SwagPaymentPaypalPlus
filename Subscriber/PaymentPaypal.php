@@ -1,6 +1,5 @@
 <?php
-
-/*
+/**
  * (c) shopware AG <info@shopware.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -19,8 +18,6 @@ use Shopware_Plugins_Frontend_SwagPaymentPaypal_Bootstrap as PaypalBootstrap;
 
 /**
  * Class PaymentPaypal
- *
- * @package Shopware\SwagPaymentPaypal\Subscriber
  */
 class PaymentPaypal
 {
@@ -45,13 +42,17 @@ class PaymentPaypal
     private $logger;
 
     /**
-     * @param RestClient $restClient
-     * @param Session $session
+     * @param RestClient      $restClient
+     * @param Session         $session
      * @param PaypalBootstrap $paypalBootstrap
-     * @param Logger $logger
+     * @param Logger          $logger
      */
-    public function __construct(RestClient $restClient, Session $session, PaypalBootstrap $paypalBootstrap, Logger $logger)
-    {
+    public function __construct(
+        RestClient $restClient,
+        Session $session,
+        PaypalBootstrap $paypalBootstrap,
+        Logger $logger
+    ) {
         $this->restClient = $restClient;
         $this->session = $session;
         $this->paypalBootstrap = $paypalBootstrap;
@@ -64,7 +65,7 @@ class PaymentPaypal
     public static function getSubscribedEvents()
     {
         return array(
-            'Enlight_Controller_Action_PreDispatch_Frontend_PaymentPaypal' => 'onPreDispatchPaymentPaypal'
+            'Enlight_Controller_Action_PreDispatch_Frontend_PaymentPaypal' => 'onPreDispatchPaymentPaypal',
         );
     }
 
@@ -77,7 +78,7 @@ class PaymentPaypal
         /** @var \Shopware_Controllers_Frontend_PaymentPaypal $controller */
         $controller = $args->getSubject();
 
-        if ($request->getActionName() != 'return') {
+        if ($request->getActionName() !== 'return') {
             return;
         }
 
@@ -96,8 +97,8 @@ class PaymentPaypal
         }
 
         if (!empty($payment['transactions'][0]['amount']['total'])) {
-            $ppAmount = floatval($payment['transactions'][0]['amount']['total']);
-            $ppCurrency = floatval($payment['transactions'][0]['amount']['currency']);
+            $ppAmount = (float) $payment['transactions'][0]['amount']['total'];
+            $ppCurrency = (float) $payment['transactions'][0]['amount']['currency'];
         } else {
             $ppAmount = 0;
             $ppCurrency = '';
@@ -109,24 +110,25 @@ class PaymentPaypal
             $controller->redirect(
                 array(
                     'controller' => 'checkout',
-                    'action' => 'confirm'
+                    'action' => 'confirm',
                 )
             );
+
             return;
         }
 
         $paypalConfig = $this->paypalBootstrap->Config();
         $orderNumber = null;
 
-        if ($payment['state'] == 'created') {
+        if ($payment['state'] === 'created') {
             if ($paypalConfig->get('paypalSendInvoiceId')) {
                 $orderNumber = $controller->saveOrder($payment['id'], sha1($payment['id']));
                 $params = array(
                     array(
                         'op' => 'add',
                         'path' => '/transactions/0/invoice_number',
-                        'value' => $orderNumber
-                    )
+                        'value' => $orderNumber,
+                    ),
                 );
 
                 $prefix = $paypalConfig->get('paypalPrefixInvoiceId');
@@ -137,10 +139,10 @@ class PaymentPaypal
                     $params[0]['value'] = $prefix . $orderNumber;
                 }
 
-                $uri = 'payments/payment/' . $paymentId;
+                $patchUri = 'payments/payment/' . $paymentId;
 
                 try {
-                    $this->restClient->patch($uri, $params);
+                    $this->restClient->patch($patchUri, $params);
                 } catch (Exception $e) {
                     $this->logException('An error occurred on patching the order number to the payment', $e);
                 }
@@ -154,7 +156,7 @@ class PaymentPaypal
             }
         }
 
-        if ($payment['state'] == 'approved') {
+        if ($payment['state'] === 'approved') {
             if (!empty($payment['transactions'][0]['related_resources'][0]['sale']['id'])) {
                 $transactionId = $payment['transactions'][0]['related_resources'][0]['sale']['id'];
             } else {
@@ -194,7 +196,7 @@ class PaymentPaypal
                 array(
                     'controller' => 'checkout',
                     'action' => 'finish',
-                    'sUniqueID' => sha1($payment['id'])
+                    'sUniqueID' => sha1($payment['id']),
                 )
             );
         }
@@ -204,7 +206,7 @@ class PaymentPaypal
      * save the invoice instructions from paypal
      *
      * @param string $orderNumber
-     * @param array $payment
+     * @param array  $payment
      */
     private function saveInvoiceInstructions($orderNumber, array $payment)
     {
@@ -215,12 +217,12 @@ class PaymentPaypal
     /**
      * Writes an exception to the plugin log.
      *
-     * @param string $message
+     * @param string    $message
      * @param Exception $e
      */
     private function logException($message, Exception $e)
     {
-        $context = ['exception' => $e];
+        $context = array('exception' => $e);
         if ($e instanceof RequestException) {
             $context['response'] = $e->getResponse();
         }
