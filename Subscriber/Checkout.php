@@ -732,7 +732,7 @@ class Checkout
     private function getBillingAddress(array $user)
     {
         $billingAddress = array(
-            'line1' => $user['billingaddress']['street'],
+            'line1' => trim($user['billingaddress']['street'] . ' ' . $user['billingaddress']['streetnumber']),
             'postal_code' => $user['billingaddress']['zipcode'],
             'city' => $user['billingaddress']['city'],
             'country_code' => $user['additional']['country']['countryiso'],
