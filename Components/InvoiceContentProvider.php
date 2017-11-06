@@ -1,6 +1,5 @@
 <?php
-
-/*
+/**
  * (c) shopware AG <info@shopware.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -26,10 +25,11 @@ class InvoiceContentProvider
     {
         $this->db = $db;
     }
-    
+
     /**
      * @param array $containers
      * @param array $orderData
+     *
      * @return array
      */
     public function getPayPalInvoiceContentInfo(array $containers, array $orderData)
@@ -39,12 +39,12 @@ class InvoiceContentProvider
         $translationComp = new Shopware_Components_Translation();
         $translation = $translationComp->read($orderData['_order']['language'], 'documents', 1);
 
-        $query = "SELECT * FROM s_core_documents_box WHERE id = ?";
+        $query = 'SELECT * FROM s_core_documents_box WHERE id = ?';
 
         $rawFooter = $this->db->fetchAssoc($query, array($footer['id']));
 
-        if (!empty($translation[1]["Paypal_Content_Info_Value"])) {
-            $rawFooter["value"] = $translation[1]["Paypal_Content_Info_Value"];
+        if (!empty($translation[1]['Paypal_Content_Info_Value'])) {
+            $rawFooter['value'] = $translation[1]['Paypal_Content_Info_Value'];
         }
 
         return $rawFooter[$footer['id']];

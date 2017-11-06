@@ -1,6 +1,5 @@
 <?php
-
-/*
+/**
  * (c) shopware AG <info@shopware.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -11,8 +10,6 @@ namespace Shopware\SwagPaymentPaypalPlus\Subscriber;
 
 /**
  * Class PaymentPaypal
- *
- * @package Shopware\SwagPaymentPaypal\Subscriber
  */
 class Webhook
 {
@@ -28,6 +25,7 @@ class Webhook
 
     /**
      * @param \Enlight_Controller_ActionEventArgs $args
+     *
      * @return bool
      */
     public function onPaymentPaypalWebhook($args)
@@ -38,7 +36,7 @@ class Webhook
         $transactionId = null;
 
         if (empty($payment['resource']['id'])) {
-            $message = "PayPal-Webhook";
+            $message = 'PayPal-Webhook';
             $context = array('request.body' => $payment);
             $action->get('pluginlogger')->error($message, $context);
         } else {

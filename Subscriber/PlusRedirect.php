@@ -1,6 +1,5 @@
 <?php
-
-/*
+/**
  * (c) shopware AG <info@shopware.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -13,8 +12,6 @@ use Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap as Bootstrap;
 
 /**
  * Class PlusRedirect
- *
- * @package Shopware\SwagPaymentPaypal\Subscriber
  */
 class PlusRedirect
 {
@@ -37,12 +34,13 @@ class PlusRedirect
     public static function getSubscribedEvents()
     {
         return array(
-            'Enlight_Controller_Action_Frontend_PaymentPaypal_PlusRedirect' => 'onPaypalPlusRedirect'
+            'Enlight_Controller_Action_Frontend_PaymentPaypal_PlusRedirect' => 'onPaypalPlusRedirect',
         );
     }
 
     /**
      * @param \Enlight_Controller_ActionEventArgs $args
+     *
      * @return bool
      */
     public function onPaypalPlusRedirect($args)
@@ -58,20 +56,20 @@ class PlusRedirect
                 'account',
                 'frontend',
                 array(
-                    'ppplusRedirect' => 1
+                    'ppplusRedirect' => 1,
                 )
             );
 
             return true;
-        } else {
-            $this->admin->sUpdatePayment();
         }
+        $this->admin->sUpdatePayment();
+
         $action->forward(
             'confirm',
             'checkout',
             'frontend',
             array(
-                'ppplusRedirect' => 1
+                'ppplusRedirect' => 1,
             )
         );
 

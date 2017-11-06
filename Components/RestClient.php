@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * (c) shopware AG <info@shopware.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -8,7 +8,7 @@
 
 namespace Shopware\SwagPaymentPaypalPlus\Components;
 
-require(__DIR__ . "/../vendor/autoload.php");
+require __DIR__ . '/../vendor/autoload.php';
 
 use Enlight_Config as PayPalConfig;
 use GuzzleHttp\Client;
@@ -37,17 +37,17 @@ class RestClient
     const CACHE_ID = 'paypal_classic_auth';
 
     /**
-     * @var Client $restClient
+     * @var Client
      */
     private $restClient;
 
     /**
-     * @var array $authHeader
+     * @var array
      */
     private $authHeader;
 
     /**
-     * @var CacheManager $cacheManager
+     * @var CacheManager
      */
     private $cacheManager;
 
@@ -59,7 +59,7 @@ class RestClient
     /**
      * @param PayPalConfig $config
      * @param CacheManager $cacheManager
-     * @param string|bool $certPath path to Bundle of CA Root Certificates (see: https://curl.haxx.se/ca/cacert.pem)
+     * @param string|bool  $certPath     path to Bundle of CA Root Certificates (see: https://curl.haxx.se/ca/cacert.pem)
      * @param DetachedShop $shop
      */
     public function __construct(PayPalConfig $config, CacheManager $cacheManager, $certPath = true, DetachedShop $shop)
@@ -81,10 +81,10 @@ class RestClient
                 'base_url' => $base_url,
                 'defaults' => array(
                     'headers' => array(
-                        'PayPal-Partner-Attribution-Id' => 'ShopwareAG_Cart_PayPalPlus_1017'
+                        'PayPal-Partner-Attribution-Id' => 'ShopwareAG_Cart_PayPalPlus_1017',
                     ),
-                    'verify' => $certPath
-                )
+                    'verify' => $certPath,
+                ),
             )
         );
 
@@ -95,7 +95,8 @@ class RestClient
      * gets the resource depending on uri
      *
      * @param string $uri
-     * @param array $params
+     * @param array  $params
+     *
      * @return array
      */
     public function get($uri, array $params = array())
@@ -109,7 +110,8 @@ class RestClient
      * creates a new resource depending on uri
      *
      * @param string $uri
-     * @param array $params
+     * @param array  $params
+     *
      * @return array
      */
     public function create($uri, array $params = array())
@@ -123,7 +125,8 @@ class RestClient
      * updates a given resource
      *
      * @param string $uri
-     * @param array $params
+     * @param array  $params
+     *
      * @return array
      */
     public function put($uri, array $params = array())
@@ -137,7 +140,8 @@ class RestClient
      * updates a given resource
      *
      * @param string $uri
-     * @param array $params
+     * @param array  $params
+     *
      * @return array
      */
     public function patch($uri, array $params = array())
@@ -153,6 +157,7 @@ class RestClient
      * @param $method
      * @param $uri
      * @param array $params
+     *
      * @return array
      */
     private function sendRequest($method, $uri, array $params = array())
@@ -174,7 +179,7 @@ class RestClient
             'auth' => array($restUser, $restPw),
             'body' => array(
                 'grant_type' => 'client_credentials',
-            )
+            ),
         );
 
         $authorization = $this->getAuthorizationFromCache();
@@ -192,8 +197,8 @@ class RestClient
 
         $this->authHeader = array(
             'headers' => array(
-                'Authorization' => $authorization
-            )
+                'Authorization' => $authorization,
+            ),
         );
     }
 
@@ -201,7 +206,8 @@ class RestClient
      * creates a new OAuth2 token
      *
      * @param string $uri
-     * @param array $params
+     * @param array  $params
+     *
      * @return array
      */
     private function createToken($uri, array $params = array())
@@ -221,7 +227,7 @@ class RestClient
 
     /**
      * @param string $token
-     * @param int $expiresIn
+     * @param int    $expiresIn
      */
     private function setAuthorizationToCache($token, $expiresIn)
     {

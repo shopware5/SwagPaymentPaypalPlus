@@ -155,7 +155,6 @@ class Checkout
             return;
         }
 
-        $this->bootstrap->registerMyTemplateDir();
         if ($templateVersion < 3) { // emotion template
             $view->extendsTemplate('frontend/payment_paypal_plus/checkout.tpl');
         }
@@ -249,8 +248,6 @@ class Checkout
             $payment['description'] = $this->bootstrap->Config()->get('paypalPlusDescription', '');
             $view->assign('sPayment', $payment);
         }
-
-        $this->bootstrap->registerMyTemplateDir();
 
         if ($templateVersion < 3) {
             $view->extendsTemplate('frontend/checkout/emotion/finish.tpl');
@@ -375,7 +372,7 @@ class Checkout
             }
 
             foreach ($profileList as $entry) {
-                if ($entry['name'] == $profile['name']) {
+                if ($entry['name'] === $profile['name']) {
                     $this->restClient->put("$uri/{$entry['id']}", $profile);
                     $this->session['PaypalProfile'] = array('id' => $entry['id']);
                     break;
@@ -470,11 +467,11 @@ class Checkout
             array(
                 'amount' => array(
                     'currency' => $this->getCurrency(),
-                    'total' => number_format($total, 2, '.', ','),
+                    'total' => number_format($total, 2),
                     'details' => array(
-                        'shipping' => number_format($shipping, 2, '.', ','),
-                        'subtotal' => number_format($total - $shipping, 2, '.', ','),
-                        'tax' => number_format(0, 2, '.', ','),
+                        'shipping' => number_format($shipping, 2),
+                        'subtotal' => number_format($total - $shipping, 2),
+                        'tax' => number_format(0, 2),
                     ),
                 ),
                 'item_list' => array(
@@ -597,7 +594,7 @@ class Checkout
 
             // If more than 2 decimal places
             if (round($amount / $quantity, 2) * $quantity != $amount) {
-                if ($quantity != 1) {
+                if ($quantity !== 1) {
                     $name = $quantity . 'x ' . $name;
                 }
                 $quantity = 1;
@@ -677,13 +674,13 @@ class Checkout
                 $list[] = array(
                     'name' => $name,
                     'sku' => $sku,
-                    'price' => number_format($amount, 2, '.', ','),
+                    'price' => number_format($amount, 2),
                     'currency' => $currency,
                     'quantity' => $quantity,
                 );
             }
 
-            $index++;
+            ++$index;
         }
 
         return $list;
@@ -735,7 +732,7 @@ class Checkout
     private function getBillingAddress(array $user)
     {
         $billingAddress = array(
-            'line1' => $user['billingaddress']['street'],
+            'line1' => trim($user['billingaddress']['street'] . ' ' . $user['billingaddress']['streetnumber']),
             'postal_code' => $user['billingaddress']['zipcode'],
             'city' => $user['billingaddress']['city'],
             'country_code' => $user['additional']['country']['countryiso'],

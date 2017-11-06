@@ -1,6 +1,5 @@
 <?php
-
-/*
+/**
  * (c) shopware AG <info@shopware.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -29,6 +28,7 @@ class PaymentInstructionProvider
     /**
      * @param string $orderNumber
      * @param string $transactionId
+     *
      * @return array
      */
     public function getInstructionsByOrderNumberAndTransactionId($orderNumber, $transactionId)
@@ -53,7 +53,7 @@ class PaymentInstructionProvider
 
     /**
      * @param string $orderNumber
-     * @param array $instructions
+     * @param array  $instructions
      */
     public function saveInstructionByOrderNumber($orderNumber, array $instructions)
     {
@@ -68,7 +68,7 @@ class PaymentInstructionProvider
             'amount_value' => $instructions['amount']['value'],
             'amount_currency' => $instructions['amount']['currency'],
             'payment_due_date' => $instructions['payment_due_date'],
-            'links' => json_encode($instructions['links'])
+            'links' => json_encode($instructions['links']),
         );
 
         $this->db->query($this->getInsertSql(), $parameter);

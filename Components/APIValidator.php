@@ -1,6 +1,5 @@
 <?php
-
-/*
+/**
  * (c) shopware AG <info@shopware.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -48,9 +47,9 @@ class APIValidator
 
             if ($response) {
                 return true;
-            } else {
-                return false;
             }
+
+            return false;
         } catch (ClientException $ce) {
             //Unauthorized: impossible to continue using PayPal plus
             if ($ce->getCode() === 401) {
@@ -61,7 +60,6 @@ class APIValidator
             if ($ce->getCode() === 500) {
                 return false;
             }
-
         } catch (RequestException $re) {
             //It's not okay, since it's an SSL exception
             return false;

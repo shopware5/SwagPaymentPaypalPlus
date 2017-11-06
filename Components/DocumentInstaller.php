@@ -1,6 +1,5 @@
 <?php
-
-/*
+/**
  * (c) shopware AG <info@shopware.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -28,10 +27,10 @@ class DocumentInstaller
 
     public function installDocuments()
     {
-    	if (!$this->hasDocumentsInstalled()) {
-	        $this->uninstallDocuments();
-	        $this->insertDefaultDocuments();
-	    }
+        if (!$this->hasDocumentsInstalled()) {
+            $this->uninstallDocuments();
+            $this->insertDefaultDocuments();
+        }
     }
 
     public function uninstallDocuments()
@@ -41,13 +40,14 @@ class DocumentInstaller
         $this->databaseConnection->query($sql, array('Paypal_%'));
     }
 
-	/**
-	 * @return bool
-	 */
+    /**
+     * @return bool
+     */
     private function hasDocumentsInstalled()
     {
-	    $sql = "SELECT id FROM s_core_documents_box WHERE name IN ('Paypal_Footer', 'Paypal_Content_Info')";
-	    return count($this->databaseConnection->executeQuery($sql)->fetchAll()) === 2;
+        $sql = "SELECT id FROM s_core_documents_box WHERE name IN ('Paypal_Footer', 'Paypal_Content_Info')";
+
+        return count($this->databaseConnection->executeQuery($sql)->fetchAll()) === 2;
     }
 
     private function insertDefaultDocuments()
@@ -123,7 +123,7 @@ class DocumentInstaller
                . '<td>{$instruction.reference_number}</td>'
                . '</tr>'
                . '</tbody>'
-               . '</table>'
+               . '</table>',
         ));
     }
 }
