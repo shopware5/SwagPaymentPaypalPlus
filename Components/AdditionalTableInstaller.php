@@ -1,6 +1,5 @@
 <?php
-
-/*
+/**
  * (c) shopware AG <info@shopware.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -32,6 +31,7 @@ class AdditionalTableInstaller
     public function installAdditionalDatabaseTable()
     {
         $sql = $this->getSql();
+
         return $this->databaseConnection->query($sql);
     }
 
@@ -40,7 +40,7 @@ class AdditionalTableInstaller
      */
     private function getSql()
     {
-        return "CREATE TABLE IF NOT EXISTS s_payment_paypal_plus_payment_instruction (
+        return 'CREATE TABLE IF NOT EXISTS s_payment_paypal_plus_payment_instruction (
                 `id` INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                 `ordernumber` VARCHAR(255),
                 `reference_number` VARCHAR(255),
@@ -52,6 +52,6 @@ class AdditionalTableInstaller
                 `amount_value` VARCHAR(255),
                 `amount_currency` VARCHAR(10),
                 `payment_due_date` DATETIME,
-                `links` TEXT);";
+                `links` TEXT);';
     }
 }

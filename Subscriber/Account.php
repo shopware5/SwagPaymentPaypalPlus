@@ -1,6 +1,5 @@
 <?php
-
-/*
+/**
  * (c) shopware AG <info@shopware.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -14,13 +13,11 @@ use Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap as Bootstrap;
 
 /**
  * Class Account
- *
- * @package Shopware\SwagPaymentPaypal\Subscriber
  */
 class Account
 {
     /**
-     * @var Bootstrap $bootstrap
+     * @var Bootstrap
      */
     protected $bootstrap;
 
@@ -38,12 +35,13 @@ class Account
     public static function getSubscribedEvents()
     {
         return array(
-            'Enlight_Controller_Action_PostDispatch_Frontend_Account' => 'onPostDispatchAccount'
+            'Enlight_Controller_Action_PostDispatch_Frontend_Account' => 'onPostDispatchAccount',
         );
     }
 
     /**
      * @param \Enlight_Controller_ActionEventArgs $args
+     *
      * @return bool
      */
     public function onPostDispatchAccount($args)
@@ -93,7 +91,7 @@ class Account
             }
         }
 
-        if($request->getActionName() === 'index') {
+        if ($request->getActionName() === 'index') {
             $user = $view->getAssign('sUserData');
             if (!empty($user['additional']['payment']['name']) && $user['additional']['payment']['name'] === 'paypal') {
                 //Check if paypal plus is available
@@ -105,7 +103,6 @@ class Account
                 $user['additional']['payment']['description'] = $newDescription;
                 $user['additional']['payment']['additionaldescription'] = $newAdditionalDescription;
                 $view->assign('sUserData', $user);
-
             }
         }
     }
