@@ -671,13 +671,18 @@ class Checkout
             }
 
             if ($quantity !== 0) {
-                $list[] = array(
+                $item = array(
                     'name' => $name,
-                    'sku' => $sku,
                     'price' => number_format($amount, 2),
                     'currency' => $currency,
                     'quantity' => $quantity,
                 );
+
+                if ($sku !== null && $sku !== '') {
+                    $item['sku'] = $sku;
+                }
+
+                $list[] = $item;
             }
 
             ++$index;
