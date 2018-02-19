@@ -1,4 +1,11 @@
 {
+    "name": "shopwareLabs/swag-payment-paypal-plus",
+    "type": "shopware-frontend-plugin",
+    "description": "A PayPal Plus integration for Shopware",
+    "license": "MIT",
+    "extra": {
+        "installer-name": "SwagPaymentPaypalPlus"
+    },
     "require": {
         "guzzlehttp/guzzle": "~5.3.0"
     }
