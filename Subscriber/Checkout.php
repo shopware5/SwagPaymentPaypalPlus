@@ -474,11 +474,15 @@ class Checkout
                         'tax' => number_format(0, 2),
                     ),
                 ),
-                'item_list' => array(
-                    'items' => $this->getItemList($basket, $user),
-                ),
             ),
         );
+
+        $sendCart = (bool) $this->config->get('paypalTransferCart');
+        if ($sendCart) {
+            $result[0]['item_list'] = array(
+                'items' => $this->getItemList($basket, $user),
+            );
+        }
 
         if ($edd) {
             $result[0]['shipment_details'] = array(
