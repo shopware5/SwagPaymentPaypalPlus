@@ -13,6 +13,7 @@ require __DIR__ . '/../vendor/autoload.php';
 use Enlight_Config as PayPalConfig;
 use GuzzleHttp\Client;
 use Shopware\Components\CacheManager;
+use Shopware\Components\Logger;
 use Shopware\Models\Shop\DetachedShop;
 
 class RestClient
@@ -57,14 +58,26 @@ class RestClient
     private $shop;
 
     /**
+     * @var Logger
+     */
+    private $logger;
+
+    /**
      * @param PayPalConfig $config
      * @param CacheManager $cacheManager
      * @param string|bool  $certPath     path to Bundle of CA Root Certificates (see: https://curl.haxx.se/ca/cacert.pem)
      * @param DetachedShop $shop
+     * @param Logger       $logger
      */
-    public function __construct(PayPalConfig $config, CacheManager $cacheManager, $certPath = true, DetachedShop $shop)
-    {
+    public function __construct(
+        PayPalConfig $config,
+        CacheManager $cacheManager,
+        $certPath = true,
+        DetachedShop $shop,
+        Logger $logger
+    ) {
         $this->shop = $shop;
+        $this->logger = $logger;
         $this->cacheManager = $cacheManager;
         $restUser = $config->get('paypalClientId');
         $restPw = $config->get('paypalSecret');
@@ -189,9 +202,8 @@ class RestClient
                 $authorization = $auth['token_type'] . ' ' . $auth['access_token'];
                 $this->setAuthorizationToCache($authorization, (int) $auth['expires_in']);
             } catch (\Exception $e) {
-                /** @var \Shopware\Components\Logger $pluginLogger */
-                $pluginLogger = Shopware()->Container()->get('pluginlogger');
-                $pluginLogger->error('An error occurred on initialising PayPal Plus: ' . $e->getMessage());
+                $logger = new LoggerService($this->logger);
+                $logger->log('An error occurred on initialising PayPal Plus: ', $e);
             }
         }
 

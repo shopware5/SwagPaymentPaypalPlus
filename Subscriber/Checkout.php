@@ -12,9 +12,9 @@ use Enlight_Components_Session_Namespace as Session;
 use Enlight_Controller_Action as Controller;
 use Enlight_View_Default as View;
 use Exception;
-use GuzzleHttp\Exception\RequestException;
 use Shopware\Components\Logger;
 use Shopware\SwagPaymentPaypalPlus\Components\APIValidator;
+use Shopware\SwagPaymentPaypalPlus\Components\LoggerService;
 use Shopware\SwagPaymentPaypalPlus\Components\PaymentInstructionProvider;
 use Shopware\SwagPaymentPaypalPlus\Components\RestClient;
 use Shopware_Plugins_Frontend_SwagPaymentPaypal_Bootstrap as PaypalBootstrap;
@@ -759,10 +759,7 @@ class Checkout
      */
     private function logException($message, Exception $e)
     {
-        $context = array('exception' => $e);
-        if ($e instanceof RequestException) {
-            $context['response'] = $e->getResponse();
-        }
-        $this->pluginLogger->error($message . ': ' . $e->getMessage(), $context);
+        $logger = new LoggerService($this->pluginLogger);
+        $logger->log($message, $e);
     }
 }
