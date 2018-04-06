@@ -10,8 +10,8 @@ namespace Shopware\SwagPaymentPaypalPlus\Subscriber;
 
 use Enlight_Components_Session_Namespace as Session;
 use Exception;
-use GuzzleHttp\Exception\RequestException;
 use Shopware\Components\Logger;
+use Shopware\SwagPaymentPaypalPlus\Components\LoggerService;
 use Shopware\SwagPaymentPaypalPlus\Components\PaymentInstructionProvider;
 use Shopware\SwagPaymentPaypalPlus\Components\RestClient;
 use Shopware_Plugins_Frontend_SwagPaymentPaypal_Bootstrap as PaypalBootstrap;
@@ -222,10 +222,7 @@ class PaymentPaypal
      */
     private function logException($message, Exception $e)
     {
-        $context = array('exception' => $e);
-        if ($e instanceof RequestException) {
-            $context['response'] = $e->getResponse();
-        }
-        $this->logger->error($message . ': ' . $e->getMessage(), $context);
+        $logger = new LoggerService($this->logger);
+        $logger->log($message, $e);
     }
 }

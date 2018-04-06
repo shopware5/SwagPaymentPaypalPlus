@@ -184,7 +184,8 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
             $this->Collection()->get('SwagPaymentPaypal')->Config(),
             Shopware()->Container()->get('shopware.cache_manager'),
             $certPath,
-            Shopware()->Shop()
+            Shopware()->Shop(),
+            $this->get('pluginlogger')
         );
 
         return $client;
