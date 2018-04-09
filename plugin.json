@@ -8,10 +8,11 @@
     "link": "http://store.shopware.com",
     "author": "shopware AG",
 
-    "currentVersion": "1.4.2",
+    "currentVersion": "1.4.3",
 
     "changelog": {
         "de": {
+            "1.4.3": "PT-7967 - Fehler Logging verbessert; PT-8503 - Die Einstellung 'Warenkorb an PayPal übertragen' wird nun korrekt berücksichtigt;",
             "1.4.2": "PT-7587 - Zahlungsartenauswahl verbessert; PT-8810 - Shopware 5.4 Kompatibilität;",
             "1.4.1": "PT-8646 - Kompatibilität zu Custom Products verbessert;",
             "1.4.0": "PT-6625 - Zahlungsinformationen für PayPal Rechnungskauf sind nun über die REST-API abrufbar; PT-6882 - Shoplogo wird nun korrekt angezeigt; PT-7547 - PayPal Rechnungskauf nutzt nun die Rechnungsadresse; PT-7565 - Vorlagen der Dokumente werden nicht mehr beim Update überschrieben; PT-8274 - Paypal Basis Plugin wird nun bei der Installation vorausgesetzt; PT-8295 - Javascript Fehler unter Shopware 5.2 behoben; PT-8332 - Kompatibilität zu Custom Products verbessert; PT-8553 - SmartySecurity Fehler behoben;",
@@ -40,6 +41,7 @@
             "1.0.0": "PT-2396 - Erstveröffentlichung"
         },
         "en": {
+            "1.4.3": "PT-7967 - Improve error logging; PT-8503 - The setting 'Transfer cart to PayPal' is now considered correctly;",
             "1.4.2": "PT-7587 - Improve payment method selection; PT-8810 - Shopware 5.4 compatibility;",
             "1.4.1": "PT-8646 - Improve compatibility with Custom Products;",
             "1.4.0": "PT-6625 - Payment instructions for PayPal Pay upon invoice are now retrievable via REST-API; PT-6882 - Shop logo is displayed correctly now; PT-7547 - PayPal Pay upon invoice now uses the billing address; PT-7565 - Documents templates are not overwritten on update anymore; PT-8274 - PayPal base plugin is now required on installation; PT-8295 - Fix javascript error in Shopware 5.2; PT-8332 - Improve compatibility with Custom Products; PT-8553 - Fix SmartySecurity error;",
