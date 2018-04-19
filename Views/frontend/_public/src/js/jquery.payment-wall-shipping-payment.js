@@ -23,6 +23,10 @@
         var me = plugin,
             approvalUrl = me.$el.find('.pp--approval-url');
 
+        if (typeof paymentWall !== 'function') {
+            return false;
+        }
+
         if (approvalUrl) {
             window.ppp = paymentWall($, approvalUrl.text());
         } else {
