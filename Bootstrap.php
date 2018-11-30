@@ -592,33 +592,32 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
 
     private function removeMyAttributes()
     {
-        /** @var $modelManager \Shopware\Components\Model\ModelManager */
-        $modelManager = $this->get('models');
+        /** @var $crudService Shopware\Bundle\AttributeBundle\Service\CrudService*/
+        $crudService = $this->get('shopware_attribute.crud_service');
         try {
-            $modelManager->removeAttribute(
+            $crudService->delete(
                 's_core_paymentmeans_attributes',
-                'paypal',
-                'plus_media'
+                'paypal_plus_media'
             );
         } catch (Exception $e) {
         }
         try {
-            $modelManager->removeAttribute(
+            $crudService->delete(
                 's_core_paymentmeans_attributes',
-                'paypal',
-                'plus_active'
+                'paypal_plus_active'
             );
         } catch (Exception $e) {
         }
         try {
-            $modelManager->removeAttribute(
+            $crudService->delete(
                 's_core_paymentmeans_attributes',
-                'paypal',
-                'plus_redirect'
+                'paypal_plus_redirect'
             );
         } catch (Exception $e) {
         }
         try {
+            /** @var $modelManager \Shopware\Components\Model\ModelManager */
+            $modelManager = $this->get('models');
             $modelManager->generateAttributeModels(array('s_core_paymentmeans_attributes'));
         } catch (Exception $e) {
         }
