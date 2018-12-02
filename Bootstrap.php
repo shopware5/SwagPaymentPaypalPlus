@@ -592,29 +592,60 @@ class Shopware_Plugins_Frontend_SwagPaymentPaypalPlus_Bootstrap extends Shopware
 
     private function removeMyAttributes()
     {
-        /** @var $crudService Shopware\Bundle\AttributeBundle\Service\CrudService*/
-        $crudService = $this->get('shopware_attribute.crud_service');
-        try {
-            $crudService->delete(
-                's_core_paymentmeans_attributes',
-                'paypal_plus_media'
-            );
-        } catch (Exception $e) {
+        /** @var $modelManager \Shopware\Components\Model\ModelManager */
+        $modelManager = $this->get('models');
+
+        if ($this->assertMinimumVersion('5.2.2')) {
+            /** @var $crudService Shopware\Bundle\AttributeBundle\Service\CrudService*/
+            $crudService = $this->get('shopware_attribute.crud_service');
+            try {
+                $crudService->delete(
+                    's_core_paymentmeans_attributes',
+                    'paypal_plus_media'
+                );
+            } catch (Exception $e) {
+            }
+            try {
+                $crudService->delete(
+                    's_core_paymentmeans_attributes',
+                    'paypal_plus_active'
+                );
+            } catch (Exception $e) {
+            }
+            try {
+                $crudService->delete(
+                    's_core_paymentmeans_attributes',
+                    'paypal_plus_redirect'
+                );
+            } catch (Exception $e) {
+            }
+        } else {
+            try {
+                $modelManager->removeAttribute(
+                    's_core_paymentmeans_attributes',
+                    'paypal',
+                    'plus_media'
+                );
+            } catch (Exception $e) {
+            }
+            try {
+                $modelManager->removeAttribute(
+                    's_core_paymentmeans_attributes',
+                    'paypal',
+                    'plus_active'
+                );
+            } catch (Exception $e) {
+            }
+            try {
+                $modelManager->removeAttribute(
+                    's_core_paymentmeans_attributes',
+                    'paypal',
+                    'plus_redirect'
+                );
+            } catch (Exception $e) {
+            }
         }
-        try {
-            $crudService->delete(
-                's_core_paymentmeans_attributes',
-                'paypal_plus_active'
-            );
-        } catch (Exception $e) {
-        }
-        try {
-            $crudService->delete(
-                's_core_paymentmeans_attributes',
-                'paypal_plus_redirect'
-            );
-        } catch (Exception $e) {
-        }
+
         try {
             /** @var $modelManager \Shopware\Components\Model\ModelManager */
             $modelManager = $this->get('models');
